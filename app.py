@@ -1,21 +1,13 @@
+import os
 from flask import Flask, render_template, request, redirect, make_response
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, Entry
 
-import os
-
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///dictionary.db"
 
 db.init_app(app)
-
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
-
-@app.context_processor
-def inject_maps_key():
-    return dict(admin_password=ADMIN_PASSWORD)
-    
 
 auth = HTTPBasicAuth()
 
@@ -25,7 +17,9 @@ def unauthorized():
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response
 
-# woo this is
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "default_admin_password")
+
+# PROBLEM AREA WILL BE HERE PROBABLY
 users = {
     "admin": generate_password_hash(ADMIN_PASSWORD),
     "moderator": generate_password_hash(ADMIN_PASSWORD)
@@ -48,17 +42,14 @@ def home():
 def submit_page():
     return render_template("submit.html")
 
-# 1.  Admin Route
+# Admin Route
 @app.route("/admin")
 @auth.login_required
 def admin():
     pending = Entry.query.filter_by(status="pending").all()
-    return render_template(
-        "admin.html",
-        pending=pending
-    )
+    return render_template("admin.html", pending=pending)
 
-# 2.  Approve Action
+# Approve Action
 @app.route("/approve/<int:id>", methods=["POST"])
 @auth.login_required
 def approve(id):
@@ -67,7 +58,7 @@ def approve(id):
     db.session.commit()
     return redirect("/admin")
 
-# 3.  Delete Action
+# Delete Action
 @app.route("/delete/<int:id>", methods=["POST"])
 @auth.login_required
 def delete(id):
@@ -100,10 +91,7 @@ def submit():
 @app.route("/browse")
 def browse():
     entries = Entry.query.filter_by(status="approved").all()    
-    return render_template(
-        "browse.html",
-        entries=entries
-    )
+    return render_template("browse.html", entries=entries)
 
 if __name__ == "__main__":
-    app.run(debug=True) 
+    app.run(debug=True)
