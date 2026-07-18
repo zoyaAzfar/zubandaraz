@@ -3,11 +3,19 @@ from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, Entry
 
+import os
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///dictionary.db"
 
 db.init_app(app)
 
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+
+@app.context_processor
+def inject_maps_key():
+    return dict(admin_password=ADMIN_PASSWORD)
+    
 
 auth = HTTPBasicAuth()
 
@@ -19,8 +27,8 @@ def unauthorized():
 
 # woo this is
 users = {
-    "admin": generate_password_hash("password"),
-    "moderator": generate_password_hash("password")
+    "admin": generate_password_hash(ADMIN_PASSWORD),
+    "moderator": generate_password_hash(ADMIN_PASSWORD)
 }
 
 @auth.verify_password
