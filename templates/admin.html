@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class = "admin">
+<h1>Pending Entries</h1>
+
+{% for entry in pending %}
+
+<h2>{{ entry.word }}</h2>
+
+<p>{{ entry.story }}</p>
+
+<form action="/approve/{{ entry.id }}" method="POST">
+    <button class = "submit-btn">Approve</button>
+</form>
+
+<form action="/delete/{{ entry.id }}" method="POST">
+    <button class = "submit-btn">Reject</button>
+</form>
+
+<hr>
+</div>
+
+{% endfor %}
+{% endblock %}

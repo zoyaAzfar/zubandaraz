@@ -1,0 +1,850 @@
+/* Import Inter Font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+
+
+@font-face {
+   font-family: "Mondwest";
+   src: url("/static/fonts/ppmondwest-regular.woff") format("woff");
+   font-weight: normal;
+   font-style: normal;
+}
+
+
+:root {
+   --blue: #0a3323;
+   --green: #d3968c;
+   --pink: #839958 ; 
+  /* --pink: rgb(255, 0, 145);*/
+   --white: #f7f4d5;
+   --yellow: rgb(198, 201, 200);
+   --red: #105666;
+}
+
+
+body {
+   background-color: var(--blue);
+   color: white;
+   font-family: "Mondwest", serif;
+   margin: 0;
+   padding: 0;
+   font-size: 1.5em;
+   overflow-x:hidden;
+}
+
+/* Apply to the whole page. Change 'html' to a class name if you want it on a specific div */
+html {
+  /* Standard CSS properties for Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #ffb7b2 #fff0f0;
+}
+
+/* Chrome, Edge, and Safari (WebKit browsers) */
+html::-webkit-scrollbar {
+  width: 10px; /* Slim width */
+}
+
+html::-webkit-scrollbar-track {
+  background: white; /* Soft pastel pink background */
+  border-radius: 10px;
+}
+
+html::-webkit-scrollbar-thumb {
+  background-color: #ffb7b2; /* Bright pastel pink handle */
+  border-radius: 10px;       /* Makes it perfectly rounded */
+  border: 2px solid #fff0f0; /* Creates padding around the handle */
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background-color: #ff9aa2; /* Darker cute pink on hover */
+}
+
+/* --- Navigation Styles --- */
+
+
+nav {
+   display: flex;
+   justify-content: center; /* Centers the links horizontally */
+   gap: 2rem;              /* Spacing between the links */
+   padding: 20px 0;        /* Some breathing room on top and bottom */
+   overlay:auto;
+}
+
+
+nav a {
+   font-family: "Mondwest", sans-serif;
+   font-weight: 500;
+   color: var(--white);    /* Clean white letters to contrast with your blue background */
+   text-decoration: none;  /* Removes the default underline */
+   font-size: 1.5rem;
+   transition: text-decoration 0.2s ease; /* Smooth transition feel */
+   -webkit-user-select: none; 
+  -ms-user-select: none;      
+  user-select: none; 
+}
+
+
+/* Hover state to show the underline */
+nav a:hover {
+   text-decoration: underline;
+}
+
+
+/* footer baby */
+
+
+footer {
+   text-align:center;
+   background-color:var(--green);
+   color:var(--blue);
+   margin:100px auto auto ;
+   padding: 10px;
+}
+
+
+.intro {
+   text-align: center;
+   margin-top: 100px; /* Adjust as needed to push below your nav */
+   margin:-3px;
+    -webkit-user-select: none; 
+  -ms-user-select: none;      
+  user-select: none; 
+}
+
+
+.intro {
+   text-align: center;
+   margin-top: 80px;
+}
+
+
+/* --- Base Title Setup --- */
+.loose-letters {
+   font-family: "Mondwest", serif;
+   font-size: 8rem;
+   line-height: 0.7; 
+   display: inline-block;
+   text-align: left; 
+    -webkit-user-select: none; 
+  -ms-user-select: none;      
+  user-select: none; 
+}
+
+
+/* Structural Layout rules */
+.loose-letters .line-1 {
+   display: block;
+}
+
+
+.loose-letters .line-2 {
+   display: block;
+   padding-left: 50px; /* Shifts the second line to the right */
+}
+
+
+.loose-letters .small-word {
+   font-size: 0.65em; /* Shrinks the word "ki" */
+   display: inline-flex;
+   gap: 1px;
+   margin-right:-20px;
+}
+
+
+.loose-letters span.space {
+   width: 15px;
+   display: inline-block;
+}
+
+
+.loose-letters span {
+   display: inline-block;
+}
+
+
+.loose-letters .line-1 span:nth-child(2) { transform: translateY(-3px) rotate(-2deg); }
+.loose-letters .line-1 span:nth-child(4) { transform: translateY(2px) rotate(1deg); }
+
+
+.loose-letters .line-2 span:nth-child(1) { transform: translateY(1px) rotate(-3deg); }
+.loose-letters .line-2 span:nth-child(4) { transform: translateY(-4px) rotate(-2deg); }
+.loose-letters .line-2 span:nth-child(5) { transform: translateY(3px) rotate(3deg); }
+.loose-letters .line-2 span:nth-child(6) { transform: translateY(-1px) rotate(-1deg); }
+
+
+.swoop-arrow {
+   display: block;
+   margin: 15px auto 0 auto; /* Centers it under the paragraph */
+   color: var(--pink); /* Easily change the arrow color to pink, yellow, or green! */
+   transform: rotate(-10deg); /* Tilt it slightly to match the loose aesthetic */
+}
+
+
+
+
+/* --- How It Works Section --- */
+/* --- 1) Make the parent a two-column grid --- */
+/* --- Stack columns vertically and center them --- */
+.parent {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   gap: 100px; /* Generous spacing between the two main sections */
+   width: 100%;
+   
+}
+
+
+/* --- Who We Are Section --- */
+.one {
+   display: flex;
+   flex-direction: column;  
+   align-items: center;     
+   width: 60%; 
+   margin: 0 auto;          
+   text-align: center; 
+}
+
+
+
+/* --- 3) Mobile Responsiveness --- */
+/* Add this at the bottom of your CSS (or merge with your existing media query) */
+@media (max-width: 1024px) {
+   .split-section {
+       grid-template-columns: 1fr; /* Stack columns vertically on smaller screens */
+       gap: 80px;
+   }
+}
+
+
+/* 1) Highlighted "HOW IT WORKS" Blocks */
+.block-title {
+   display: inline-flex;
+   gap: 12px;
+   font-family: "Mondwest", serif;
+   font-size: clamp(2rem, 5vw, 3.5rem);
+   text-align: center;
+    -webkit-user-select: none; 
+  -ms-user-select: none;      
+  user-select: none; 
+}
+
+
+.block {
+   background-color: var(--green);
+   color: var(--blue);
+   padding: 6px 20px;
+   font-weight: bold;
+   display: inline-block;
+   /* box-shadow: 4px 4px 0px var(--); Fun 3D pop shadow */
+    -webkit-user-select: none; 
+  -ms-user-select: none;      
+  user-select: none; 
+}
+
+
+
+
+/* Stamped effect (bouncing above and below) */
+.block-1 { transform: translateY(-8px) rotate(-3deg); }
+.block-2 { transform: translateY(4px) rotate(2deg); }
+.block-3 { transform: translateY(-2px) rotate(-1deg); }
+
+
+
+
+/* --- Updated Container --- */
+.timeline-container {
+   display: flex;
+   flex-direction: column;
+   /* Removed align-items: center so children can shift side-to-side */
+}
+
+
+/* --- Updated Row --- */
+.timeline-row {
+   display: flex;
+   flex-direction: column;
+   /* This ensures the connecting lines always stay centered */
+   align-items: center;
+}
+/* --- Updated Card --- */
+
+
+/* --- ADD THESE NEW RULES BELOW .step-card --- */
+
+
+/* Step 1 and 3 (Odd) shift to the left */
+.timeline-row:nth-child(odd) .step-card {
+   align-self: flex-start;
+}
+
+
+/* Step 2 (Even) shifts to the right */
+.timeline-row:nth-child(even) .step-card {
+   align-self: flex-end;
+}
+
+
+/* Hover offset interactive effect */
+.step-card:hover {
+   transform: translate(-2px, -2px);
+}
+
+
+/* --- Compact Step Card --- */
+.step-card {
+   display: grid;
+   grid-template-columns: 50px 1fr; /* Reduced from 60px */
+   width: 75%; /* Reduced from 85% to make the boxes physically narrower */
+   background-color: #ffffff;
+   border: 3px solid #000000;
+   border-radius: 8px;
+   overflow: hidden;
+   transition: transform 0.2s ease, box-shadow 0.2s ease;
+   padding: 15px; /* Reduced padding from 20px */
+   margin-bottom:20px;
+}
+
+
+/* --- Compact Left Side (Number) --- */
+.card-left {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   padding: 10px; /* Reduced padding */
+}
+
+
+.step-number {
+   font-family: "Mondwest", serif;
+   font-size: 3.5rem; /* Reduced from 5rem so it fits the narrower card beautifully */
+   font-weight: bold;
+   color: #000000;
+   line-height: 1;
+}
+
+
+/* --- Compact Right Side (Text Content) --- */
+.card-right {
+   padding: 10px 15px; /* Reduced padding */
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   text-align: left;
+}
+
+
+.step-title {
+   font-family: "Mondwest", serif;
+   font-weight: bold;
+   margin-top: 0;
+   margin-bottom: 6px;
+   letter-spacing: 0.5px;
+   color: #000000;
+}
+
+
+.step-desc {
+   font-size: 1.5rem; /* Slightly smaller description font */
+   color: #333333;
+   margin: 0;
+}
+
+
+/* --- Responsive Layout for Mobile --- */
+@media (max-width: 768px) {
+   .timeline-container {
+       width: 95%;
+   }
+
+
+   .step-card {
+       grid-template-columns: 80px 1fr; /* Shrink the number partition on smaller screens */
+   }
+
+
+   .card-left {
+       padding: 15px;
+   }
+
+
+   .step-number {
+       font-size: 2.5rem;
+   }
+
+
+   .card-right {
+       padding: 20px;
+   }
+}
+
+.split-section {
+    width: min(1400px, 92%);
+    margin: 0 auto;
+
+    display: flex;
+    gap: 80px;
+    flex-direction: row; /* 1. BACK TO COLUMNS SIDE-BY-SIDE! */
+    align-items: flex-start; /* Keeps columns aligned nicely at the top */
+}
+
+.two {
+    flex: 7;
+    min-width: 0;
+    
+    /* 2. Center things ONLY inside this column */
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    text-align: center;
+}
+
+.dictionary-preview {
+    flex: 3;
+    min-width: 0;
+    
+    /* 3. Center things ONLY inside this column */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.block-title {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Keeps the words/icons inside the title centered */
+    gap: 12px;
+}
+
+/* --- Centering Container --- */
+.form-container {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   min-height: 100vh;
+   padding: 20px;
+   box-sizing: border-box;
+}
+
+
+/* --- Cute Form Styling --- */
+.cute-form {
+   background-color: var(--white);
+   border: 2px solid black;
+   padding: 40px;
+   width: 100%;
+   max-width: 70%;
+   display: flex;
+   flex-direction: column;
+   gap: 25px;
+   color:black;
+}
+
+
+/* --- Input Groups & Labels --- */
+.input-group {
+   display: flex;
+   flex-direction: column;
+   gap: 8px;
+}
+
+
+.input-group label {
+   font-family: "Mondwest", serif;
+   color: black; /* Pop of color for labels */
+   font-size: 1.2em;
+   letter-spacing: 1px;
+}
+
+
+/* --- Fields (Inputs & Textarea) --- */
+.cute-form input[type="text"],
+.cute-form textarea {
+   font-family: "Mondwest", serif;
+   font-size: 1em;
+   color: black;
+   background-color: rgba(255, 255, 255, 0.1);
+   border: 2px solid black;
+   padding: 12px 15px;
+   outline: none;
+   transition: all 0.2s ease;
+}
+
+
+/* The larger, cute story textarea */
+.cute-form textarea {
+   min-height: 150px;
+   max-height:200px;
+   resize: vertical;
+}
+
+
+/* Hover & Focus States */
+.cute-form input:focus,
+.cute-form textarea:focus {
+   border-color: var(--pink);
+}
+
+
+/* Placeholder Styling */
+.cute-form ::placeholder {
+   color: var(--pink);
+   font-family: "Mondwest", serif;
+}
+
+
+/* --- The Submit Button --- */
+.submit-btn {
+   font-family: "Mondwest", serif;
+   font-size: 1.2em;
+   background-color: var(--green);
+   color: var(--blue);
+   border-radius: 50px;
+   padding: 12px 24px;
+   cursor: pointer;
+   align-self: center;
+   transition: transform 0.1s ease, box-shadow 0.1s ease;
+   margin-top: 10px;
+   border: 2px solid black;
+}
+
+
+.submit-btn:hover {
+   transform: translateY(-1px);
+}
+
+
+.submit-btn:active {
+   transform: translateY(1px);
+}
+
+
+/* Container padding */
+.browse-container {
+   padding: 40px 20px;
+   max-width: 1200px;
+   margin: 0 auto;
+}
+
+
+.page-title {
+   font-family: "Mondwest", serif;
+   font-size: 3rem;
+   color: var(--green);
+   margin-bottom: 40px;
+   text-align: center;
+}
+
+
+/* --- masonry grid stuff --- */
+/* --- The Dynamic Grid Container --- */
+.masonry-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+   grid-auto-rows: minmax(120px, auto);
+   grid-auto-flow: dense; /* 👈 This is the magic! It fills in empty gaps out of order */
+   gap: 20px;
+   width: 100%;
+}
+
+
+/* --- Base Card --- */
+.entry-card {
+   background-color: var(--white);
+   color: black;
+   border: 2px solid black;
+   padding: 20px;
+   box-sizing: border-box;
+   box-shadow: 5px 5px 0px var(--pink);
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
+}
+
+
+/* --- Dynamic Size Variations (No Rotations!) --- */
+.browse-container {
+   padding: 40px 20px;
+   max-width: 1400px;
+   margin: 0 auto;
+}
+
+
+/* --- Search Input Styling --- */
+.search-container {
+   display: flex;
+   justify-content: center;
+   margin-bottom: 40px;
+}
+
+
+#search-bar {
+   font-family: "Mondwest", serif;
+   font-size: 1.2em;
+   padding: 12px 20px;
+   width: 100%;
+   max-width: 400px;
+   border: 2px solid black;
+   background-color: var(--white);
+   color: black;
+   outline: none;
+}
+
+
+#search-bar:focus {
+   border-color: var(--pink);
+}
+/* --- Isotope Grid Setup --- */
+.isotope-grid {
+   width: 100%;
+   margin: 0 auto;
+}
+
+
+/* Fluid Column & Gutter Sizers for Isotope */
+.grid-sizer, .grid-item {
+   width: 23.5%; /* 4 columns on desktop */
+}
+.gutter-sizer {
+   width: 2%; /* Percentage-based horizontal gap */
+}
+
+
+.grid-item {
+   margin-bottom: 20px; /* Vertical gap */
+   background-color: var(--white);
+   color: black;
+   border: 2px solid black;
+   padding: 20px;
+   box-sizing: border-box;
+   transition: transform 0.2s ease;
+}
+
+
+.grid-item:nth-child(odd) {
+   box-shadow: 5px 5px 0px var(--pink);
+}
+
+
+.grid-item:nth-child(even) {
+   box-shadow: 5px 5px 0px var(--green); 
+}
+
+
+.grid-item:hover {
+   transform: translateY(-2px);
+}
+
+
+/* Typography elements remain clean */
+.entry-lang {
+   font-family: "Mondwest", serif;
+   font-size: 0.8em;
+   color: #666;
+   display: block;
+   margin-bottom: 5px;
+}
+
+
+.entry-word {
+   font-family: "Mondwest", serif;
+   font-size: 1.8em;
+   margin: 0 0 10px 0;
+}
+
+
+.entry-story {
+   font-family: "Mondwest", serif;
+   font-size: 0.9em;
+   margin: 0;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+   .grid-sizer, .grid-item { width: 49%; } /* 2 columns */
+   .gutter-sizer { width: 2%; }
+}
+@media (max-width: 600px) {
+   .grid-sizer, .grid-item { width: 100%; } /* 1 column */
+   .gutter-sizer { width: 0%; }
+}
+
+
+
+
+/* --- Updated Container --- */
+.timeline-container {
+   display: flex;
+   flex-direction: column;
+   /* Removed align-items: center so children can shift side-to-side */
+}
+
+
+/* --- Updated Row --- */
+.timeline-row {
+   display: flex;
+   flex-direction: column;
+   /* This ensures the connecting lines always stay centered */
+   align-items: center;
+}
+/* --- Updated Card --- */
+
+
+
+
+/* --- ADD THESE NEW RULES BELOW .step-card --- */
+
+
+/* Step 1 and 3 (Odd) shift to the left */
+.timeline-row:nth-child(odd) .step-card {
+   align-self: flex-start;
+}
+
+
+/* Step 2 (Even) shifts to the right */
+.timeline-row:nth-child(even) .step-card {
+   align-self: flex-end;
+}
+
+
+/* Hover offset interactive effect */
+.step-card:hover {
+   transform: translate(-2px, -2px);
+}
+
+
+/* --- Compact Step Card --- */
+.step-card {
+   display: grid;
+   grid-template-columns: 50px 1fr; /* Reduced from 60px */
+   width: 75%; /* Reduced from 85% to make the boxes physically narrower */
+   background-color: #ffffff;
+   border: 3px solid #000000;
+   border-radius: 8px;
+   overflow: hidden;
+   transition: transform 0.2s ease, box-shadow 0.2s ease;
+   padding: 15px; /* Reduced padding from 20px */
+   margin-bottom:20px;
+}
+
+
+/* --- Compact Left Side (Number) --- */
+.card-left {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   padding: 10px; /* Reduced padding */
+}
+
+
+.step-number {
+   font-family: "Mondwest", serif;
+   font-size: 3.5rem; /* Reduced from 5rem so it fits the narrower card beautifully */
+   font-weight: bold;
+   color: #000000;
+   line-height: 1;
+}
+
+
+/* --- Compact Right Side (Text Content) --- */
+.card-right {
+   padding: 10px 15px; /* Reduced padding */
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   text-align: left;
+}
+
+/* --- Comprehensive Mobile Responsiveness (Add to bottom of file) --- */
+@media (max-width: 768px) {
+   
+   /* 1. Force vertical stacking on the home page split-section */
+   .split-section {
+       flex-direction: column !important;
+       gap: 40px; 
+       align-items: center;
+   }
+
+   .two, .dictionary-preview, .one {
+       width: 100% !important; 
+   }
+
+   /* 2. Turn "Loose Letters" into a completely normal heading */
+   .loose-letters {
+       font-size: 5rem !important; /* Forces the text to scale down nicely on phones */
+       text-align: center !important;
+       display: block !important;
+       width: 100% !important;
+       margin-bottom: 20px;
+      }
+
+   /* KILL the hardcoded inline shifts so text doesn't spill out */
+   .loose-letters .line-1,
+   .loose-letters .line-2 {
+       display: block !important; /* Stacks "zuban" and "daraz" cleanly */
+       margin-left: 0 !important;
+       margin-right: 0 !important;
+       padding-left: 0 !important; 
+   }
+
+   .loose-letters .line-2 {
+      margin-top: 20px;
+   }
+   
+   /* Reset the paragraph sub-heading below it */
+   .loose-letters + p, 
+   p[style*="margin-top:-50px"] {
+       margin-top: 10px !important; /* Removes the negative overlap so it doesn't smash into the text */
+       text-align: center;
+   }
+
+   .loose-letters .small-word {
+       font-size: 1em;
+       display: inline;
+       margin-right: 0 !important;
+   }
+
+   #pesky {
+      line-height:200px;
+   }
+
+
+   /* 3. Strip ALL transforms (no rotations, no translations) */
+   .loose-letters span,
+   .loose-letters .line-1 span:nth-child(2),
+   .loose-letters .line-1 span:nth-child(4),
+   .loose-letters .line-2 span:nth-child(1),
+   .loose-letters .line-2 span:nth-child(4),
+   .loose-letters .line-2 span:nth-child(5),
+   .loose-letters .line-2 span:nth-child(6) {
+       transform: none !important; 
+   }
+
+   .block {
+       display: block;
+       width: fit-content;
+   }
+
+   /* 5. Fix the Form width on phones */
+   .cute-form {
+       max-width: 100%;
+       padding: 20px; 
+   }
+
+   /* 6. Center timeline cards instead of zig-zagging off-screen */
+   .timeline-row:nth-child(odd) .step-card,
+   .timeline-row:nth-child(even) .step-card {
+       align-self: center; 
+       width: 90%;
+   }
+
+   #humanirememberyourgenocides {
+      margin-top:70px;
+   }
+}
+
+.admin {
+   padding:10px;
+}

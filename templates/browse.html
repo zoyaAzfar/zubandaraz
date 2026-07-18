@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="browse-container" style="text-align:center; margin-top:-20px;">
+    <h1 class="loose-letters">
+        <span class="line-1">
+                <span>t</span><span>h</span><span>e</span>
+        </span>
+        <span class="line-2">
+            <span>w</span><span>o</span><span>r</span><span>d</span><span>s</span>
+        </span>
+    </h1>
+
+    <div class="search-container">
+        <input type="text" id="search-bar" placeholder="search words or languages...">
+    </div>
+
+    <div class="isotope-grid">
+        <div class="grid-sizer"></div>
+        <div class="gutter-sizer"></div>
+
+        {% for entry in entries %}
+            <div class="grid-item" data-word="{{ entry.word | lower }}" data-language="{{ entry.language | lower }}">
+                <span class="entry-lang">{{ entry.language }}</span>
+                <h2 class="entry-word">{{ entry.word }}</h2>
+                <p class="entry-story">{{ entry.story }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+<script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Initialize Isotope on our grid
+    var iso = new Isotope('.isotope-grid', {
+        itemSelector: '.grid-item',
+        layoutMode: 'masonry',
+        percentPosition: true, // Crucial for fluid percentage grids
+        masonry: {
+            columnWidth: '.grid-sizer', // Points to our sizer element
+            gutter: '.gutter-sizer',    // Points to our gutter element
+            horizontalOrder: true       // Keeps things rendering left-to-right cleanly
+        }
+    });
+
+    // 2. Setup Live Search functionality
+    var searchBar = document.getElementById('search-bar');
+    
+    searchBar.addEventListener('input', function() {
+        var filterValue = searchBar.value.toLowerCase().trim();
+        
+        iso.arrange({
+            filter: function(itemElem) {
+                // Skips the sizer elements so they don't mess up filtering
+                if (itemElem.classList.contains('grid-sizer') || itemElem.classList.contains('gutter-sizer')) {
+                    return false;
+                }
+                
+                var word = itemElem.getAttribute('data-word') || '';
+                var lang = itemElem.getAttribute('data-language') || '';
+                
+                return word.includes(filterValue) || lang.includes(filterValue);
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}
+

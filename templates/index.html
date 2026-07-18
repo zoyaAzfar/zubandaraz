@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="intro" style="margin-bottom:300px;"> 
+<h1 class="loose-letters" style="font-size:10rem;">
+        <span class="line-1" style="margin-right:-90px">
+            <span>z</span><span>u</span><span>b</span><span>a</span><span>n</span>
+        </span>
+            
+            <span class="space">&nbsp;</span>
+          <span class = "line-2" style="margin-left:-130px; margin-top:-120px;" id = "pesky">
+            <span>d</span><span>a</span><span>r</span><span>a</span><span>z</span> 
+        </span>
+
+    </h1>
+    <p style="margin-top:-50px;"> A Crowd-Sourced Dictionary</p>
+</div>
+
+<section class= "parent"> 
+<section class = "one-section one"> 
+    <h2 class="block-title">
+    <span class="block block-1">WHO</span> 
+    <span class="block block-2">WE</span> 
+    <span class="block block-3">ARE</span> 
+</h2>
+
+    <div> 
+        <p> Zuban Daraz [adj.]: big-mouthed, arrogant, disrespectful in speech. <br><br>
+          Or, more literally: a drawer (daraz) of language (zuban). <br><br>
+
+        
+        Zuban Daraz is a sociolinguistics project dedicated to exploring the relationship of South
+        Asian women with language. 
+        Through anonymous submissions, we document examples of words which play a key role in how women
+        are referred to - and percieved - by those around them, across cultures and language.
+        These words do not necessarily need to be insults or taboo words; instead, we are looking
+        for words that hold special significance for you. By exploring how can hold different
+        meanings for different people, we hope to get a glimpse into the unique stories of women
+        in South Asia. 
+        
+
+        </p>
+
+    </div>
+</section>
+
+<section class = "split-section">
+<section class="two">
+  <h2 class="block-title" style ="text-align:center;">
+    <span class="block block-1">HOW</span>
+    <span class="block block-2">IT</span>
+    <span class="block block-3">WORKS</span>
+  </h2>
+
+  <div class="timeline-container">
+    
+  <div class="timeline-row">
+    <div class="step-card">
+      <div class="card-left">
+        <span class="step-number">01</span>
+      </div>
+      <div class="card-right">
+        <h3 class="step-title">Pick a word</h3>
+        <p class="step-desc">Choose a word of your choice which you feel is derogatory or with which you have a complex relationship.
+          This doesn't have to be a profanity, it could be an ordinary word in any language of your choice.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-row">
+    <div class="step-card">
+      <div class="card-left">
+        <span class="step-number">02</span>
+      </div>
+      <div class="card-right">
+        <h3 class="step-title">Tell us about it</h3>
+        <p class="step-desc">Write about what the word means literally and what connotations it holds.
+          And, if you're comfortable, if there was a specific moment in your life that 
+          motivated you to pick it.
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="timeline-row">
+    <div class="step-card">
+      <div class="card-left">
+        <span class="step-number">03</span>
+      </div>
+      <div class="card-right">
+        <h3 class="step-title">Submit!</h3>
+        <p class="step-desc">Publish your (totally anonymous) submission to our dictionary. Once it gets approved by our moderators, it'll get listed here for people to see.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<section class = "dictionary-preview">
+  
+    
+<p>
+
+
+  
+</p>
+
+            <h2 class="block-title">
+    <span class="block block-1">{{ submission_count }} words so far</span> 
+</h2>
+<h2 class="block-title"  id = "humanirememberyourgenocides">
+    <span class="block block-1" style="margin-top:-70px;"><a href="/submit" class="tab {% if request.path == '/submit' %}active{% endif %}" style="text-decoration:underline; color:var(--blue);">Add yours?</a>
+</span> 
+</h2>
+</section>
+
+</section>
+</section>
+
+
+
+{% endblock %}
