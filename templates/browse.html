@@ -33,19 +33,18 @@
 <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Initialize Isotope on our grid
-    var iso = new Isotope('.isotope-grid', {
+     var iso = new Isotope('.isotope-grid', {
         itemSelector: '.grid-item',
         layoutMode: 'masonry',
-        percentPosition: true, // Crucial for fluid percentage grids
+        percentPosition: true, 
         masonry: {
-            columnWidth: '.grid-sizer', // Points to our sizer element
-            gutter: '.gutter-sizer',    // Points to our gutter element
-            horizontalOrder: true       // Keeps things rendering left-to-right cleanly
+            columnWidth: '.grid-sizer',  
+            gutter: '.gutter-sizer',     
+            horizontalOrder: true       
         }
     });
 
-    // 2. Setup Live Search functionality
+    // search bar
     var searchBar = document.getElementById('search-bar');
     
     searchBar.addEventListener('input', function() {
@@ -53,7 +52,6 @@ document.addEventListener("DOMContentLoaded", function() {
         
         iso.arrange({
             filter: function(itemElem) {
-                // Skips the sizer elements so they don't mess up filtering
                 if (itemElem.classList.contains('grid-sizer') || itemElem.classList.contains('gutter-sizer')) {
                     return false;
                 }
