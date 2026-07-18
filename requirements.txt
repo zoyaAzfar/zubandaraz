@@ -1,2 +1,6 @@
-flask
+Flask
+Flask-SQLAlchemy
+Flask-HTTPAuth
+Werkzeug
 gunicorn
+python-dotenv
