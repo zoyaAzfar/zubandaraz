@@ -1,26 +1,43 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="admin">
+    <h1>Pending Entries</h1>
 
-<div class = "admin">
-<h1>Pending Entries</h1>
+    {% for entry in pending %}
+        <div class="admin-entry-card" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+            <h2>{{ entry.word }} <small>({{ entry.language }})</small></h2>
+            <p><strong>Story:</strong> {{ entry.story }}</p>
 
-{% for entry in pending %}
+            <form action="/approve/{{ entry.id }}" method="POST" style="margin-top: 15px;">
+                <div style="margin-bottom: 10px;">
+                    <label for="origin-{{ entry.id }}"><strong>Origin:</strong></label><br>
+                    <input type="text" id="origin-{{ entry.id }}" name="origin" value="{{ entry.origin or '' }}" placeholder="e.g. Latin, Old Norse">
+                </div>
 
-<h2>{{ entry.word }}</h2>
+                <div style="margin-bottom: 10px;">
+                    <label for="dialect-{{ entry.id }}"><strong>Dialect:</strong></label><br>
+                    <input type="text" id="dialect-{{ entry.id }}" name="dialect" value="{{ entry.dialect or '' }}" placeholder="e.g. Yorkshire, Southern US">
+                </div>
 
-<p>{{ entry.story }}</p>
+                <div style="margin-bottom: 10px;">
+                    <label for="source-{{ entry.id }}"><strong>Source:</strong></label><br>
+                    <input type="text" id="source-{{ entry.id }}" name="source" value="{{ entry.source or '' }}" placeholder="e.g. Oral tradition, Book Title">
+                </div>
 
-<form action="/approve/{{ entry.id }}" method="POST">
-    <button class = "submit-btn">Approve</button>
-</form>
+                <button type="submit" class="submit-btn" style="background-color: #4CAF50; color: white; padding: 8px 12px; border: none; cursor: pointer;">
+                    Approve & Save Details
+                </button>
+            </form>
 
-<form action="/delete/{{ entry.id }}" method="POST">
-    <button class = "submit-btn">Reject</button>
-</form>
-
-<hr>
+            <form action="/delete/{{ entry.id }}" method="POST" style="margin-top: 10px;">
+                <button type="submit" class="submit-btn" style="background-color: #f44336; color: white; padding: 8px 12px; border: none; cursor: pointer;">
+                    Reject
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <p>No pending entries to review!</p>
+    {% endfor %}
 </div>
-
-{% endfor %}
 {% endblock %}
