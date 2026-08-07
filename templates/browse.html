@@ -1,18 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <div class="browse-container" style="text-align:center; margin-top:-20px;">
     <h1 class="loose-letters">
         <span class="line-1">
-                <span>t</span><span>h</span><span>e</span>
+            <span>t</span><span>h</span><span>e</span>
         </span>
         <span class="line-2">
             <span>w</span><span>o</span><span>r</span><span>d</span><span>s</span>
         </span>
     </h1>
 
-    <div class="search-container">
-        <input type="text" id="search-bar" placeholder="search words or languages...">
+   <div class="search-container" style="display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; border-radius:20px;">
+    <input type="text" id="search-bar" placeholder="Search...">
+
+            <div class="custom-dropdown" id="custom-dropdown">
+                <button type="button" class="dropdown-button" id="dropdown-btn">
+                    <span id="selected-option">All</span>
+                    <span class="arrow">▾</span>
+                </button>
+                <ul class="dropdown-menu" id="dropdown-menu">
+                    <li data-value="all">All</li>
+                    <li data-value="word">Word</li>
+                    <li data-value="language">Language</li>
+                    <li data-value="origin">Origin</li>
+                </ul>
+            </div>
+       
     </div>
 
     <div class="isotope-grid">
@@ -20,51 +35,124 @@
         <div class="gutter-sizer"></div>
 
         {% for entry in entries %}
-            <div class="grid-item" data-word="{{ entry.word | lower }}" data-language="{{ entry.language | lower }}">
-                <span class="entry-lang">{{ entry.language }}</span>
+            <div class="grid-item" 
+                 data-word="{{ entry.word | lower }}" 
+                 data-language="{{ entry.language | lower }}"
+                 data-origin="{{ (entry.origin or '') | lower }}"
+                 data-dialect="{{ (entry.dialect or '') | lower }}"
+                 data-source="{{ (entry.source or '') | lower }}">
+                
+                
+               
                 <h2 class="entry-word">{{ entry.word }}</h2>
+                
+                 <span class="entry-lang">{{ entry.language }}</span>
+
+
+                {% if entry.origin %}
+                    <p class="entry-origin"> {{ entry.origin }}</p>
+                {% endif %}
+
+
                 <p class="entry-story">{{ entry.story }}</p>
+                
+
+                
+                {% if entry.dialect %}
+                <span class="entry-dialect">({{ entry.dialect }})</span>
+                {% endif %}
+                
+
+                {% if entry.source %}
+                    <p class="entry-source">Source: {{ entry.source }}</p>
+                {% endif %}
             </div>
         {% endfor %}
     </div>
 </div>
 
-
 <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-     var iso = new Isotope('.isotope-grid', {
+    // 1. Initialize Isotope layout
+    var iso = new Isotope('.isotope-grid', {
         itemSelector: '.grid-item',
         layoutMode: 'masonry',
-        percentPosition: true, 
+        percentPosition: true,
         masonry: {
-            columnWidth: '.grid-sizer',  
-            gutter: '.gutter-sizer',     
-            horizontalOrder: true       
+            columnWidth: '.grid-sizer',
+            gutter: '.gutter-sizer',
+            horizontalOrder: true
         }
     });
 
-    // search bar
+    // 2. DOM Elements & State
     var searchBar = document.getElementById('search-bar');
-    
-    searchBar.addEventListener('input', function() {
-        var filterValue = searchBar.value.toLowerCase().trim();
-        
+    var currentCategory = 'all'; // Store the active category state here
+
+    // Custom Dropdown Elements
+    const dropdown = document.getElementById('custom-dropdown');
+    const dropdownBtn = document.getElementById('dropdown-btn');
+    const selectedOption = document.getElementById('selected-option');
+    const menuItems = dropdown.querySelectorAll('.dropdown-menu li');
+
+    // 3. Filter Function
+    function performSearch() {
+        var query = searchBar.value.toLowerCase().trim();
+
         iso.arrange({
             filter: function(itemElem) {
+                // Skip sizer elements so layout grid isn't disrupted
                 if (itemElem.classList.contains('grid-sizer') || itemElem.classList.contains('gutter-sizer')) {
                     return false;
                 }
-                
-                var word = itemElem.getAttribute('data-word') || '';
-                var lang = itemElem.getAttribute('data-language') || '';
-                
-                return word.includes(filterValue) || lang.includes(filterValue);
+
+                var word = (itemElem.getAttribute('data-word') || '').toLowerCase();
+                var lang = (itemElem.getAttribute('data-language') || '').toLowerCase();
+                var origin = (itemElem.getAttribute('data-origin') || '').toLowerCase();
+
+                // Filter logic based on currentCategory variable
+                if (currentCategory === 'word') {
+                    return word.includes(query);
+                } else if (currentCategory === 'language') {
+                    return lang.includes(query);
+                } else if (currentCategory === 'origin') {
+                    return origin.includes(query);
+                } else {
+                    // Default ('all'): matches if query exists in ANY field
+                    return word.includes(query) || lang.includes(query) || origin.includes(query);
+                }
             }
         });
+    }
+
+    // 4. Attach Event Listeners
+
+    // Typing in search bar
+    searchBar.addEventListener('input', performSearch);
+
+    // Toggle dropdown open/close
+    dropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+    });
+
+    // Handle selecting a category from the custom dropdown
+    menuItems.forEach(item => {
+        item.addEventListener('click', () => {
+            selectedOption.textContent = item.textContent;
+            currentCategory = item.dataset.value; // Update the category state
+            dropdown.classList.remove('open');
+            
+            performSearch(); // Trigger search when category changes!
+        });
+    });
+
+    // Close menu when clicking anywhere outside
+    document.addEventListener('click', () => {
+        dropdown.classList.remove('open');
     });
 });
 </script>
 
 {% endblock %}
-
