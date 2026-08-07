@@ -42,23 +42,39 @@ def home():
 def submit_page():
     return render_template("submit.html")
 
-# Admin Route
+# FIX: Renamed function from submit_page to about_page
+@app.route("/about")
+def about_page():
+    return render_template("aboutus.html")
+
 @app.route("/admin")
 @auth.login_required
 def admin():
     pending = Entry.query.filter_by(status="pending").all()
     return render_template("admin.html", pending=pending)
 
-# Approve Action
+# Updated Approve Action
 @app.route("/approve/<int:id>", methods=["POST"])
 @auth.login_required
 def approve(id):
     entry = Entry.query.get_or_404(id)
+    
+    # Grab the manual/edited inputs from the admin form
+    origin = request.form.get("origin")
+    dialect = request.form.get("dialect")
+    source = request.form.get("source")
+
+    # Update fields (save None/null if left blank)
+    entry.origin = origin.strip() if origin and origin.strip() else None
+    entry.dialect = dialect.strip() if dialect and dialect.strip() else None
+    entry.source = source.strip() if source and source.strip() else None
+
+    # Mark as approved and commit
     entry.status = "approved"
     db.session.commit()
+
     return redirect("/admin")
 
-# Delete Action
 @app.route("/delete/<int:id>", methods=["POST"])
 @auth.login_required
 def delete(id):
@@ -69,17 +85,25 @@ def delete(id):
 
 @app.route("/submit", methods=["POST"])
 def submit():
-    word = request.form["word"]
-    language = request.form["language"]
-    story = request.form["story"]
+    word = request.form.get("word")
+    language = request.form.get("language")
+    story = request.form.get("story")
+    
+    # Optional fields from user input
+    origin = request.form.get("origin") or None
+    dialect = request.form.get("dialect") or None
+    source = request.form.get("source") or None
 
-    if not word or len(word) > 100 or len(story) > 2000:
+    if not word or not story or len(word) > 100 or len(story) > 2000:
         return "Invalid input length", 400
 
     entry = Entry(
         word=word,
         story=story,
         language=language,
+        origin=origin,
+        dialect=dialect,
+        source=source,
         status="pending"
     )
 
@@ -90,7 +114,7 @@ def submit():
 
 @app.route("/browse")
 def browse():
-    entries = Entry.query.filter_by(status="approved").all()    
+    entries = Entry.query.filter_by(status="approved").all()
     return render_template("browse.html", entries=entries)
 
 if __name__ == "__main__":
