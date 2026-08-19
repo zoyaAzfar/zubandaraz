@@ -118,4 +118,4 @@ def browse():
     return render_template("browse.html", entries=entries)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
