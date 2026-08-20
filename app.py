@@ -5,9 +5,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, Entry
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///dictionary.db"
+
+# Fetch database URL from environment; convert legacy postgres:// prefixes if necessary
+db_url = os.environ.get("DATABASE_URL", "sqlite:///dictionary.db")
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
+
 
 auth = HTTPBasicAuth()
 
