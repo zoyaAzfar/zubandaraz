@@ -1158,3 +1158,114 @@ footer {
     border-radius: 50px;
     border: 2px solid black;
 }
+
+/* --- EDIT PAGE STYLING --- */
+.edit-mode-container {
+}
+
+.wiki-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Base label styling */
+.wiki-edit-form label {
+    font-family: "Mondwest", serif;
+    font-size: 1.1rem;
+    color: black;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* Headers for the big text areas, styled like your H2s */
+.wiki-edit-form .section-label {
+    font-size: 1.3rem;
+    color: var(--green);
+    margin-top: 15px;
+    border-bottom: 2px solid var(--pink);
+    padding-bottom: 4px;
+    display: inline-block;
+    width: max-content;
+}
+
+/* The Wiki-style editing boxes */
+.wiki-edit-form input[type="text"],
+.wiki-edit-form textarea {
+    font-family: "Courier New", Courier, monospace; /* Gives it that raw Wiki feel */
+    font-size: 1rem;
+    padding: 12px;
+    border: 2px solid black;
+    background-color: #f9f9f9;
+    color: #333;
+    resize: vertical;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+/* Active focus states to match your branding */
+.wiki-edit-form input[type="text"]:focus,
+.wiki-edit-form textarea:focus {
+    outline: none;
+    border-color: black;
+    background-color: var(--white);
+    box-shadow: 4px 4px 0px var(--pink);
+}
+
+/* Bottom Actions Toolbar */
+.edit-form-actions {
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-top: 2px solid black;
+    padding-top: 20px;
+}
+
+/* Submit Button styled identically to your edit button */
+.save-btn {
+    font-family: "Mondwest", serif;
+    font-size: 1.1rem;
+    background-color: var(--green);
+    color: var(--white);
+    padding: 10px 24px;
+    border-radius: 50px;
+    border: 2px solid black;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.save-btn:active {
+    transform: translate(2px, 2px);
+}
+
+.cancel-link {
+    font-family: "Mondwest", serif;
+    font-size: 1.1rem;
+    color: var(--blue); /* Or #555 if you don't have a var(--blue) */
+    text-decoration: none;
+}
+
+.cancel-link:hover {
+    text-decoration: underline;
+}
+
+/* Mobile responsiveness for side-by-side inputs */
+@media (max-width: 600px) {
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
