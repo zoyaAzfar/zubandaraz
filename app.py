@@ -61,11 +61,6 @@ def submit_page():
 def about_page():
     return render_template("aboutus.html")
 
-@app.route("/admin")
-@auth.login_required
-def admin():
-    pending = Entry.query.filter_by(status="pending").all()
-    return render_template("admin.html", pending=pending)
 
 @app.route("/entry/<slug>")
 def entry_detail(slug):
@@ -96,29 +91,35 @@ def edit_entry(slug):
 
     return render_template("edit_entry.html", entry=entry)
 
-@app.route("/approve/<int:id>", methods=["POST"])
+@app.route("/admin")
 @auth.login_required
-def approve(id):
-    entry = Entry.query.get_or_404(id)
-    
-    origin = request.form.get("origin")
-    dialect = request.form.get("dialect")
-    source = request.form.get("source")
+def admin():
+    pending_entries = Entry.query.filter_by(status="pending").all()
+    pending_edits = EntryEdit.query.filter_by(status="pending").all()
+    return render_template("admin.html", pending=pending_entries, pending_edits=pending_edits)
 
-    entry.origin = origin.strip() if origin and origin.strip() else None
-    entry.dialect = dialect.strip() if dialect and dialect.strip() else None
-    entry.source = source.strip() if source and source.strip() else None
+@app.route("/approve_edit/<int:id>", methods=["POST"])
+@auth.login_required
+def approve_edit(id):
+    edit = EntryEdit.query.get_or_404(id)
+    entry = edit.entry
 
-    entry.status = "approved"
+    # Only overwrite fields the editor actually changed
+    for field in ["word", "language", "literal_definition", "etymology",
+                  "story", "origin", "dialect", "source"]:
+        val = getattr(edit, field)
+        if val is not None:
+            setattr(entry, field, val)
+
+    edit.status = "approved"
     db.session.commit()
-
     return redirect("/admin")
 
-@app.route("/delete/<int:id>", methods=["POST"])
+@app.route("/reject_edit/<int:id>", methods=["POST"])
 @auth.login_required
-def delete(id):
-    entry = Entry.query.get_or_404(id)
-    db.session.delete(entry)
+def reject_edit(id):
+    edit = EntryEdit.query.get_or_404(id)
+    edit.status = "rejected"
     db.session.commit()
     return redirect("/admin")
 
@@ -138,8 +139,11 @@ def submit():
 
     entry = Entry(
         word=word,
+        slug=make_unique_slug(word),
         story=story,
         language=language,
+        literal_definition=request.form.get("literal_definition") or None,
+        etymology=request.form.get("etymology") or None,
         origin=origin,
         dialect=dialect,
         source=source,
