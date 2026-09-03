@@ -142,7 +142,7 @@ def entry_detail(slug):
         {"entry_id": entry.id}
     ).fetchall()
 
-    return render_template('entry_detail.html', entry=entry, stories=stories)
+    return render_template('entry.html', entry=entry, stories=stories)
 
 
 @app.route('/entry/<slug>/submit-story', methods=['GET', 'POST'])
