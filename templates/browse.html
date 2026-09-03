@@ -31,11 +31,24 @@
 
     <div class="entry-index">
         {% for entry in entries %}
-            <a href="{{ url_for('entry_detail', slug=entry.slug) }}"
+           <a href="{{ url_for('entry_detail', slug=entry.slug) }}"
                class="entry-row"
                data-word="{{ entry.word | lower }}"
                data-language="{{ entry.language | lower }}"
                data-origin="{{ (entry.origin or '') | lower }}">
+                <div class="entry-row-main">
+                    <span class="entry-word">{{ entry.word }}</span>
+                    <span class="entry-row-meta">
+                        {% if entry.part_of_speech %}<span class="entry-pos">{{ entry.part_of_speech }}.</span>{% endif %}
+                        <span class="entry-lang">{{ entry.language }}</span>
+                    </span>
+                </div>
+                {% if entry.literal_definition %}
+                    <p class="entry-snippet">{{ entry.literal_definition | truncate(120) }}</p>
+                {% else %}
+                    <p class="entry-snippet">{{ entry.story | truncate(120) }}</p>
+                {% endif %}
+            </a>
 
                 <div class="entry-row-main">
                     <span class="entry-word">{{ entry.word }}</span>
