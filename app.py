@@ -131,21 +131,22 @@ def browse():
     )
 
 
-@app.route("/entry/<slug>")
+@app.route('/entry/<slug>')
 def entry_detail(slug):
-    entry = (
-        Entry.query
-        .filter_by(
-            slug=slug,
-            status="approved"
-        )
-        .first_or_404()
-    )
+    # 1. Fetch the main entry
+    # (Assuming you have a function to query Turso/SQLite)
+    entry = db.execute("SELECT * FROM entries WHERE slug = ?", (slug,)).fetchone()
+    
+    if not entry:
+        abort(404)
 
-    return render_template(
-        "entry.html",
-        entry=entry
-    )
+    # 2. Fetch all APPROVED stories for this entry
+    stories = db.execute(
+        "SELECT * FROM stories WHERE entry_id = ? AND is_approved = 1 ORDER BY created_at DESC", 
+        (entry['id'],)
+    ).fetchall()
+
+    return render_template('entry_detail.html', entry=entry, stories=stories)
 
 
 @app.route(
