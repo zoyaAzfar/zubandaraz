@@ -1,12 +1,10 @@
 import os
-from flask import Flask, render_template, request, redirect, make_response
+from flask import Flask, render_template, request, redirect, make_response, url_for, abort
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import text
 from models import db, Entry, EntryEdit
 from slugify import slugify
-from sqlalchemy import text
-from flask import abort, url_for
-
 
 app = Flask(__name__)
 
