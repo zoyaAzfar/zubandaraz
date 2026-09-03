@@ -143,15 +143,15 @@ def entry_detail(slug):
 
     return render_template('entry.html', entry=entry, stories=stories)
 
-
 @app.route('/entry/<slug>/submit-story', methods=['GET', 'POST'])
 def submit_story(slug):
     # Fetch entry to make sure it exists
     entry = Entry.query.filter_by(slug=slug, status="approved").first_or_404()
     
     if request.method == 'POST':
-        content = request.form['content']
-        submitted_by = request.form['submitted_by']
+        # Tip: using .get() is safer than ['key'] because it won't crash if the user leaves it blank
+        content = request.form.get('content')
+        submitted_by = request.form.get('submitted_by')
         
         # Insert the new story using raw SQL via SQLAlchemy
         db.session.execute(
@@ -160,8 +160,8 @@ def submit_story(slug):
         )
         db.session.commit()
         
-        # Redirect back to the entry page
-        return redirect(url_for('entry', slug=slug, story_submitted=True))
+        # FIXED LINE: Redirect using the correct function name 'entry_detail'
+        return redirect(url_for('entry_detail', slug=slug, story_submitted=True))
         
     return render_template('submit-story.html', entry=entry)
     
