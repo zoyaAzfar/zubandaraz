@@ -162,7 +162,7 @@ def submit_story(slug):
         db.session.commit()
         
         # Redirect back to the entry page
-        return redirect(url_for('entry_detail', slug=slug, story_submitted=True))
+        return redirect(url_for('entry', slug=slug, story_submitted=True))
         
     return render_template('submit_story.html', entry=entry)
     
