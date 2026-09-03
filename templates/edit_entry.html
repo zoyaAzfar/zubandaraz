@@ -43,22 +43,6 @@
         <label for="etymology" class="section-label">Etymology</label>
         <textarea id="etymology" name="etymology" rows="4">{{ entry.etymology or '' }}</textarea>
 
-        <!-- SEPARATED STORY BOX -->
-        <div class="story-edit-box" style="
-            background-color: var(--white, #fff); 
-            border: 2px solid black; /* Change to 'white' if you want a literal white line */
-            padding: 20px; 
-            margin: 25px 0; 
-            box-shadow: 4px 4px 0px var(--pink);
-        ">
-            <label for="story" class="section-label" style="margin-top: 0;">Original Story</label>
-            <p style="font-family: 'Mondwest', serif; font-size: 0.95rem; color: #555; margin-bottom: 10px;">
-                Editing the main story attached to this entry.
-            </p>
-            <textarea id="story" name="story" rows="10" maxlength="2000">{{ entry.story }}</textarea>
-        </div>
-        <!-- END SEPARATED STORY BOX -->
-
         <div class="form-row">
             <div class="form-group">
                 <label for="source">Source</label>
