@@ -7,10 +7,21 @@ from slugify import slugify
 
 app = Flask(__name__)
 
-db_url = os.environ.get("TURSO_DATABASE_URL")   
+db_url = os.environ.get("TURSO_DATABASE_URL")     # e.g. libsql://your-db-org.turso.io
 auth_token = os.environ.get("TURSO_AUTH_TOKEN")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite+{db_url.replace('libsql://', 'libsql://')}?authToken={auth_token}&secure=true"
+if db_url and db_url.startswith("libsql://"):
+    stripped = db_url.replace("libsql://", "", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite+libsql://{stripped}?secure=true"
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "connect_args": {"auth_token": auth_token}
+    }
+else:
+    # local dev fallback
+    fallback = os.environ.get("DATABASE_URL", "sqlite:///dictionary.db")
+    if fallback.startswith("postgres://"):
+        fallback = fallback.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = fallback
 
 db.init_app(app)
 
