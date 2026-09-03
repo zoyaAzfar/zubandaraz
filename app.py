@@ -157,7 +157,7 @@ def submit():
 
 @app.route("/browse")
 def browse():
-    entries = Entry.query.filter_by(status="approved").all()
+    entries = Entry.query.filter_by(status="approved").order_by(Entry.word).all()
     return render_template("browse.html", entries=entries)
 
 if __name__ == "__main__":
