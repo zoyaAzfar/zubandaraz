@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, make_response
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, Entry
+from models import db, Entry, EntryEdit
 from slugify import slugify
 
 app = Flask(__name__)
