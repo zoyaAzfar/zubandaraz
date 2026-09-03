@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Editing {{ entry.word }} — Zuban Daraz{% endblock %}
+
+{% block content %}
+
+<div class="edit-container">
+    <h1>Editing "{{ entry.word }}"</h1>
+    <p class="edit-note">Changes are reviewed before going live. The current entry stays visible in the meantime.</p>
+
+    <form method="POST" action="{{ url_for('edit_entry', slug=entry.slug) }}">
+
+        <label for="word">Word</label>
+        <input type="text" id="word" name="word" value="{{ entry.word }}" maxlength="100">
+
+        <label for="language">Language</label>
+        <input type="text" id="language" name="language" value="{{ entry.language }}" maxlength="100">
+
+        <label for="literal_definition">Literal definition</label>
+        <textarea id="literal_definition" name="literal_definition" rows="3">{{ entry.literal_definition or '' }}</textarea>
+
+        <label for="etymology">Etymology</label>
+        <textarea id="etymology" name="etymology" rows="3">{{ entry.etymology or '' }}</textarea>
+
+        <label for="story">Story</label>
+        <textarea id="story" name="story" rows="6" maxlength="2000">{{ entry.story }}</textarea>
+
+        <label for="origin">Origin</label>
+        <input type="text" id="origin" name="origin" value="{{ entry.origin or '' }}" maxlength="150">
+
+        <label for="dialect">Dialect</label>
+        <input type="text" id="dialect" name="dialect" value="{{ entry.dialect or '' }}" maxlength="100">
+
+        <label for="source">Source</label>
+        <input type="text" id="source" name="source" value="{{ entry.source or '' }}" maxlength="250">
+
+        <label for="submitted_by">Your name or email (optional)</label>
+        <input type="text" id="submitted_by" name="submitted_by" maxlength="150">
+
+        <div class="edit-form-actions">
+            <button type="submit">Submit edit for review</button>
+            <a href="{{ url_for('entry_detail', slug=entry.slug) }}" class="cancel-link">Cancel</a>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}
