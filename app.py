@@ -148,6 +148,25 @@ def entry_detail(slug):
 
     return render_template('entry_detail.html', entry=entry, stories=stories)
 
+@app.route('/entry/<slug>/submit-story', methods=['GET', 'POST'])
+def submit_story(slug):
+    entry = db.execute("SELECT id, word FROM entries WHERE slug = ?", (slug,)).fetchone()
+    
+    if request.method == 'POST':
+        content = request.form['content']
+        submitted_by = request.form['submitted_by']
+        
+        # Insert the new story into Turso (defaults to is_approved = 0)
+        db.execute(
+            "INSERT INTO stories (entry_id, content, submitted_by) VALUES (?, ?, ?)",
+            (entry['id'], content, submitted_by)
+        )
+        db.commit()
+        
+        # Redirect back to the entry page with a success message
+        return redirect(url_for('entry_detail', slug=slug, story_submitted=True))
+        
+    return render_template('submit_story.html', entry=entry)
 
 @app.route(
     "/entry/<slug>/edit",
