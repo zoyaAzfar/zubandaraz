@@ -764,6 +764,52 @@ footer {
    .gutter-sizer { width: 0%; }
 }
 
+/* --- Browse Page: Entry List (matches the classes in browse.html) --- */
+
+.entry-index {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.entry-row {
+    background-color: var(--white);
+    color: black;
+    border: 2px solid black;
+    padding: 20px;
+    box-sizing: border-box;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease;
+}
+
+.entry-row:nth-child(odd) {
+    box-shadow: 5px 5px 0px var(--pink);
+}
+
+.entry-row:nth-child(even) {
+    box-shadow: 5px 5px 0px var(--green);
+}
+
+.entry-row:hover {
+    transform: translateY(-2px);
+}
+
+.entry-row-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.entry-snippet {
+    font-family: "Mondwest", serif;
+    font-size: 0.9em;
+    color: #333;
+    margin: 10px 0 0 0;
+}
 
 
 
