@@ -81,8 +81,8 @@ def verify_password(username, password):
         return username
 
 
-with app.app_context():
-    db.create_all()
+#with app.app_context():
+#    db.create_all()
 
 
 def make_unique_slug(word):
