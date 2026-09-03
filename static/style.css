@@ -726,8 +726,6 @@ footer {
    font-family: "Mondwest", serif;
    font-size: 0.8em;
    color: #666;
-   display: block;
-   margin-bottom: 5px;
 }
 
 .entry-origin {
@@ -772,7 +770,6 @@ footer {
     gap: 20px;
     width: 100%;
 }
-
 .entry-row {
     background-color: var(--white);
     color: black;
@@ -782,32 +779,41 @@ footer {
     text-decoration: none;
     display: flex;
     flex-direction: column;
+    text-align: left;
     transition: transform 0.2s ease;
 }
 
-.entry-row:nth-child(odd) {
-    box-shadow: 5px 5px 0px var(--pink);
-}
-
-.entry-row:nth-child(even) {
-    box-shadow: 5px 5px 0px var(--green);
-}
-
-.entry-row:hover {
-    transform: translateY(-2px);
-}
+.entry-row:nth-child(odd)  { box-shadow: 5px 5px 0px var(--pink); }
+.entry-row:nth-child(even) { box-shadow: 5px 5px 0px var(--green); }
+.entry-row:hover           { transform: translateY(-2px); }
 
 .entry-row-main {
     display: flex;
-    justify-content: space-between;
     align-items: baseline;
-    gap: 10px;
+    justify-content: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.entry-row-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.entry-pos {
+    font-family: "Mondwest", serif;
+    font-style: italic;
+    font-size: 0.8em;
+    color: #666;
 }
 
 .entry-snippet {
     font-family: "Mondwest", serif;
+    font-style: italic;
     font-size: 0.9em;
     color: #333;
+    text-align: left;
     margin: 10px 0 0 0;
 }
 
