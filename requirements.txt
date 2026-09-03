@@ -6,5 +6,5 @@ gunicorn
 python-dotenv
 psycopg2-binary
 sqlalchemy-libsql
-libsql-client
+libsql
 python-slugify
