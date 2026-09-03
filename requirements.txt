@@ -5,3 +5,6 @@ Werkzeug
 gunicorn
 python-dotenv
 psycopg2-binary
+sqlalchemy-libsql
+libsql-client
+python-slugify
