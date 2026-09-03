@@ -4,6 +4,9 @@ from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, Entry, EntryEdit
 from slugify import slugify
+from sqlalchemy import text
+from flask import abort, url_for
+
 
 app = Flask(__name__)
 
@@ -130,44 +133,41 @@ def browse():
         entries=entries
     )
 
-
 @app.route('/entry/<slug>')
 def entry_detail(slug):
-    # 1. Fetch the main entry
-    # (Assuming you have a function to query Turso/SQLite)
-    entry = db.execute("SELECT * FROM entries WHERE slug = ?", (slug,)).fetchone()
-    
-    if not entry:
-        abort(404)
+    # Use ORM to fetch the entry, just like your edit_entry route does!
+    entry = Entry.query.filter_by(slug=slug, status="approved").first_or_404()
 
-    # 2. Fetch all APPROVED stories for this entry
-    stories = db.execute(
-        "SELECT * FROM stories WHERE entry_id = ? AND is_approved = 1 ORDER BY created_at DESC", 
-        (entry['id'],)
+    # Fetch approved stories for this entry using raw SQL via SQLAlchemy
+    stories = db.session.execute(
+        text("SELECT * FROM stories WHERE entry_id = :entry_id AND is_approved = 1 ORDER BY created_at DESC"), 
+        {"entry_id": entry.id}
     ).fetchall()
 
     return render_template('entry_detail.html', entry=entry, stories=stories)
 
+
 @app.route('/entry/<slug>/submit-story', methods=['GET', 'POST'])
 def submit_story(slug):
-    entry = db.execute("SELECT id, word FROM entries WHERE slug = ?", (slug,)).fetchone()
+    # Fetch entry to make sure it exists
+    entry = Entry.query.filter_by(slug=slug, status="approved").first_or_404()
     
     if request.method == 'POST':
         content = request.form['content']
         submitted_by = request.form['submitted_by']
         
-        # Insert the new story into Turso (defaults to is_approved = 0)
-        db.execute(
-            "INSERT INTO stories (entry_id, content, submitted_by) VALUES (?, ?, ?)",
-            (entry['id'], content, submitted_by)
+        # Insert the new story using raw SQL via SQLAlchemy
+        db.session.execute(
+            text("INSERT INTO stories (entry_id, content, submitted_by) VALUES (:entry_id, :content, :submitted_by)"),
+            {"entry_id": entry.id, "content": content, "submitted_by": submitted_by}
         )
-        db.commit()
+        db.session.commit()
         
-        # Redirect back to the entry page with a success message
+        # Redirect back to the entry page
         return redirect(url_for('entry_detail', slug=slug, story_submitted=True))
         
     return render_template('submit_story.html', entry=entry)
-
+    
 @app.route(
     "/entry/<slug>/edit",
     methods=["GET", "POST"]
@@ -275,6 +275,7 @@ def submit():
 
 
 @app.route("/admin")
+@app.route("/admin")
 @auth.login_required
 def admin():
 
@@ -292,12 +293,41 @@ def admin():
         .all()
     )
 
+    # NEW: Fetch pending stories using SQLAlchemy's text() wrapper
+    pending_stories = db.session.execute(text("""
+        SELECT stories.*, entries.word 
+        FROM stories 
+        JOIN entries ON stories.entry_id = entries.id 
+        WHERE stories.is_approved = 0
+    """)).fetchall()
+
     return render_template(
         "admin.html",
         pending=pending_entries,
-        pending_edits=pending_edits
+        pending_edits=pending_edits,
+        pending_stories=pending_stories
     )
 
+@app.route("/approve_story/<int:story_id>", methods=["POST"])
+@auth.login_required
+def approve_story(story_id):
+    db.session.execute(
+        text("UPDATE stories SET is_approved = 1 WHERE id = :id"), 
+        {"id": story_id}
+    )
+    db.session.commit()
+    return redirect("/admin")
+
+@app.route("/reject_story/<int:story_id>", methods=["POST"])
+@auth.login_required
+def reject_story(story_id):
+    db.session.execute(
+        text("DELETE FROM stories WHERE id = :id"), 
+        {"id": story_id}
+    )
+    db.session.commit()
+    return redirect("/admin")
+    
 
 
 @app.route(
