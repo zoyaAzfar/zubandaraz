@@ -9,8 +9,8 @@
             <h2>{{ entry.word }} <small>({{ entry.language }})</small></h2>
             <p><strong>Story:</strong> {{ entry.story }}</p>
 
-            <form action="/approve/{{ entry.id }}" method="POST" style="margin-top: 15px;">
-                <div style="margin-bottom: 10px;">
+    <form action="/approve_edit/{{ entry.id }}" method="POST" style="margin-top: 15px;">
+    <div style="margin-bottom: 10px;">
                     <label for="origin-{{ entry.id }}"><strong>Origin:</strong></label><br>
                     <input type="text" id="origin-{{ entry.id }}" name="origin" value="{{ entry.origin or '' }}" placeholder="e.g. Latin, Old Norse">
                 </div>
