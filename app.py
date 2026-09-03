@@ -80,6 +80,30 @@ def entry_detail(slug):
     entry = Entry.query.filter_by(slug=slug, status="approved").first_or_404()
     return render_template("entry.html", entry=entry)
 
+@app.route("/approve/<int:id>", methods=["POST"])
+@auth.login_required
+def approve(id):
+    entry = Entry.query.get_or_404(id)
+
+    entry.origin = request.form.get("origin") or None
+    entry.dialect = request.form.get("dialect") or None
+    entry.source = request.form.get("source") or None
+    entry.status = "approved"
+
+    db.session.commit()
+
+    return redirect("/admin")
+
+
+@app.route("/delete/<int:id>", methods=["POST"])
+@auth.login_required
+def delete(id):
+    entry = Entry.query.get_or_404(id)
+
+    db.session.delete(entry)
+    db.session.commit()
+
+    return redirect("/admin")
 @app.route("/entry/<slug>/edit", methods=["GET", "POST"])
 def edit_entry(slug):
     entry = Entry.query.filter_by(slug=slug, status="approved").first_or_404()
