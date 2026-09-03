@@ -1,4 +1,3 @@
-```python
 import os
 from flask import Flask, render_template, request, redirect, make_response
 from flask_httpauth import HTTPBasicAuth
