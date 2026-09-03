@@ -425,7 +425,12 @@ def reject_edit(id):
 
     return redirect("/admin")
 
-
+@app.route("/setup-db-secret")
+def setup_db():
+    # This manually creates the tables in Turso
+    with app.app_context():
+        db.create_all()
+    return "dbs made."
 
 if __name__ == "__main__":
     app.run(debug=False)
