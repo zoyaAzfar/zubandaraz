@@ -3,16 +3,14 @@ from flask import Flask, render_template, request, redirect, make_response
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, Entry
+from slugify import slugify
 
 app = Flask(__name__)
 
-# Fetch database URL from environment; convert legacy postgres:// prefixes if necessary
-db_url = os.environ.get("DATABASE_URL", "sqlite:///dictionary.db")
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+db_url = os.environ.get("TURSO_DATABASE_URL")   
+auth_token = os.environ.get("TURSO_AUTH_TOKEN")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = db_url
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite+{db_url.replace('libsql://', 'libsql://')}?authToken={auth_token}&secure=true"
 
 db.init_app(app)
 
@@ -33,6 +31,15 @@ users = {
     "moderator": generate_password_hash(ADMIN_PASSWORD)
 }
 
+def make_unique_slug(word):
+    base = slugify(word)
+    slug = base
+    i = 1
+    while Entry.query.filter_by(slug=slug).first():
+        i += 1
+        slug = f"{base}-{i}"
+    return slug
+
 @auth.verify_password
 def verify_password(username, password):
     if username in users and check_password_hash(users.get(username), password):
@@ -50,7 +57,6 @@ def home():
 def submit_page():
     return render_template("submit.html")
 
-# FIX: Renamed function from submit_page to about_page
 @app.route("/about")
 def about_page():
     return render_template("aboutus.html")
@@ -61,23 +67,48 @@ def admin():
     pending = Entry.query.filter_by(status="pending").all()
     return render_template("admin.html", pending=pending)
 
-# Updated Approve Action
+@app.route("/entry/<slug>")
+def entry_detail(slug):
+    entry = Entry.query.filter_by(slug=slug, status="approved").first_or_404()
+    return render_template("entry.html", entry=entry)
+
+@app.route("/entry/<slug>/edit", methods=["GET", "POST"])
+def edit_entry(slug):
+    entry = Entry.query.filter_by(slug=slug, status="approved").first_or_404()
+
+    if request.method == "POST":
+        edit = EntryEdit(
+            entry_id=entry.id,
+            word=request.form.get("word") or None,
+            language=request.form.get("language") or None,
+            literal_definition=request.form.get("literal_definition") or None,
+            etymology=request.form.get("etymology") or None,
+            story=request.form.get("story") or None,
+            origin=request.form.get("origin") or None,
+            dialect=request.form.get("dialect") or None,
+            source=request.form.get("source") or None,
+            submitted_by=request.form.get("submitted_by") or None,
+            status="pending",
+        )
+        db.session.add(edit)
+        db.session.commit()
+        return redirect(f"/entry/{slug}?edit_submitted=1")
+
+    return render_template("edit_entry.html", entry=entry)
+
 @app.route("/approve/<int:id>", methods=["POST"])
 @auth.login_required
 def approve(id):
     entry = Entry.query.get_or_404(id)
     
-    # Grab the manual/edited inputs from the admin form
     origin = request.form.get("origin")
     dialect = request.form.get("dialect")
     source = request.form.get("source")
 
-    # Update fields (save None/null if left blank)
     entry.origin = origin.strip() if origin and origin.strip() else None
     entry.dialect = dialect.strip() if dialect and dialect.strip() else None
     entry.source = source.strip() if source and source.strip() else None
 
-    # Mark as approved and commit
     entry.status = "approved"
     db.session.commit()
 
