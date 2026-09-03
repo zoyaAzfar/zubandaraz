@@ -292,9 +292,9 @@ def admin():
 
     # NEW: Fetch pending stories using SQLAlchemy's text() wrapper
     pending_stories = db.session.execute(text("""
-        SELECT stories.*, entries.word 
+        SELECT stories.*, entry.word 
         FROM stories 
-        JOIN entries ON stories.entry_id = entries.id 
+        JOIN entry ON stories.entry_id = entry.id 
         WHERE stories.is_approved = 0
     """)).fetchall()
 
