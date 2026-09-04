@@ -305,14 +305,31 @@ def admin():
         pending_stories=pending_stories
     )
 
-@app.route("/approve_story/<int:story_id>", methods=["POST"])
+@app.route("/approve/<int:id>", methods=["POST"])
 @auth.login_required
-def approve_story(story_id):
-    db.session.execute(
-        text("UPDATE stories SET is_approved = 1 WHERE id = :id"), 
-        {"id": story_id}
-    )
+def approve(id):
+    entry = Entry.query.get_or_404(id)
+
+    entry.language = request.form.get("language") or entry.language
+    entry.etymology = request.form.get("etymology") or None
+    entry.origin = request.form.get("origin") or None
+    entry.dialect = request.form.get("dialect") or None
+    entry.source = request.form.get("source") or None
+    entry.status = "approved"
+
+    # Automatically add the original story to the 'stories' table
+    # We set is_approved = 1 so it shows up immediately without needing a second approval
+    if entry.story:
+        db.session.execute(
+            text("""
+                INSERT INTO stories (entry_id, content, submitted_by, is_approved) 
+                VALUES (:entry_id, :content, 'Original Submitter', 1)
+            """),
+            {"entry_id": entry.id, "content": entry.story}
+        )
+
     db.session.commit()
+
     return redirect("/admin")
 
 @app.route("/reject_story/<int:story_id>", methods=["POST"])
