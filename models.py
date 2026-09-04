@@ -5,6 +5,8 @@ from datetime import datetime
 db = SQLAlchemy()
 
 class Entry(db.Model):
+    __tablename__ = 'entries'  # <-- Added this line
+    
     id = db.Column(db.Integer, primary_key=True)
     slug = db.Column(db.String(120), unique=True, nullable=False, index=True)
     word = db.Column(db.String(100), nullable=False)
@@ -24,7 +26,9 @@ class Entry(db.Model):
 
 class EntryEdit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    entry_id = db.Column(db.Integer, db.ForeignKey("entry.id"), nullable=False)
+    
+    # <-- Updated ForeignKey to point to 'entries.id' instead of 'entry.id'
+    entry_id = db.Column(db.Integer, db.ForeignKey("entries.id"), nullable=False)
     entry = db.relationship("Entry", backref="pending_edits")
 
     word = db.Column(db.String(100), nullable=True)
