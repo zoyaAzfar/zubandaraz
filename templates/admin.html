@@ -108,11 +108,37 @@
 
                     <h3>Review Details</h3>
 
+                    <div style="margin-bottom: 10px;">
+    <label for="language-{{ entry.id }}">
+        <strong>Language:</strong>
+    </label>
+    <br>
+    <input
+        type="text"
+        id="language-{{ entry.id }}"
+        name="language"
+        value="{{ entry.language or '' }}"
+        placeholder="e.g. English, Spanish"
+    >
+</div>
 
+<div style="margin-bottom: 10px;">
+    <label for="etymology-{{ entry.id }}">
+        <strong>Etymology:</strong>
+    </label>
+    <br>
+    <input
+        type="text"
+        id="etymology-{{ entry.id }}"
+        name="etymology"
+        value="{{ entry.etymology or '' }}"
+        placeholder="e.g. From Latin..."
+    >
+</div>
 
                     <div style="margin-bottom: 10px;">
 
-
+                        
 
                         <label for="origin-{{ entry.id }}">
 
