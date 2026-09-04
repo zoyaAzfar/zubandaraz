@@ -270,8 +270,6 @@ def submit():
 
     return redirect("/browse")
 
-
-@app.route("/admin")
 @app.route("/admin")
 @auth.login_required
 def admin():
@@ -317,8 +315,6 @@ def approve(id):
     entry.source = request.form.get("source") or None
     entry.status = "approved"
 
-    # Automatically add the original story to the 'stories' table
-    # We set is_approved = 1 so it shows up immediately without needing a second approval
     if entry.story:
         db.session.execute(
             text("""
@@ -342,38 +338,6 @@ def reject_story(story_id):
     db.session.commit()
     return redirect("/admin")
     
-
-
-@app.route(
-    "/approve/<int:id>",
-    methods=["POST"]
-)
-@auth.login_required
-def approve(id):
-
-    entry = Entry.query.get_or_404(id)
-
-    entry.origin = (
-        request.form.get("origin")
-        or None
-    )
-
-    entry.dialect = (
-        request.form.get("dialect")
-        or None
-    )
-
-    entry.source = (
-        request.form.get("source")
-        or None
-    )
-
-    entry.status = "approved"
-
-    db.session.commit()
-
-    return redirect("/admin")
-
 
 @app.route(
     "/delete/<int:id>",
