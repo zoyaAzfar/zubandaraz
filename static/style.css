@@ -621,43 +621,8 @@ footer {
    margin: 0 auto;
 }
 
-
-/* --- Search Input Styling --- */
-/* --- Search Container & Layout --- */
-.search-container {
-   display: flex;
-   justify-content: center;
-   align-items: center; /* Keeps items aligned vertically */
-   gap: 8px;
-   margin-bottom: 40px;
-}
-
-/* --- Search Container Layout --- */
-/* --- Wrapper Layout --- */
-.search-container {
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   gap: 8px;
-   margin-bottom: 40px;
-}
-
-/* --- Search Input Styling --- */
-#search-bar {
-   font-family: "Mondwest", serif;
-   font-size: 1.2em;
-   padding: 12px 20px;
-   width: 100%;
-   max-width: 550px;
-   border: 2px solid black;
-   background-color: var(--white, #ffffff);
-   color: black;
-   outline: none;
-   box-sizing: border-box;
-}
-
-#search-bar:focus {
-   border-color: var(--pink, pink);
+#sort-dropdown-btn {
+    width: 260px; 
 }
 
 /* --- Custom Dropdown Component --- */
@@ -813,24 +778,25 @@ footer {
    .gutter-sizer { width: 0%; }
 }
 
-/* --- Browse Page: Entry List (matches the classes in browse.html) --- */
-
+/* --- Browse Page: Entry List (full-width rows) --- */
 .entry-index {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
     width: 100%;
+    gap: 16px;
 }
+
 .entry-row {
     background-color: var(--white);
     color: black;
     border: 2px solid black;
-    padding: 20px;
+    padding: 20px 24px;
     box-sizing: border-box;
     text-decoration: none;
     display: flex;
     flex-direction: column;
     text-align: left;
+    width: 100%;
     transition: transform 0.2s ease;
 }
 
@@ -841,9 +807,15 @@ footer {
 .entry-row-main {
     display: flex;
     align-items: baseline;
-    justify-content: flex-start;
+    justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
+}
+
+.entry-word {
+    font-family: "Mondwest", serif;
+    font-size: 1.8em;
+    margin: 0;
 }
 
 .entry-row-meta {
@@ -855,20 +827,18 @@ footer {
 .entry-pos {
     font-family: "Mondwest", serif;
     font-style: italic;
-    font-size: 0.8em;
+    font-size: 0.9em;
     color: #666;
 }
 
 .entry-snippet {
     font-family: "Mondwest", serif;
     font-style: italic;
-    font-size: 0.9em;
+    font-size: 1em;
     color: #333;
     text-align: left;
-    margin: 10px 0 0 0;
+    margin: 12px 0 0 0;
 }
-
-
 
 /* --- Updated Container --- */
 .timeline-container {
