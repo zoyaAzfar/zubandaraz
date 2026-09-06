@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block content %}
-
 <div class="browse-container" style="text-align:center; margin-top:-20px;">
     <h1 class="loose-letters">
         <span class="line-1">
@@ -9,31 +7,29 @@
         </span>
     </h1>
 
-    <div class="search-container" style="display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; border-radius:20px;">
-        <input type="text" id="search-bar" placeholder="Search...">
-
-        <div class="custom-dropdown" id="custom-dropdown">
-            <button type="button" class="dropdown-button" id="dropdown-btn">
-                <span id="selected-option">All</span>
+    <div class="sort-container">
+        <div class="custom-dropdown" id="sort-dropdown">
+            <button type="button" class="dropdown-button" id="sort-dropdown-btn">
+                <span id="sort-selected-option">Sort: Alphabetical</span>
                 <span class="arrow">▾</span>
             </button>
-            <ul class="dropdown-menu" id="dropdown-menu">
-                <li data-value="all">All</li>
-                <li data-value="word">Word</li>
+            <ul class="dropdown-menu" id="sort-dropdown-menu">
+                <li data-value="alphabetical">Alphabetical</li>
                 <li data-value="language">Language</li>
-                <li data-value="origin">Origin</li>
+                <li data-value="popularity">Popularity</li>
             </ul>
         </div>
     </div>
 
-   <div class="entry-index">
+    <div class="entry-index">
     {% for entry in entries %}
         <a href="{{ url_for('entry_detail', slug=entry.slug) }}"
            class="entry-row"
            data-word="{{ entry.word | lower }}"
            data-language="{{ entry.language | lower }}"
-           data-origin="{{ (entry.origin or '') | lower }}">
-           
+           data-origin="{{ (entry.origin or '') | lower }}"
+           data-story-count="{{ entry.stories | length }}">
+
             <div class="entry-row-main">
                 <span class="entry-word">{{ entry.word }}</span>
                 <span class="entry-row-meta">
@@ -41,53 +37,54 @@
                     <span class="entry-lang">{{ entry.language }}</span>
                 </span>
             </div>
-            
+
             {% if entry.literal_definition %}
-                <p class="entry-snippet">{{ entry.literal_definition | truncate(120) }}</p>
+                <p class="entry-snippet">{{ entry.literal_definition }}</p>
             {% else %}
-                <p class="entry-snippet">{{ entry.story | truncate(120) }}</p>
+                <p class="entry-snippet">{{ entry.story | truncate(160) }}</p>
             {% endif %}
-            
+
         </a>
     {% endfor %}
-</div>
+    </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    var searchBar = document.getElementById('search-bar');
-    var rows = document.querySelectorAll('.entry-row');
-    var currentCategory = 'all';
-
-    const dropdown = document.getElementById('custom-dropdown');
-    const dropdownBtn = document.getElementById('dropdown-btn');
-    const selectedOption = document.getElementById('selected-option');
+    const dropdown = document.getElementById('sort-dropdown');
+    const dropdownBtn = document.getElementById('sort-dropdown-btn');
+    const selectedOption = document.getElementById('sort-selected-option');
     const menuItems = dropdown.querySelectorAll('.dropdown-menu li');
+    const entryIndex = document.querySelector('.entry-index');
+    let rows = Array.from(document.querySelectorAll('.entry-row'));
 
-    function performSearch() {
-        var query = searchBar.value.toLowerCase().trim();
-
-        rows.forEach(function(row) {
-            var word = (row.getAttribute('data-word') || '');
-            var lang = (row.getAttribute('data-language') || '');
-            var origin = (row.getAttribute('data-origin') || '');
-
-            var match;
-            if (currentCategory === 'word') {
-                match = word.includes(query);
-            } else if (currentCategory === 'language') {
-                match = lang.includes(query);
-            } else if (currentCategory === 'origin') {
-                match = origin.includes(query);
-            } else {
-                match = word.includes(query) || lang.includes(query) || origin.includes(query);
-            }
-
-            row.style.display = match ? '' : 'none';
-        });
+    function sortRows(criteria) {
+        let sorted;
+        if (criteria === 'language') {
+            sorted = rows.slice().sort((a, b) => {
+                const langA = a.getAttribute('data-language') || '';
+                const langB = b.getAttribute('data-language') || '';
+                if (langA === langB) {
+                    return (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '');
+                }
+                return langA.localeCompare(langB);
+            });
+        } else if (criteria === 'popularity') {
+            sorted = rows.slice().sort((a, b) => {
+                const countA = parseInt(a.getAttribute('data-story-count') || '0', 10);
+                const countB = parseInt(b.getAttribute('data-story-count') || '0', 10);
+                if (countB === countA) {
+                    return (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '');
+                }
+                return countB - countA; // most stories first
+            });
+        } else {
+            sorted = rows.slice().sort((a, b) =>
+                (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '')
+            );
+        }
+        sorted.forEach(row => entryIndex.appendChild(row));
     }
-
-    searchBar.addEventListener('input', performSearch);
 
     dropdownBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -96,17 +93,30 @@ document.addEventListener("DOMContentLoaded", function() {
 
     menuItems.forEach(item => {
         item.addEventListener('click', () => {
-            selectedOption.textContent = item.textContent;
-            currentCategory = item.dataset.value;
+            selectedOption.textContent = 'Sort: ' + item.textContent;
             dropdown.classList.remove('open');
-            performSearch();
+            sortRows(item.dataset.value);
         });
     });
 
     document.addEventListener('click', () => {
         dropdown.classList.remove('open');
     });
+
+    // Honor ?q= from the nav search bar, since this page no longer has its own
+    const params = new URLSearchParams(window.location.search);
+    const query = (params.get('q') || '').toLowerCase().trim();
+    if (query) {
+        rows.forEach(row => {
+            const word = row.getAttribute('data-word') || '';
+            const lang = row.getAttribute('data-language') || '';
+            const origin = row.getAttribute('data-origin') || '';
+            const match = word.includes(query) || lang.includes(query) || origin.includes(query);
+            row.style.display = match ? '' : 'none';
+        });
+    }
+
+    sortRows('alphabetical'); // default sort on load
 });
 </script>
-
 {% endblock %}
