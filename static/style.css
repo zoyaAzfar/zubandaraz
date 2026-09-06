@@ -60,32 +60,73 @@ html::-webkit-scrollbar-thumb:hover {
 
 /* --- Navigation Styles --- */
 
-
-nav {
-   display: flex;
-   justify-content: center; /* Centers the links horizontally */
-   gap: 2rem;              /* Spacing between the links */
-   padding: 20px 0;        /* Some breathing room on top and bottom */
-   overlay:auto;
+.tab-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 2rem;
 }
 
+.nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
 
 nav a {
-   font-family: "Mondwest", sans-serif;
-   font-weight: 500;
-   color: var(--white);    /* Clean white letters to contrast with your blue background */
-   text-decoration: none;  /* Removes the default underline */
-   font-size: 1.5rem;
-   transition: text-decoration 0.2s ease; /* Smooth transition feel */
-   -webkit-user-select: none; 
-  -ms-user-select: none;      
-  user-select: none; 
+    font-family: "Mondwest", sans-serif;
+    font-weight: 500;
+    color: var(--white);
+    text-decoration: none;
+    font-size: 1.5rem;
+    transition: text-decoration 0.2s ease;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-
-/* Hover state to show the underline */
 nav a:hover {
-   text-decoration: underline;
+    text-decoration: underline;
+}
+
+.nav-search {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 4px 14px;
+    gap: 6px;
+}
+
+.nav-search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--white);
+    font-family: "Mondwest", sans-serif;
+    font-size: 1rem;
+    width: 160px;
+}
+
+.nav-search input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.nav-search button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--white);
+    font-size: 1rem;
+    padding: 0;
+}
+
+/* stack on narrow screens instead of squeezing */
+@media (max-width: 640px) {
+    .tab-container {
+        flex-direction: column;
+        gap: 12px;
+    }
 }
 
 
