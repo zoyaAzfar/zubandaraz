@@ -1,106 +1,51 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>{% block title %}Zuban Daraz{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=search" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{% block title %}Zuban Daraz {% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&family=Noto+Sans+Bengali:wght@400;500;600&family=Noto+Sans+Gurmukhi:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% block extra_head %}{% endblock %}
 </head>
-
 <body>
 
-<header>
-    <nav class="tab-container">
-        <div class="nav-left">
-            <a href="/" class="tab {% if request.path == '/' %}active{% endif %}">Home</a>
-            <a href="/browse" class="tab {% if request.path == '/browse' %}active{% endif %}">Browse</a>
-            <a href="/about" class="tab {% if request.path == '/about' %}active{% endif %}">About</a>
-        </div>
-        <div class="nav-right">
-            <form class="nav-search" action="/browse" method="get">
-                <input type="text" name="q" placeholder="Search..." autocomplete="off">
-                <button type="submit" aria-label="Search"><span class="material-symbols-outlined">
-                    search
-                </span></button>
-            </form>
-            <a href="/submit" class="tab submit-tab {% if request.path == '/submit' %}active{% endif %}">Submit</a>
-        </div>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="{{ url_for('home') }}">
+      <span class="logo-mark">ز</span>
+      <span class="logo-word">Zuban Daraz</span>
+    </a>
+    <form class="search" action="{{ url_for('browse') }}" method="get">
+      <label class="visually-hidden" for="searchInput">Search the archive</label>
+      <select name="language" aria-label="Filter by language">
+        <option value="">All languages</option>
+        {% for lang in ["Urdu", "Hindi", "Punjabi", "Bengali", "Tamil"] %}
+        <option {% if request.args.get('language') == lang %}selected{% endif %}>{{ lang }}</option>
+        {% endfor %}
+      </select>
+      <input id="searchInput" name="q" type="text" placeholder="Search for a word…" value="{{ request.args.get('q', '') }}" />
+      <button type="submit" aria-label="Search">⌕</button>
+    </form>
+    <nav class="main-nav">
+      <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Home</a>
+      <a class="nav-link {% if request.endpoint == 'browse' %}active{% endif %}" href="{{ url_for('browse') }}">Browse</a>
+      <a class="nav-link {% if request.endpoint == 'about_page' %}active{% endif %}" href="{{ url_for('about_page') }}">About</a>
+      <a class="btn-submit" href="{{ url_for('submit_page') }}">Submit a word</a>
     </nav>
+  </div>
 </header>
 
-
-{% block content %}
-{% endblock %}
-
+{% block content %}{% endblock %}
 
 <footer>
-    <h1>You've reached the end.</h1>
-
-    <p>Aurat ki Zuban | 2026</p>
-
-
-
+  <div class="footer-inner">
+    <span>Zuban Daraz — an open-source dictionary.</span>
+    <span><a href="https://github.com" target="_blank" rel="noopener">Source code</a> · <a href="{{ url_for('submit_page') }}">Contribute a word</a> · <a href="{{ url_for('about_page') }}">Moderation policy</a></span>
+  </div>
 </footer>
 
-    <script> 
-    document.addEventListener("DOMContentLoaded", function() {
-    var searchBar = document.getElementById('search-bar');
-    var rows = document.querySelectorAll('.entry-row');
-    var currentCategory = 'all';
-    const dropdown = document.getElementById('custom-dropdown');
-    const dropdownBtn = document.getElementById('dropdown-btn');
-    const selectedOption = document.getElementById('selected-option');
-    const menuItems = dropdown.querySelectorAll('.dropdown-menu li');
-
-    // NEW: pick up ?q= from the nav search bar
-    var params = new URLSearchParams(window.location.search);
-    var initialQuery = params.get('q');
-    if (initialQuery) {
-        searchBar.value = initialQuery;
-    }
-
-    function performSearch() {
-        var query = searchBar.value.toLowerCase().trim();
-        rows.forEach(function(row) {
-            var word = (row.getAttribute('data-word') || '');
-            var lang = (row.getAttribute('data-language') || '');
-            var origin = (row.getAttribute('data-origin') || '');
-            var match;
-            if (currentCategory === 'word') {
-                match = word.includes(query);
-            } else if (currentCategory === 'language') {
-                match = lang.includes(query);
-            } else if (currentCategory === 'origin') {
-                match = origin.includes(query);
-            } else {
-                match = word.includes(query) || lang.includes(query) || origin.includes(query);
-            }
-            row.style.display = match ? '' : 'none';
-        });
-    }
-
-    searchBar.addEventListener('input', performSearch);
-    dropdownBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.classList.toggle('open');
-    });
-    menuItems.forEach(item => {
-        item.addEventListener('click', () => {
-            selectedOption.textContent = item.textContent;
-            currentCategory = item.dataset.value;
-            dropdown.classList.remove('open');
-            performSearch();
-        });
-    });
-    document.addEventListener('click', () => {
-        dropdown.classList.remove('open');
-    });
-
-    performSearch(); // run once on load so a ?q= from the nav actually filters
-});
-    
-    </script>
+{% block extra_scripts %}{% endblock %}
 </body>
-
 </html>
