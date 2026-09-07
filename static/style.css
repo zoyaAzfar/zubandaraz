@@ -237,8 +237,14 @@ a { color: inherit; }
 .about-view .note { margin-top: 32px; padding: 18px 20px; border-left: 3px solid var(--pink); background: rgba(131,153,88,0.1); font-size: 0.92rem; color: var(--paper); }
 
 /* ---------- footer ---------- */
-footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
-.footer-inner { max-width: 1120px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; color: var(--muted); font-size: 0.88rem; }
+
+footer {
+   text-align:center;
+   background-color:var(--pink);
+   color:var(--green);
+   margin:100px auto auto ;
+   padding: 10px;
+}
 .footer-inner a { text-decoration: underline; }
 
 /* ---------- modal / form card (reused as a plain page on submit.html etc.) ---------- */
