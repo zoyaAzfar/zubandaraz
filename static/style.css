@@ -1,1294 +1,234 @@
-/* Import Inter Font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+:root {
+  /* --- brand variables --- */
+  --blue: #0a3323;    /* deep ink green — grounds the page */
+  --green: #d3968c;   /* dusty rose — the one accent we spend */
+  --pink: #839958;    /* olive — tags, dividers */
+  --white: #f8f7f5;   /* warm paper */
+  --yellow: rgb(198, 201, 200); /* warm grey — quiet text, rules */
+  --red: #105666;     /* deep teal — links, secondary accent */
 
+  /* --- semantic aliases used throughout this file --- */
+  --ink: var(--blue);
+  --paper: var(--white);
+  --accent: var(--green);
+  --tag-a: var(--pink);
+  --tag-b: var(--red);
+  --muted: var(--yellow);
+
+  --display: "Mondwest", "Fraunces", Georgia, serif;
+  --script-urdu: "Noto Nastaliq Urdu", serif;
+  --script-deva: "Noto Sans Devanagari", sans-serif;
+  --script-beng: "Noto Sans Bengali", sans-serif;
+  --script-guru: "Noto Sans Gurmukhi", sans-serif;
+  --script-tamil: "Noto Sans Tamil", sans-serif;
+  --body: "Inter", sans-serif;
+
+  --radius: 3px;
+  --border: 1px solid rgba(248, 247, 245, 0.16);
+}
 
 @font-face {
-   font-family: "Mondwest";
-   src: url("/static/fonts/ppmondwest-regular.woff") format("woff");
-   font-weight: normal;
-   font-style: normal;
+  font-family: "Mondwest";
+  src: url("/static/fonts/ppmondwest-regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
 }
 
+* { box-sizing: border-box; }
 
-:root {
-   --blue: #0a3323;
-   --green: #d3968c;
-   --pink: #839958 ; 
-  /* --pink: rgb(255, 0, 145);*/
-   --white: #f8f7f5;
-   --yellow: rgb(198, 201, 200);
-   --red: #105666;
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--green) var(--paper);
 }
-
+html::-webkit-scrollbar { width: 10px; }
+html::-webkit-scrollbar-track { background: var(--paper); }
+html::-webkit-scrollbar-thumb {
+  background-color: var(--green);
+  border-radius: 10px;
+  border: 2px solid var(--paper);
+}
+html::-webkit-scrollbar-thumb:hover { background-color: #c07d70; }
 
 body {
-   background-color: var(--blue);
-   color: white;
-   font-family: "Mondwest", serif;
-   margin: 0;
-   padding: 0;
-   font-size: 1.5em;
-   overflow-x:hidden;
+  background-color: var(--ink);
+  color: var(--paper);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.55;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
-/* Apply to the whole page. Change 'html' to a class name if you want it on a specific div */
-html {
-  /* Standard CSS properties for Firefox */
-  scrollbar-width: thin;
-  scrollbar-color: #ffb7b2 #fff0f0;
+h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; }
+p { margin: 0; }
+button { font-family: var(--body); cursor: pointer; }
+a { color: inherit; }
+
+:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
 }
 
-/* Chrome, Edge, and Safari (WebKit browsers) */
-html::-webkit-scrollbar {
-  width: 10px; /* Slim width */
+/* script-family helpers — pair with dir="rtl"/"ltr" set from the server */
+.script-arabic { font-family: var(--script-urdu); }
+.script-devanagari { font-family: var(--script-deva); }
+.script-bengali { font-family: var(--script-beng); }
+.script-gurmukhi { font-family: var(--script-guru); }
+.script-tamil { font-family: var(--script-tamil); }
+.script-latin { font-family: inherit; }
+
+/* ---------- header ---------- */
+.site-header { position: sticky; top: 0; z-index: 40; background: var(--ink); border-bottom: var(--border); }
+.header-inner {
+  max-width: 1120px; margin: 0 auto; padding: 18px 32px;
+  display: flex; align-items: center; gap: 28px;
+}
+.logo { display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: var(--paper); flex-shrink: 0; }
+.logo-mark { font-family: var(--script-urdu); font-size: 1.5rem; color: var(--green); line-height: 1; }
+.logo-word { font-family: var(--display); font-size: 1.35rem; letter-spacing: 0.01em; }
+
+.search { flex: 1; display: flex; align-items: stretch; background: var(--paper); border-radius: var(--radius); overflow: hidden; max-width: 480px; }
+.search select { border: none; background: rgba(10,51,35,0.06); color: var(--ink); font-family: var(--body); font-size: 0.85rem; padding: 0 10px; border-right: 1px solid rgba(10,51,35,0.12); }
+.search input { flex: 1; border: none; padding: 10px 12px; font-family: var(--body); font-size: 0.95rem; color: var(--ink); background: transparent; min-width: 0; }
+.search input:focus, .search select:focus { outline: none; }
+.search button { border: none; background: var(--ink); color: var(--paper); width: 42px; font-size: 1rem; }
+
+.main-nav { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.nav-link { background: none; border: none; color: var(--paper); opacity: 0.8; font-size: 0.95rem; padding: 8px 12px; border-radius: var(--radius); text-decoration: none; }
+.nav-link:hover, .nav-link.active { opacity: 1; background: rgba(248,247,245,0.08); }
+.btn-submit { background: var(--green); color: var(--ink); border: none; font-weight: 600; font-size: 0.9rem; padding: 9px 16px; border-radius: var(--radius); margin-left: 4px; text-decoration: none; display: inline-block; }
+.btn-submit:hover { background: #e0aca3; }
+
+/* ---------- generic components ---------- */
+.section-label { font-family: var(--body); font-size: 0.85rem; color: var(--muted); margin: 0 0 14px; }
+.btn-primary { background: var(--green); color: var(--ink); border: none; font-weight: 600; font-size: 0.95rem; padding: 12px 22px; border-radius: var(--radius); text-decoration: none; display: inline-block; }
+.btn-primary:hover { background: #e0aca3; }
+.btn-secondary { background: none; color: var(--paper); border: 1px solid rgba(248,247,245,0.35); font-size: 0.95rem; padding: 12px 22px; border-radius: var(--radius); text-decoration: none; display: inline-block; }
+.btn-secondary:hover { border-color: var(--paper); }
+
+.tag { display: inline-block; font-size: 0.78rem; color: var(--ink); background: var(--pink); padding: 3px 9px; border-radius: 2px; }
+.tag.tag-teal { background: var(--red); color: var(--paper); }
+
+.resonance { display: block; color: var(--muted); font-size: 0.85rem; }
+
+/* ---------- hero ---------- */
+.hero { max-width: 1120px; margin: 0 auto; padding: 72px 32px 56px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: end; }
+.hero-eyebrow { font-size: 0.9rem; color: var(--green); margin: 0 0 18px; }
+.hero-word { line-height: 1.25; }
+.hero-word-text { display: block; font-size: 4.4rem; line-height: 1.25; }
+.hero-translit { display: block; font-family: var(--body); font-size: 1.05rem; color: var(--muted); direction: ltr; margin-top: 10px; letter-spacing: 0.02em; }
+.hero-copy { padding-bottom: 6px; }
+.mission { font-size: 1.05rem; color: rgba(248,247,245,0.88); max-width: 46ch; }
+.hero-actions { display: flex; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
+
+@media (max-width: 820px) {
+  .hero { grid-template-columns: 1fr; gap: 28px; padding-top: 40px; }
+  .hero-word-text { font-size: 3.2rem; }
 }
 
-html::-webkit-scrollbar-track {
-  background: white; /* Soft pastel pink background */
-  border-radius: 10px;
+/* ---------- word of the day ---------- */
+.wotd { max-width: 1120px; margin: 0 auto; padding: 0 32px 64px; }
+.wotd-card { background: var(--paper); color: var(--ink); border-radius: var(--radius); padding: 36px 40px; display: grid; grid-template-columns: 260px 1fr; gap: 40px; }
+.wotd-word-col { border-right: 1px solid rgba(10,51,35,0.12); padding-right: 32px; }
+.wotd-script { font-size: 2.6rem; }
+.wotd-translit { font-size: 1rem; color: #5b6b62; margin-top: 6px; }
+.wotd-tags { margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
+.wotd-gloss { font-family: var(--display); font-size: 1.3rem; line-height: 1.4; max-width: 56ch; }
+.voice { margin-top: 20px; padding-left: 16px; border-left: 3px solid var(--green); font-size: 0.98rem; color: #33443b; }
+.voice cite { display: block; font-style: normal; font-size: 0.82rem; color: #6d7d74; margin-top: 8px; }
+.wotd-foot { margin-top: 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.link-btn { background: none; border: none; color: var(--red); font-weight: 600; font-size: 0.92rem; padding: 0; text-decoration: none; }
+.link-btn:hover { text-decoration: underline; }
+
+@media (max-width: 720px) {
+  .wotd-card { grid-template-columns: 1fr; }
+  .wotd-word-col { border-right: none; border-bottom: 1px solid rgba(10,51,35,0.12); padding-right: 0; padding-bottom: 20px; }
 }
 
-html::-webkit-scrollbar-thumb {
-  background-color: #ffb7b2; /* Bright pastel pink handle */
-  border-radius: 10px;       /* Makes it perfectly rounded */
-  border: 2px solid #fff0f0; /* Creates padding around the handle */
-}
+/* ---------- entry grid (home preview + browse) ---------- */
+.browse-preview, .browse-full { max-width: 1120px; margin: 0 auto; padding: 0 32px 72px; }
+.section-heading-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+.section-heading-row .link-btn { color: var(--paper); }
+.section-heading-row .link-btn:hover { color: var(--green); }
 
-html::-webkit-scrollbar-thumb:hover {
-  background-color: #ff9aa2; /* Darker cute pink on hover */
-}
+.entry-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media (max-width: 880px) { .entry-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .entry-grid { grid-template-columns: 1fr; } }
 
-/* --- Navigation Styles --- */
+.entry-card { text-align: left; background: rgba(248,247,245,0.04); border: var(--border); border-radius: var(--radius); padding: 22px; color: var(--paper); display: flex; flex-direction: column; gap: 10px; text-decoration: none; }
+.entry-card:hover { background: rgba(248,247,245,0.08); border-color: rgba(248,247,245,0.3); }
+.entry-card .script { font-size: 1.5rem; line-height: 1.3; }
+.entry-card .translit { font-size: 0.85rem; color: var(--muted); }
+.entry-card .gloss { font-size: 0.92rem; color: rgba(248,247,245,0.8); flex: 1; }
+.entry-card .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.entry-card .card-foot { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+.empty-note { color: var(--muted); }
+.empty-note a { color: var(--green); }
 
-.tab-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 2rem;
-}
+/* ---------- browse (search) view ---------- */
+.browse-full .search-row { display: flex; gap: 12px; margin: 8px 0 32px; flex-wrap: wrap; }
+.browse-full .search-row input { flex: 1; min-width: 220px; padding: 12px 14px; border-radius: var(--radius); border: 1px solid rgba(248,247,245,0.25); background: rgba(248,247,245,0.06); color: var(--paper); font-family: var(--body); font-size: 0.95rem; }
+.browse-full .search-row input::placeholder { color: var(--muted); }
+.browse-full .search-row select { padding: 12px 14px; border-radius: var(--radius); border: 1px solid rgba(248,247,245,0.25); background: rgba(248,247,245,0.06); color: var(--paper); font-family: var(--body); }
+.result-count { color: var(--muted); font-size: 0.9rem; margin-bottom: 18px; }
 
-.nav-left, .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-}
+/* ---------- entry detail (factsheet) ---------- */
+.entry-detail { max-width: 1120px; margin: 0 auto; padding: 0 32px 80px; }
+.entry-back { background: none; border: none; color: var(--muted); font-size: 0.9rem; padding: 24px 0 8px; display: inline-block; text-decoration: none; }
+.entry-back:hover { color: var(--paper); }
+.entry-head { padding: 20px 0 28px; border-bottom: var(--border); }
+.entry-head .script { font-size: 3rem; }
+.entry-head .translit { color: var(--muted); margin-top: 6px; font-size: 1.05rem; }
+.entry-head .card-tags { margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
 
-nav a {
-    font-family: "Mondwest", sans-serif;
-    font-weight: 500;
-    color: var(--white);
-    text-decoration: none;
-    font-size: 1.5rem;
-    transition: text-decoration 0.2s ease;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
+.entry-tabs { display: flex; gap: 4px; border-bottom: var(--border); margin-top: 8px; overflow-x: auto; }
+.entry-tab { background: none; border: none; color: var(--muted); font-size: 0.95rem; padding: 14px 4px; margin-right: 26px; border-bottom: 2px solid transparent; white-space: nowrap; }
+.entry-tab.active { color: var(--paper); border-color: var(--green); }
 
-nav a:hover {
-    text-decoration: underline;
-}
+.entry-panel { padding: 32px 0; max-width: 68ch; }
+.entry-panel[hidden] { display: none; }
+.entry-panel h3 { font-size: 1.2rem; margin-bottom: 10px; }
+.entry-panel p { margin-bottom: 14px; color: rgba(248,247,245,0.86); }
+.entry-panel .voice { border-left: 3px solid var(--green); padding-left: 16px; margin: 0 0 22px; color: rgba(248,247,245,0.86); background: none; }
+.entry-panel .voice cite { display: block; font-style: normal; color: var(--muted); margin-top: 8px; font-size: 0.85rem; }
+.related-list { display: flex; flex-wrap: wrap; gap: 10px; }
+.related-chip { background: rgba(248,247,245,0.06); border: var(--border); border-radius: var(--radius); padding: 8px 14px; font-size: 0.92rem; text-decoration: none; }
+.related-chip:hover { border-color: var(--green); }
 
-.nav-search {
-    display: flex;
-    align-items: center;
-    border: 2px solid black;
-    background-color: var(--white, #ffffff);
-    padding: 0 12px;
-    gap: 8px;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease;
-}
+/* ---------- about view ---------- */
+.about-view { max-width: 1120px; margin: 0 auto; padding: 56px 32px 90px; }
+.about-view .about-inner { max-width: 62ch; }
+.about-view h2 { font-size: 2rem; margin-bottom: 20px; }
+.about-view p { margin-bottom: 16px; color: rgba(248,247,245,0.88); font-size: 1.02rem; }
+.about-view .note { margin-top: 32px; padding: 18px 20px; border-left: 3px solid var(--pink); background: rgba(131,153,88,0.1); font-size: 0.92rem; color: var(--paper); }
 
-.nav-search:focus-within {
-    border-color: var(--pink, pink);
-}
+/* ---------- footer ---------- */
+footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
+.footer-inner { max-width: 1120px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; color: var(--muted); font-size: 0.88rem; }
+.footer-inner a { text-decoration: underline; }
 
-.nav-search input {
-    font-family: "Mondwest", serif;
-    font-size: 1rem;
-    padding: 10px 0;
-    border: none;
-    background: transparent;
-    color: black;
-    outline: none;
-    width: 200px;
-    box-sizing: border-box;
-}
+/* ---------- modal / form card (reused as a plain page on submit.html etc.) ---------- */
+.modal-overlay { position: fixed; inset: 0; background: rgba(6,20,13,0.72); display: flex; align-items: flex-start; justify-content: center; padding: 48px 20px; z-index: 100; overflow-y: auto; }
+.modal-overlay[hidden] { display: none; }
+.modal { background: var(--paper); color: var(--ink); width: 100%; max-width: 560px; border-radius: var(--radius); padding: 36px 36px 30px; position: relative; margin: 0 auto; }
+.modal-close { position: absolute; top: 18px; right: 18px; background: none; border: none; font-size: 1.3rem; color: var(--ink); line-height: 1; }
+.modal h2 { font-size: 1.5rem; margin-bottom: 8px; }
+.modal > p.modal-intro { color: #4a5950; margin-bottom: 24px; font-size: 0.95rem; }
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 0.85rem; color: #33443b; margin-bottom: 6px; font-weight: 500; }
+.field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border: 1px solid rgba(10,51,35,0.18); border-radius: var(--radius); font-family: var(--body); font-size: 0.95rem; color: var(--ink); background: #fff; }
+.field textarea { resize: vertical; min-height: 80px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field-hint { font-size: 0.8rem; color: #6d7d74; margin-top: 6px; }
+.modal-submit { background: var(--ink); color: var(--paper); border: none; width: 100%; padding: 13px; border-radius: var(--radius); font-weight: 600; font-size: 0.98rem; margin-top: 6px; }
+.modal-submit:hover { background: #124a32; }
 
-.nav-search input::placeholder {
-    color: #555;
-}
-
-.nav-search button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: black;
-    font-size: 1rem;
-    padding: 0;
-    display: flex;
-    align-items: center;
-}
-
-/* stack on narrow screens instead of squeezing */
 @media (max-width: 640px) {
-    .tab-container {
-        flex-direction: column;
-        gap: 12px;
-    }
+  .header-inner { flex-wrap: wrap; }
+  .search { order: 3; max-width: none; width: 100%; }
+  .main-nav { margin-left: auto; }
+  .field-row { grid-template-columns: 1fr; }
 }
-
-
-/* footer baby */
-
-
-footer {
-   text-align:center;
-   background-color:var(--green);
-   color:var(--blue);
-   margin:100px auto auto ;
-   padding: 10px;
-}
-
-
-.intro {
-   text-align: center;
-   margin-top: 100px; /* Adjust as needed to push below your nav */
-   margin:-3px;
-    -webkit-user-select: none; 
-  -ms-user-select: none;      
-  user-select: none; 
-}
-
-
-.intro {
-   text-align: center;
-   margin-top: 80px;
-}
-
-
-/* --- Base Title Setup --- */
-.loose-letters {
-   font-family: "Mondwest", serif;
-   font-size: 8rem;
-   line-height: 0.7; 
-   display: inline-block;
-   text-align: left; 
-    -webkit-user-select: none; 
-  -ms-user-select: none;      
-  user-select: none; 
-}
-
-
-/* Structural Layout rules */
-.loose-letters .line-1 {
-   display: block;
-}
-
-
-.loose-letters .line-2 {
-   display: block;
-   padding-left: 50px; /* Shifts the second line to the right */
-}
-
-
-.loose-letters .small-word {
-   font-size: 0.65em; /* Shrinks the word "ki" */
-   display: inline-flex;
-   gap: 1px;
-   margin-right:-20px;
-}
-
-
-.loose-letters span.space {
-   width: 15px;
-   display: inline-block;
-}
-
-
-.loose-letters span {
-   display: inline-block;
-}
-
-
-.loose-letters .line-1 span:nth-child(2) { transform: translateY(-3px) rotate(-2deg); }
-.loose-letters .line-1 span:nth-child(4) { transform: translateY(2px) rotate(1deg); }
-
-
-.loose-letters .line-2 span:nth-child(1) { transform: translateY(1px) rotate(-3deg); }
-.loose-letters .line-2 span:nth-child(4) { transform: translateY(-4px) rotate(-2deg); }
-.loose-letters .line-2 span:nth-child(5) { transform: translateY(3px) rotate(3deg); }
-.loose-letters .line-2 span:nth-child(6) { transform: translateY(-1px) rotate(-1deg); }
-
-
-.swoop-arrow {
-   display: block;
-   margin: 15px auto 0 auto; /* Centers it under the paragraph */
-   color: var(--pink); /* Easily change the arrow color to pink, yellow, or green! */
-   transform: rotate(-10deg); /* Tilt it slightly to match the loose aesthetic */
-}
-
-
-
-
-/* --- How It Works Section --- */
-/* --- 1) Make the parent a two-column grid --- */
-/* --- Stack columns vertically and center them --- */
-.parent {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   gap: 100px; /* Generous spacing between the two main sections */
-   width: 100%;
-   
-}
-
-
-/* --- Who We Are Section --- */
-.one {
-   display: flex;
-   flex-direction: column;  
-   align-items: center;     
-   width: 60%; 
-   margin: 0 auto;          
-   text-align: center; 
-}
-
-
-
-/* --- 3) Mobile Responsiveness --- */
-/* Add this at the bottom of your CSS (or merge with your existing media query) */
-@media (max-width: 1024px) {
-   .split-section {
-       grid-template-columns: 1fr; /* Stack columns vertically on smaller screens */
-       gap: 80px;
-   }
-}
-
-
-/* 1) Highlighted "HOW IT WORKS" Blocks */
-.block-title {
-   display: inline-flex;
-   gap: 12px;
-   font-family: "Mondwest", serif;
-   font-size: clamp(2rem, 5vw, 3.5rem);
-   text-align: center;
-    -webkit-user-select: none; 
-  -ms-user-select: none;      
-  user-select: none; 
-}
-
-
-.block {
-   background-color: var(--green);
-   color: var(--blue);
-   padding: 6px 20px;
-   font-weight: bold;
-   display: inline-block;
-   /* box-shadow: 4px 4px 0px var(--); Fun 3D pop shadow */
-    -webkit-user-select: none; 
-  -ms-user-select: none;      
-  user-select: none; 
-}
-
-
-
-
-/* Stamped effect (bouncing above and below) */
-.block-1 { transform: translateY(-8px) rotate(-3deg); }
-.block-2 { transform: translateY(4px) rotate(2deg); }
-.block-3 { transform: translateY(-2px) rotate(-1deg); }
-
-
-
-
-/* --- Updated Container --- */
-.timeline-container {
-   display: flex;
-   flex-direction: column;
-   /* Removed align-items: center so children can shift side-to-side */
-}
-
-
-/* --- Updated Row --- */
-.timeline-row {
-   display: flex;
-   flex-direction: column;
-   /* This ensures the connecting lines always stay centered */
-   align-items: center;
-}
-/* --- Updated Card --- */
-
-
-/* --- ADD THESE NEW RULES BELOW .step-card --- */
-
-
-/* Step 1 and 3 (Odd) shift to the left */
-.timeline-row:nth-child(odd) .step-card {
-   align-self: flex-start;
-}
-
-
-/* Step 2 (Even) shifts to the right */
-.timeline-row:nth-child(even) .step-card {
-   align-self: flex-end;
-}
-
-
-/* Hover offset interactive effect */
-.step-card:hover {
-   transform: translate(-2px, -2px);
-}
-
-
-/* --- Compact Step Card --- */
-.step-card {
-   display: grid;
-   grid-template-columns: 50px 1fr; /* Reduced from 60px */
-   width: 75%; /* Reduced from 85% to make the boxes physically narrower */
-   background-color: #ffffff;
-   border: 3px solid #000000;
-   border-radius: 8px;
-   overflow: hidden;
-   transition: transform 0.2s ease, box-shadow 0.2s ease;
-   padding: 15px; /* Reduced padding from 20px */
-   margin-bottom:20px;
-}
-
-
-/* --- Compact Left Side (Number) --- */
-.card-left {
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   padding: 10px; /* Reduced padding */
-}
-
-
-.step-number {
-   font-family: "Mondwest", serif;
-   font-size: 3.5rem; /* Reduced from 5rem so it fits the narrower card beautifully */
-   font-weight: bold;
-   color: #000000;
-   line-height: 1;
-}
-
-
-/* --- Compact Right Side (Text Content) --- */
-.card-right {
-   padding: 10px 15px; /* Reduced padding */
-   display: flex;
-   flex-direction: column;
-   justify-content: center;
-   text-align: left;
-}
-
-
-.step-title {
-   font-family: "Mondwest", serif;
-   font-weight: bold;
-   margin-top: 0;
-   margin-bottom: 6px;
-   letter-spacing: 0.5px;
-   color: #000000;
-}
-
-
-.step-desc {
-   font-size: 1.5rem; /* Slightly smaller description font */
-   color: #333333;
-   margin: 0;
-}
-
-
-/* --- Responsive Layout for Mobile --- */
-@media (max-width: 768px) {
-   .timeline-container {
-       width: 95%;
-   }
-
-
-   .step-card {
-       grid-template-columns: 80px 1fr; /* Shrink the number partition on smaller screens */
-   }
-
-
-   .card-left {
-       padding: 15px;
-   }
-
-
-   .step-number {
-       font-size: 2.5rem;
-   }
-
-
-   .card-right {
-       padding: 20px;
-   }
-}
-
-.split-section {
-    width: min(1400px, 92%);
-    margin: 0 auto;
-
-    display: flex;
-    gap: 80px;
-    flex-direction: row; /* 1. BACK TO COLUMNS SIDE-BY-SIDE! */
-    align-items: flex-start; /* Keeps columns aligned nicely at the top */
-}
-
-.two {
-    flex: 7;
-    min-width: 0;
-    
-    /* 2. Center things ONLY inside this column */
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-    text-align: center;
-}
-
-.dictionary-preview {
-    flex: 3;
-    min-width: 0;
-    
-    /* 3. Center things ONLY inside this column */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.block-title {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* Keeps the words/icons inside the title centered */
-    gap: 12px;
-}
-
-/* --- Centering Container --- */
-.form-container {
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   min-height: 100vh;
-   padding: 20px;
-   box-sizing: border-box;
-}
-
-
-/* --- Cute Form Styling --- */
-.cute-form {
-   background-color: var(--white);
-   border: 2px solid black;
-   padding: 40px;
-   width: 100%;
-   max-width: 70%;
-   display: flex;
-   flex-direction: column;
-   gap: 25px;
-   color:black;
-}
-
-
-/* --- Input Groups & Labels --- */
-.input-group {
-   display: flex;
-   flex-direction: column;
-   gap: 8px;
-}
-
-
-.input-group label {
-   font-family: "Mondwest", serif;
-   color: black; /* Pop of color for labels */
-   font-size: 1.2em;
-   letter-spacing: 1px;
-}
-
-
-/* --- Fields (Inputs & Textarea) --- */
-.cute-form input[type="text"],
-.cute-form textarea {
-   font-family: "Mondwest", serif;
-   font-size: 1em;
-   color: black;
-   background-color: rgba(255, 255, 255, 0.1);
-   border: 2px solid black;
-   padding: 12px 15px;
-   outline: none;
-   transition: all 0.2s ease;
-}
-
-
-/* The larger, cute story textarea */
-.cute-form textarea {
-   min-height: 150px;
-   max-height:200px;
-   resize: vertical;
-}
-
-
-/* Hover & Focus States */
-.cute-form input:focus,
-.cute-form textarea:focus {
-   border-color: var(--pink);
-}
-
-
-/* Placeholder Styling */
-.cute-form ::placeholder {
-   color: var(--pink);
-   font-family: "Mondwest", serif;
-}
-
-
-/* --- The Submit Button --- */
-.submit-btn {
-   font-family: "Mondwest", serif;
-   font-size: 1.2em;
-   background-color: var(--green);
-   color: var(--blue);
-   border-radius: 50px;
-   padding: 12px 24px;
-   cursor: pointer;
-   align-self: center;
-   transition: transform 0.1s ease, box-shadow 0.1s ease;
-   margin-top: 10px;
-   border: 2px solid black;
-}
-
-
-.submit-btn:hover {
-   transform: translateY(-1px);
-}
-
-
-.submit-btn:active {
-   transform: translateY(1px);
-}
-
-
-/* Container padding */
-.browse-container {
-   padding: 40px 20px;
-   max-width: 1200px;
-   margin: 0 auto;
-}
-
-
-.page-title {
-   font-family: "Mondwest", serif;
-   font-size: 3rem;
-   color: var(--green);
-   margin-bottom: 40px;
-   text-align: center;
-}
-
-
-/* --- masonry grid stuff --- */
-/* --- The Dynamic Grid Container --- */
-.masonry-grid {
-   display: grid;
-   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-   grid-auto-rows: minmax(120px, auto);
-   grid-auto-flow: dense;  
-   gap: 20px;
-   width: 100%;
-}
-
-
-/* --- Base Card --- */
-.entry-card {
-   background-color: var(--white);
-   color: black;
-   border: 2px solid black;
-   padding: 20px;
-   box-sizing: border-box;
-   box-shadow: 5px 5px 0px var(--pink);
-   display: flex;
-   flex-direction: column;
-   justify-content: space-between;
-}
-
-
-/* --- Dynamic Size Variations (No Rotations!) --- */
-.browse-container {
-   padding: 40px 20px;
-   max-width: 1400px;
-   margin: 0 auto;
-}
-
-#sort-dropdown-btn {
-    width: 300px; 
-    margin-bottom: 10px; 
-}
-
-/* --- Custom Dropdown Component --- */
-.custom-dropdown {
-   position: relative; /* Essential for positioning the popout menu */
-   user-select: none;
-}
-
-/* The Dropdown Button */
-/* Update your existing .dropdown-button rule in CSS */
-.dropdown-button {
-   font-family: "Mondwest", serif;
-   font-size: 1.2em;
-   padding: 12px 20px;
-   border: 2px solid black;
-   background-color: var(--white, #ffffff);
-   color: black;
-   cursor: pointer;
-   display: flex;
-   align-items: center;
-   
-   /* --- ADD THIS TO FIX THE WIDTH --- */
-   justify-content: space-between; /* Keeps the arrow nicely pushed to the far right */
-   width: 190px;               /* Ensures "Language" and longer words fit without stretching */
-   box-sizing: border-box;
-   text-align: left;
-   outline: none;
-}
-
-.dropdown-button:focus,
-.custom-dropdown.open .dropdown-button {
-   border-color: var(--pink, pink);
-}
-
-/* The Popout Menu */
-.dropdown-menu {
-   display: none; /* Hidden by default */
-   position: absolute;
-   top: calc(100% + 4px); /* Sits right below the button */
-   left: 0;
-   width: 100%;
-   background-color: #ffffff; /* Forces white background */
-   border: 2px solid black;
-   list-style: none;
-   margin: 0;
-   padding: 0;
-   z-index: 1000;
-   box-sizing: border-box;
-}
-
-/* Show menu when open */
-.custom-dropdown.open .dropdown-menu {
-   display: block;
-}
-
-/* Individual Dropdown Items */
-.dropdown-menu li {
-   font-family: "Mondwest", serif; /* Custom font works here! */
-   font-size: 1.1em;
-   padding: 10px 16px;
-   color: black;
-   cursor: pointer;
-   transition: background-color 0.2s ease;
-   text-align:left;
-}
-
-/* Hover & Selected states */
-.dropdown-menu li:hover {
-   background-color: #f0f0f0;
-}
-
-
-/* --- Isotope Grid Setup --- */
-.isotope-grid {
-   width: 100%;
-   margin: 0 auto;
-}
-
-
-/* Fluid Column & Gutter Sizers for Isotope */
-.grid-sizer, .grid-item {
-   width: 23.5%; /* 4 columns on desktop */
-}
-.gutter-sizer {
-   width: 2%; /* Percentage-based horizontal gap */
-}
-
-
-.grid-item {
-   margin-bottom: 20px; /* Vertical gap */
-   background-color: var(--white);
-   color: black;
-   border: 2px solid black;
-   padding: 20px;
-   box-sizing: border-box;
-   transition: transform 0.2s ease;
-}
-
-
-.grid-item:nth-child(odd) {
-   box-shadow: 5px 5px 0px var(--pink);
-}
-
-
-.grid-item:nth-child(even) {
-   box-shadow: 5px 5px 0px var(--green); 
-}
-
-
-.grid-item:hover {
-   transform: translateY(-2px);
-}
-
-
-/* Typography elements remain clean */
-.entry-lang {
-   font-family: "Mondwest", serif;
-   font-size: 0.8em;
-   color: #666;
-}
-
-.entry-origin {
-   font-size: 0.8em;
-   color: #666;
-   display: block;
-   margin-top: 5px;
-
-}
-
-.entry-word  {
-   font-family: "Mondwest", serif;
-   font-size: 1.8em;
-   margin: 0 0 10px 0;
-
-   margin-top: 10px;
-}
-
-
-.entry-story {
-   font-family: "Mondwest", serif;
-   font-size: 0.9em;
-   margin: 0;
-}
-
-
-/* Responsive adjustments */
-@media (max-width: 900px) {
-   .grid-sizer, .grid-item { width: 49%; } /* 2 columns */
-   .gutter-sizer { width: 2%; }
-}
-@media (max-width: 600px) {
-   .grid-sizer, .grid-item { width: 100%; } /* 1 column */
-   .gutter-sizer { width: 0%; }
-}
-
-/* --- Browse Page: Entry List (full-width rows) --- */
-.entry-index {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    gap: 16px;
-}
-
-.entry-row {
-    background-color: var(--white);
-    color: black;
-    border: 2px solid black;
-    padding: 20px 24px;
-    box-sizing: border-box;
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    width: 100%;
-    transition: transform 0.2s ease;
-}
-
-.entry-row:nth-child(odd)  { box-shadow: 5px 5px 0px var(--pink); }
-.entry-row:nth-child(even) { box-shadow: 5px 5px 0px var(--green); }
-.entry-row:hover           { transform: translateY(-2px); }
-
-.entry-row-main {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.entry-word {
-    font-family: "Mondwest", serif;
-    font-size: 1.8em;
-    margin: 0;
-}
-
-.entry-row-meta {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-}
-
-.entry-pos {
-    font-family: "Mondwest", serif;
-    font-style: italic;
-    font-size: 0.9em;
-    color: #666;
-}
-
-.entry-snippet {
-    font-family: "Mondwest", serif;
-    font-style: italic;
-    font-size: 1em;
-    color: #333;
-    text-align: left;
-    margin: 12px 0 0 0;
-}
-
-/* --- Updated Container --- */
-.timeline-container {
-   display: flex;
-   flex-direction: column;
-   /* Removed align-items: center so children can shift side-to-side */
-}
-
-
-/* --- Updated Row --- */
-.timeline-row {
-   display: flex;
-   flex-direction: column;
-   /* This ensures the connecting lines always stay centered */
-   align-items: center;
-}
-/* --- Updated Card --- */
-
-
-
-
-/* --- ADD THESE NEW RULES BELOW .step-card --- */
-
-
-/* Step 1 and 3 (Odd) shift to the left */
-.timeline-row:nth-child(odd) .step-card {
-   align-self: flex-start;
-}
-
-
-/* Step 2 (Even) shifts to the right */
-.timeline-row:nth-child(even) .step-card {
-   align-self: flex-end;
-}
-
-
-/* Hover offset interactive effect */
-.step-card:hover {
-   transform: translate(-2px, -2px);
-}
-
-
-/* --- Compact Step Card --- */
-.step-card {
-   display: grid;
-   grid-template-columns: 50px 1fr; /* Reduced from 60px */
-   width: 75%; /* Reduced from 85% to make the boxes physically narrower */
-   background-color: #ffffff;
-   border: 3px solid #000000;
-   border-radius: 8px;
-   overflow: hidden;
-   transition: transform 0.2s ease, box-shadow 0.2s ease;
-   padding: 15px; /* Reduced padding from 20px */
-   margin-bottom:20px;
-}
-
-
-/* --- Compact Left Side (Number) --- */
-.card-left {
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   padding: 10px; /* Reduced padding */
-}
-
-
-.step-number {
-   font-family: "Mondwest", serif;
-   font-size: 3.5rem; /* Reduced from 5rem so it fits the narrower card beautifully */
-   font-weight: bold;
-   color: #000000;
-   line-height: 1;
-}
-
-
-/* --- Compact Right Side (Text Content) --- */
-.card-right {
-   padding: 10px 15px; /* Reduced padding */
-   display: flex;
-   flex-direction: column;
-   justify-content: center;
-   text-align: left;
-}
-
-/* --- Comprehensive Mobile Responsiveness (Add to bottom of file) --- */
-@media (max-width: 768px) {
-   
-   /* 1. Force vertical stacking on the home page split-section */
-   .split-section {
-       flex-direction: column !important;
-       gap: 40px; 
-       align-items: center;
-   }
-
-   .two, .dictionary-preview, .one {
-       width: 100% !important; 
-   }
-
-   /* 2. Turn "Loose Letters" into a completely normal heading */
-   .loose-letters {
-       font-size: 5rem !important; /* Forces the text to scale down nicely on phones */
-       text-align: center !important;
-       display: block !important;
-       width: 100% !important;
-       margin-bottom: 20px;
-      }
-
-   /* KILL the hardcoded inline shifts so text doesn't spill out */
-   .loose-letters .line-1,
-   .loose-letters .line-2 {
-       display: block !important; /* Stacks "zuban" and "daraz" cleanly */
-       margin-left: 0 !important;
-       margin-right: 0 !important;
-       padding-left: 0 !important; 
-   }
-
-   .loose-letters .line-2 {
-      margin-top: 20px;
-   }
-   
-   /* Reset the paragraph sub-heading below it */
-   .loose-letters + p, 
-   p[style*="margin-top:-50px"] {
-       margin-top: 10px !important; /* Removes the negative overlap so it doesn't smash into the text */
-       text-align: center;
-   }
-
-   .loose-letters .small-word {
-       font-size: 1em;
-       display: inline;
-       margin-right: 0 !important;
-   }
-
-   #pesky {
-      line-height:200px;
-   }
-
-
-   /* 3. Strip ALL transforms (no rotations, no translations) */
-   .loose-letters span,
-   .loose-letters .line-1 span:nth-child(2),
-   .loose-letters .line-1 span:nth-child(4),
-   .loose-letters .line-2 span:nth-child(1),
-   .loose-letters .line-2 span:nth-child(4),
-   .loose-letters .line-2 span:nth-child(5),
-   .loose-letters .line-2 span:nth-child(6) {
-       transform: none !important; 
-   }
-
-   .block {
-       display: block;
-       width: fit-content;
-   }
-
-   /* 5. Fix the Form width on phones */
-   .cute-form {
-       max-width: 100%;
-       padding: 20px; 
-   }
-
-   /* 6. Center timeline cards instead of zig-zagging off-screen */
-   .timeline-row:nth-child(odd) .step-card,
-   .timeline-row:nth-child(even) .step-card {
-       align-self: center; 
-       width: 90%;
-   }
-
-   #humanirememberyourgenocides {
-      margin-top:70px;
-   }
-}
-
-.admin {
-   padding:10px;
-}
-
-.wallotext {
-   width: 70%;
-   margin: 0 auto;  
-   display: flex;
-   flex-direction: column;  
-   justify-content: center;
-   align-items: center;
-   text-align:center;
-}
-
-/* --- Entry Detail Page --- */
-
-.entry-detail-container {
-    max-width: 800px;
-    margin: 60px auto;
-    background-color: var(--white);
-    color: black;
-    border: 2px solid black;
-    box-shadow: 8px 8px 0px var(--pink);
-    padding: 40px 50px;
-    text-align: left;
-}
-
-.entry-detail-header {
-    margin-bottom: 30px;
-    border-bottom: 2px solid black;
-    padding-bottom: 20px;
-}
-
-.entry-detail-word {
-    font-family: "Mondwest", serif;
-    font-size: 3rem;
-    color: var(--green);
-    margin: 0;
-    line-height: 1;
-}
-
-.entry-detail-pos {
-    font-family: "Mondwest", serif;
-    font-style: italic;
-    font-size: 1.1rem;
-    color: #555;
-    margin: 6px 0 12px 0;
-}
-
-.entry-detail-lang-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.lang-pill {
-    font-family: "Mondwest", serif;
-    font-size: 0.75em;
-    font-weight: bold;
-    background-color: var(--green);
-    color: var(--white);
-    padding: 2px 8px;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-}
-
-.entry-detail-lang-name {
-    font-family: "Mondwest", serif;
-    font-size: 1.1rem;
-    color: black;
-}
-
-.entry-dialect {
-    font-family: "Mondwest", serif;
-    font-size: 1rem;
-    color: #777;
-}
-
-/* Definition: left accent bar, like the reference */
-.entry-definition {
-    border-left: 4px solid var(--pink);
-    padding: 4px 0 4px 16px;
-    margin: 0 0 25px 0;
-}
-
-.entry-definition p {
-    font-family: "Mondwest", serif;
-    font-size: 1.2rem;
-    margin: 0;
-}
-
-/* Etymology: shaded box with tab label */
-.entry-etymology {
-    background-color: #f0efe9;
-    padding: 40px 20px 20px 20px;
-    margin-bottom: 25px;
-    position: relative;
-}
-
-.etymology-tab {
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: var(--green);
-    color: var(--white);
-    font-family: "Mondwest", serif;
-    font-weight: bold;
-    font-size: 0.9em;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 6px 16px;
-    border-bottom-right-radius: 8px;
-}
-
-.entry-etymology p {
-    font-family: "Mondwest", serif;
-    font-size: 1.1rem;
-    margin: 0;
-}
-
-/* Story + generic sections */
-.entry-section h2 {
-    font-family: "Mondwest", serif;
-    font-size: 1.3rem;
-    color: var(--green);
-    margin-bottom: 8px;
-}
-
-.entry-section p {
-    font-family: "Mondwest", serif;
-    font-size: 1.1rem;
-    line-height: 1.5;
-    margin: 0 0 20px 0;
-}
-
-.entry-meta p {
-    font-family: "Mondwest", serif;
-    font-size: 0.95rem;
-    color: #555;
-    margin: 4px 0;
-}
-
-.edit-banner {
-    background-color: var(--yellow);
-    color: black;
-    padding: 12px 16px;
-    margin-bottom: 20px;
-    font-family: "Mondwest", serif;
-    border: 2px solid black;
-}
-
-.edit-entry-btn,
-.back-link {
-    font-family: "Mondwest", serif;
-    display: inline-block;
-    margin-top: 10px;
-    margin-right: 20px;
-    text-decoration: none;
-    color: var(--blue);
-}
-
-.edit-entry-btn {
-    background-color: var(--green);
-    color: var(--white);
-    padding: 8px 18px;
-    border-radius: 50px;
-    border: 2px solid black;
-}
-
-/* --- EDIT PAGE STYLING --- */
-.edit-mode-container {
-}
-
-.wiki-edit-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.form-row {
-    display: flex;
-    gap: 20px;
-}
-
-.form-group {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Base label styling */
-.wiki-edit-form label {
-    font-family: "Mondwest", serif;
-    font-size: 1.1rem;
-    color: black;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-/* Headers for the big text areas, styled like your H2s */
-.wiki-edit-form .section-label {
-    font-size: 1.3rem;
-    color: var(--green);
-    margin-top: 15px;
-    border-bottom: 2px solid var(--pink);
-    padding-bottom: 4px;
-    display: inline-block;
-    width: max-content;
-}
-
-/* The Wiki-style editing boxes */
-.wiki-edit-form input[type="text"],
-.wiki-edit-form textarea {
-    font-family: "Courier New", Courier, monospace; /* Gives it that raw Wiki feel */
-    font-size: 1rem;
-    padding: 12px;
-    border: 2px solid black;
-    background-color: #f9f9f9;
-    color: #333;
-    resize: vertical;
-    width: 100%;
-    box-sizing: border-box;
-    transition: all 0.2s ease;
-}
-
-/* Active focus states to match your branding */
-.wiki-edit-form input[type="text"]:focus,
-.wiki-edit-form textarea:focus {
-    outline: none;
-    border-color: black;
-    background-color: var(--white);
-    box-shadow: 4px 4px 0px var(--pink);
-}
-
-/* Bottom Actions Toolbar */
-.edit-form-actions {
-    margin-top: 30px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    border-top: 2px solid black;
-    padding-top: 20px;
-}
-
-/* Submit Button styled identically to your edit button */
-.save-btn {
-    font-family: "Mondwest", serif;
-    font-size: 1.1rem;
-    background-color: var(--green);
-    color: var(--white);
-    padding: 10px 24px;
-    border-radius: 50px;
-    border: 2px solid black;
-    cursor: pointer;
-    transition: transform 0.1s;
-}
-
-.save-btn:active {
-    transform: translate(2px, 2px);
-}
-
-.cancel-link {
-    font-family: "Mondwest", serif;
-    font-size: 1.1rem;
-    color: var(--blue); /* Or #555 if you don't have a var(--blue) */
-    text-decoration: none;
-}
-
-.cancel-link:hover {
-    text-decoration: underline;
-}
-
-/* Mobile responsiveness for side-by-side inputs */
-@media (max-width: 600px) {
-    .form-row {
-        flex-direction: column;
-        gap: 15px;
-    }
-}
-
