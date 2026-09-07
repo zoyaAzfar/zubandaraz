@@ -1,4 +1,8 @@
 import os
+import random
+import secrets
+from datetime import date
+
 from flask import Flask, render_template, request, redirect, make_response, url_for, abort
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -58,14 +62,29 @@ def unauthorized():
     return response
 
 
-ADMIN_PASSWORD = os.environ.get(
-    "ADMIN_PASSWORD",
-    "default_admin_password"
-)
+# FIX: no more shared hardcoded fallback password. If the env var isn't set
+# we generate a one-time password and log it loudly instead of silently
+# booting with a value that's now sitting in this file (and possibly a
+# public repo). Admin and moderator also get independent passwords.
+def _resolve_password(env_var):
+    value = os.environ.get(env_var)
+    if value:
+        return value
+    generated = secrets.token_urlsafe(16)
+    app.logger.warning(
+        "%s is not set — generated a one-time password for this run: %s "
+        "(set %s in your environment before deploying).",
+        env_var, generated, env_var
+    )
+    return generated
+
+
+ADMIN_PASSWORD = _resolve_password("ADMIN_PASSWORD")
+MODERATOR_PASSWORD = _resolve_password("MODERATOR_PASSWORD")
 
 users = {
     "admin": generate_password_hash(ADMIN_PASSWORD),
-    "moderator": generate_password_hash(ADMIN_PASSWORD)
+    "moderator": generate_password_hash(MODERATOR_PASSWORD)
 }
 
 
@@ -85,24 +104,88 @@ def verify_password(username, password):
 #    db.create_all()
 
 
-def make_unique_slug(word):
+def make_unique_slug(word, exclude_entry_id=None):
     base = slugify(word)
     slug = base
     i = 1
 
-    while Entry.query.filter_by(slug=slug).first():
+    def taken(candidate):
+        q = Entry.query.filter_by(slug=candidate)
+        if exclude_entry_id is not None:
+            q = q.filter(Entry.id != exclude_entry_id)
+        return q.first() is not None
+
+    while taken(slug):
         i += 1
         slug = f"{base}-{i}"
 
     return slug
 
 
+# Best-effort script detection, so a word renders in the right font and
+# direction without needing a dedicated "script" column per entry — useful
+# since e.g. Punjabi can show up in either Gurmukhi (LTR) or Shahmukhi
+# (Arabic script, RTL) depending on who submitted it.
+_SCRIPT_RANGES = [
+    ("arabic", 0x0600, 0x06FF, True),
+    ("arabic", 0x0750, 0x077F, True),
+    ("arabic", 0xFB50, 0xFDFF, True),
+    ("arabic", 0xFE70, 0xFEFF, True),
+    ("devanagari", 0x0900, 0x097F, False),
+    ("bengali", 0x0980, 0x09FF, False),
+    ("gurmukhi", 0x0A00, 0x0A7F, False),
+    ("tamil", 0x0B80, 0x0BFF, False),
+]
+
+
+def detect_script(word):
+    if not word:
+        return "latin", False
+    for ch in word:
+        cp = ord(ch)
+        for name, lo, hi, rtl in _SCRIPT_RANGES:
+            if lo <= cp <= hi:
+                return name, rtl
+    return "latin", False
+
+
+app.jinja_env.globals["detect_script"] = detect_script
+
+
+def pick_word_of_day(approved_entries):
+    """Deterministic per-day pick so it doesn't change on every refresh."""
+    if not approved_entries:
+        return None
+    rng = random.Random(date.today().isoformat())
+    return rng.choice(approved_entries)
+
+
 @app.route("/")
 def home():
     count = Entry.query.count()
+    approved = Entry.query.filter_by(status="approved").all()
+
+    word_of_day = pick_word_of_day(approved)
+
+    pool = [e for e in approved if not word_of_day or e.id != word_of_day.id]
+    if len(pool) <= 3:
+        preview_entries = pool
+    else:
+        preview_entries = random.Random(date.today().isoformat() + "-preview").sample(pool, 3)
+
+    story_count = 0
+    if word_of_day:
+        story_count = db.session.execute(
+            text("SELECT COUNT(*) FROM stories WHERE entry_id = :entry_id AND is_approved = 1"),
+            {"entry_id": word_of_day.id}
+        ).scalar()
+
     return render_template(
         "index.html",
-        submission_count=count
+        submission_count=count,
+        word_of_day=word_of_day,
+        word_of_day_story_count=story_count,
+        entries=preview_entries,
     )
 
 
@@ -118,53 +201,80 @@ def about_page():
 
 @app.route("/browse")
 def browse():
-    entries = (
-        Entry.query
-        .filter_by(status="approved")
-        .order_by(Entry.word)
-        .all()
-    )
+    # FIX: the header search bar had nowhere to send its query — browse()
+    # only ever returned every approved entry. It now reads ?q= and
+    # ?language= and actually filters.
+    q = (request.args.get("q") or "").strip()
+    language = (request.args.get("language") or "").strip()
+
+    query = Entry.query.filter_by(status="approved")
+    if language:
+        query = query.filter(Entry.language == language)
+    if q:
+        like = f"%{q}%"
+        query = query.filter(
+            db.or_(
+                Entry.word.ilike(like),
+                Entry.transliteration.ilike(like),
+                Entry.literal_definition.ilike(like),
+                Entry.story.ilike(like),
+            )
+        )
+
+    entries = query.order_by(Entry.word).all()
 
     return render_template(
         "browse.html",
-        entries=entries
+        entries=entries,
+        q=q,
+        language=language,
     )
+
 
 @app.route('/entry/<slug>')
 def entry_detail(slug):
-    # Use ORM to fetch the entry, just like your edit_entry route does!
     entry = Entry.query.filter_by(slug=slug, status="approved").first_or_404()
 
-    # Fetch approved stories for this entry using raw SQL via SQLAlchemy
     stories = db.session.execute(
-        text("SELECT * FROM stories WHERE entry_id = :entry_id AND is_approved = 1 ORDER BY created_at DESC"), 
+        text("SELECT * FROM stories WHERE entry_id = :entry_id AND is_approved = 1 ORDER BY created_at DESC"),
         {"entry_id": entry.id}
     ).fetchall()
 
     return render_template('entry.html', entry=entry, stories=stories)
 
+
 @app.route('/entry/<slug>/submit-story', methods=['GET', 'POST'])
 def submit_story(slug):
-    # Fetch entry to make sure it exists
     entry = Entry.query.filter_by(slug=slug, status="approved").first_or_404()
-    
+
     if request.method == 'POST':
-        # Tip: using .get() is safer than ['key'] because it won't crash if the user leaves it blank
-        content = request.form.get('content')
-        submitted_by = request.form.get('submitted_by')
-        
-        # Insert the new story using raw SQL via SQLAlchemy
+        content = (request.form.get('content') or "").strip()
+        submitted_by = request.form.get('submitted_by') or None  # blank = anonymous
+
+        # FIX: no validation at all before — an empty or absurdly long
+        # story could be inserted.
+        if not content or len(content) > 2000:
+            return "Invalid input length", 400
+
+        # FIX: is_approved was left out of this INSERT entirely, so new
+        # stories landed as NULL. The admin queue below filters on
+        # "is_approved = 0", and NULL never matches that — new
+        # submissions were invisible to moderators. Setting it explicitly
+        # here puts them back in the queue.
         db.session.execute(
-            text("INSERT INTO stories (entry_id, content, submitted_by) VALUES (:entry_id, :content, :submitted_by)"),
+            text("""
+                INSERT INTO stories (entry_id, content, submitted_by, is_approved)
+                VALUES (:entry_id, :content, :submitted_by, 0)
+            """),
             {"entry_id": entry.id, "content": content, "submitted_by": submitted_by}
         )
         db.session.commit()
-        
-        # FIXED LINE: Redirect using the correct function name 'entry_detail'
+
         return redirect(url_for('entry_detail', slug=slug, story_submitted=True))
-        
+
     return render_template('submit-story.html', entry=entry)
-    
+
+
 @app.route(
     "/entry/<slug>/edit",
     methods=["GET", "POST"]
@@ -186,6 +296,7 @@ def edit_entry(slug):
             entry_id=entry.id,
 
             word=request.form.get("word") or None,
+            transliteration=request.form.get("transliteration") or None,
             language=request.form.get("language") or None,
             literal_definition=(
                 request.form.get("literal_definition")
@@ -228,9 +339,14 @@ def submit():
     language = request.form.get("language")
     story = request.form.get("story")
 
+    transliteration = request.form.get("transliteration") or None
     origin = request.form.get("origin") or None
     dialect = request.form.get("dialect") or None
     source = request.form.get("source") or None
+    # FIX: this was never being read from the form at all, which is why
+    # approve() below had nothing to credit and fell back to a hardcoded
+    # placeholder name for every single entry.
+    submitted_by = request.form.get("submitted_by") or None
 
     # Basic input validation
     if (
@@ -247,6 +363,7 @@ def submit():
         slug=make_unique_slug(word),
         story=story,
         language=language,
+        transliteration=transliteration,
 
         literal_definition=(
             request.form.get("literal_definition")
@@ -261,6 +378,7 @@ def submit():
         origin=origin,
         dialect=dialect,
         source=source,
+        submitted_by=submitted_by,
 
         status="pending"
     )
@@ -288,7 +406,6 @@ def admin():
         .all()
     )
 
-    # NEW: Fetch pending stories using SQLAlchemy's text() wrapper
     pending_stories = db.session.execute(text("""
         SELECT stories.*, entry.word 
         FROM stories 
@@ -316,12 +433,22 @@ def approve(id):
     entry.status = "approved"
 
     if entry.story:
+        # FIX: this used to hardcode submitted_by to the literal string
+        # 'Original Submitter' for every entry, regardless of whether the
+        # person who submitted it asked to be credited or to stay
+        # anonymous. It now uses whatever they actually chose, and only
+        # falls back to "Anonymous" (matching how every later story is
+        # labeled) when they left it blank.
         db.session.execute(
             text("""
                 INSERT INTO stories (entry_id, content, submitted_by, is_approved) 
-                VALUES (:entry_id, :content, 'Original Submitter', 1)
+                VALUES (:entry_id, :content, :submitted_by, 1)
             """),
-            {"entry_id": entry.id, "content": entry.story}
+            {
+                "entry_id": entry.id,
+                "content": entry.story,
+                "submitted_by": entry.submitted_by or "Anonymous",
+            }
         )
 
     db.session.commit()
@@ -367,6 +494,7 @@ def approve_edit(id):
 
     editable_fields = [
         "word",
+        "transliteration",
         "language",
         "literal_definition",
         "etymology",
@@ -376,12 +504,20 @@ def approve_edit(id):
         "source"
     ]
 
+    old_word = entry.word
+
     for field in editable_fields:
 
         value = getattr(edit, field)
 
         if value is not None:
             setattr(entry, field, value)
+
+    # FIX: an approved word-text edit was never reflected in the URL —
+    # the slug stayed whatever it was at creation, silently drifting out
+    # of sync with the displayed word.
+    if entry.word != old_word:
+        entry.slug = make_unique_slug(entry.word, exclude_entry_id=entry.id)
 
     # Mark the edit as approved
     edit.status = "approved"
