@@ -742,3 +742,30 @@ footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
   color: var(--muted);
   letter-spacing: 0.02em;
 }
+
+/* ---------- submit word page ---------- */
+.form-section {
+  padding: 26px 0;
+  border-bottom: var(--border);
+}
+.form-section:first-of-type { padding-top: 4px; }
+.form-section:last-of-type { border-bottom: none; }
+
+.form-section h3 {
+  font-size: 1.05rem;
+  color: var(--paper);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.optional-tag {
+  font-family: var(--body);
+  font-weight: 400;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
