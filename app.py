@@ -407,9 +407,9 @@ def admin():
     )
 
     pending_stories = db.session.execute(text("""
-        SELECT stories.*, entry.word 
+        SELECT stories.*, entries.word 
         FROM stories 
-        JOIN entry ON stories.entry_id = entry.id 
+        JOIN entries ON stories.entry_id = entries.id 
         WHERE stories.is_approved = 0
     """)).fetchall()
 
