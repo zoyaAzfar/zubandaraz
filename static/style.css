@@ -444,11 +444,14 @@ footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
   color: var(--muted);
   margin-top: 4px;
 }
-
 .entry-actions {
   margin-top: 8px;
   padding-top: 24px;
   border-top: var(--border);
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
 }
 .entry-actions .link-btn { color: var(--green); }
 .entry-actions .link-btn:hover { color: var(--paper); }
