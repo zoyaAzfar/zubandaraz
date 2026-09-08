@@ -218,6 +218,24 @@ a { color: inherit; }
 .wotd-foot { margin-top: 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .link-btn { background: none; border: none; color: var(--red); font-weight: 600; font-size: 0.92rem; padding: 0; text-decoration: none; }
 .link-btn:hover { text-decoration: underline; }
+.wotd-meta-details {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wotd-meta-item {
+  font-size: 0.95rem;
+  color: #33443b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.wotd-meta-item strong {
+  color: var(--ink);
+  font-weight: 600;
+}
 
 @media (max-width: 720px) {
   .wotd-card { grid-template-columns: 1fr; }
