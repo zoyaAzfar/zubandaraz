@@ -30,8 +30,6 @@
 @font-face {
   font-family: "Mondwest";
   src: url("/static/fonts/ppmondwest-regular.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
 }
 
 * { box-sizing: border-box; }
@@ -181,7 +179,7 @@ a { color: inherit; }
   font-size: 4.4rem; 
   line-height: 1.6; /* Increased line-height to prevent vertical clipping */
   padding: 8px 0;   /* Gives room for tall ascenders/descenders */
-  font-family: var(--body);
+  font-family: var(--display);
 }
 
 /* Ensure script-arabic specifically has breathing room across the site */
