@@ -26,38 +26,49 @@
       
     </div>
   </section>
+  
+{% if word_of_day %}
+{% set wod_script, wod_rtl = detect_script(word_of_day.word) %}
+<section class="wotd">
+  <p class="section-label">Word of the day</p>
+  <article class="wotd-card">
+    <div class="wotd-word-col">
+      <p class="wotd-script script-{{ wod_script }}" dir="{{ 'rtl' if wod_rtl else 'ltr' }}">{{ word_of_day.word }}</p>
+      {% if word_of_day.transliteration %}<p class="wotd-translit">{{ word_of_day.transliteration }}</p>{% endif %}
+      <div class="wotd-tags">
+        <span class="tag">{{ word_of_day.language }}</span>
+        {% if word_of_day.dialect %}<span class="tag tag-teal">{{ word_of_day.dialect }}</span>{% endif %}
+      </div>
+    </div>
+    <div class="wotd-body">
+      {% if word_of_day.literal_definition %}
+      <p class="wotd-gloss">{{ word_of_day.literal_definition }}</p>
+      {% endif %}
 
-  {% if word_of_day %}
-  {% set wod_script, wod_rtl = detect_script(word_of_day.word) %}
-  <section class="wotd">
-    <p class="section-label">Word of the day</p>
-    <article class="wotd-card">
-      <div class="wotd-word-col">
-        <p class="wotd-script script-{{ wod_script }}" dir="{{ 'rtl' if wod_rtl else 'ltr' }}">{{ word_of_day.word }}</p>
-        {% if word_of_day.transliteration %}<p class="wotd-translit">{{ word_of_day.transliteration }}</p>{% endif %}
-        <div class="wotd-tags">
-          <span class="tag">{{ word_of_day.language }}</span>
-          {% if word_of_day.dialect %}<span class="tag tag-teal">{{ word_of_day.dialect }}</span>{% endif %}
-        </div>
-      </div>
-      <div class="wotd-body">
-        {% if word_of_day.literal_definition %}<p class="wotd-gloss">{{ word_of_day.literal_definition }}</p>{% endif %}
-        {% if word_of_day.story %}
-        <blockquote class="voice">
-          {{ word_of_day.story }}
-          <cite>shared {{ "as " + word_of_day.submitted_by if word_of_day.submitted_by else "anonymously" }}</cite>
-        </blockquote>
+      <div class="wotd-meta-details">
+        {% if word_of_day.origin %}
+        <p class="wotd-meta-item">
+          <strong>Origin:</strong> {{ word_of_day.origin }}
+        </p>
         {% endif %}
-        <div class="wotd-foot">
-          {% if word_of_day_story_count %}
-          <span class="resonance">{{ word_of_day_story_count }} {{ "woman has" if word_of_day_story_count == 1 else "women have" }} added their own story to this word</span>
-          {% endif %}
-          <a class="link-btn" href="{{ url_for('entry_detail', slug=word_of_day.slug) }}">Read the full entry</a>
-        </div>
+
+        {% if word_of_day.etymology %}
+        <p class="wotd-meta-item">
+          <strong>Etymology:</strong> {{ word_of_day.etymology }}
+        </p>
+        {% endif %}
       </div>
-    </article>
-  </section>
-  {% endif %}
+
+      <div class="wotd-foot">
+        {% if word_of_day_story_count %}
+        <span class="resonance">{{ word_of_day_story_count }} {{ "woman has" if word_of_day_story_count == 1 else "women have" }} added their own story to this word</span>
+        {% endif %}
+        <a class="link-btn" href="{{ url_for('entry_detail', slug=word_of_day.slug) }}">Read the full entry</a>
+      </div>
+    </div>
+  </article>
+</section>
+{% endif %}
 
   <section class="browse-preview">
     <div class="section-heading-row">
