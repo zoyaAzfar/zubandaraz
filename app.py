@@ -199,14 +199,12 @@ def about_page():
     return render_template("aboutus.html")
 
 
+
 @app.route("/browse")
 def browse():
-    # FIX: the header search bar had nowhere to send its query — browse()
-    # only ever returned every approved entry. It now reads ?q= and
-    # ?language= and actually filters.
     q = (request.args.get("q") or "").strip()
     language = (request.args.get("language") or "").strip()
-
+ 
     query = Entry.query.filter_by(status="approved")
     if language:
         query = query.filter(Entry.language == language)
@@ -220,15 +218,22 @@ def browse():
                 Entry.story.ilike(like),
             )
         )
-
+ 
     entries = query.order_by(Entry.word).all()
-
+ 
+    story_counts = dict(db.session.execute(
+        text("SELECT entry_id, COUNT(*) FROM stories WHERE is_approved = 1 GROUP BY entry_id")
+    ).all())
+ 
     return render_template(
         "browse.html",
         entries=entries,
         q=q,
         language=language,
+        story_counts=story_counts,
     )
+ 
+ 
 
 
 @app.route('/entry/<slug>')
