@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}{{ entry.word }} — Zuban Daraz{% endblock %}
-
 {% block content %}
 {% set script, rtl = detect_script(entry.word) %}
 <div class="entry-detail">
@@ -55,13 +53,36 @@
       {% for story in stories %}
       <blockquote class="voice">
         {{ story.content }}
-        <cite>shared {{ "as " + story.submitted_by if story.submitted_by else "anonymously" }}</cite>
+        shared {{ "as " + story.submitted_by if story.submitted_by else "anonymously" }}
       </blockquote>
       {% endfor %}
     {% else %}
       <p class="empty-note">No stories yet — be the first to share one.</p>
     {% endif %}
-    <a class="btn-secondary" href="{{ url_for('submit_story', slug=entry.slug) }}">Share your story</a>
+
+    <button type="button" class="btn-secondary" id="story-toggle">Share your story</button>
+
+    <form method="POST" action="{{ url_for('submit_story', slug=entry.slug) }}" class="story-form" id="story-form" hidden>
+      <p class="story-form-prompt">How do you use this word? Is there a memory attached to it?</p>
+      <div class="field">
+        <label for="content">Your story</label>
+        <textarea id="content" name="content" rows="6" required placeholder="Write your story or memory here…"></textarea>
+      </div>
+      <div class="field">
+        <label for="submitted_by">Your name (optional)</label>
+        <input type="text" id="submitted_by" name="submitted_by" maxlength="150" placeholder="Anonymous">
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Submit for review</button>
+        <button type="button" class="btn-cancel" id="story-cancel">Cancel</button>
+      </div>
+    </form>
+
+    <noscript>
+      <p style="margin-top:16px;">
+        <a class="link-btn" href="{{ url_for('submit_story', slug=entry.slug) }}">Share your story →</a>
+      </p>
+    </noscript>
   </div>
 
   <div class="entry-actions">
@@ -73,13 +94,33 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".entry-tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll(".entry-tab").forEach(t => t.classList.toggle("active", t === tab));
-      document.querySelectorAll(".entry-panel").forEach(p => {
-        p.hidden = p.dataset.panel !== tab.dataset.tab;
-      });
-    });
+  const tabs = document.querySelectorAll(".entry-tab");
+  const panels = document.querySelectorAll(".entry-panel");
+
+  function activate(tabName) {
+    tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tabName));
+    panels.forEach(p => p.hidden = p.dataset.panel !== tabName);
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => activate(tab.dataset.tab));
+  });
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("story_submitted")) activate("voices");
+
+  const storyToggle = document.getElementById("story-toggle");
+  const storyForm = document.getElementById("story-form");
+  const storyCancel = document.getElementById("story-cancel");
+
+  storyToggle.addEventListener("click", () => {
+    storyForm.hidden = false;
+    storyToggle.hidden = true;
+    document.getElementById("content").focus();
+  });
+  storyCancel.addEventListener("click", () => {
+    storyForm.hidden = true;
+    storyToggle.hidden = false;
   });
 });
 </script>
