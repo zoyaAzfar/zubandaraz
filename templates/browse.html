@@ -12,7 +12,7 @@
 
   <div class="browse-toolbar">
     <p class="result-count">
-      {{ entries|length }} {{ "entry" if entries|length == 1 else "entries" }}{% if q %} matching &ldquo;{{ q }}&rdquo;{% endif %}{% if language %} in {{ language }}{% endif %}{% if q or language %} · <a class="clear-filters" href="{{ url_for('browse') }}">clear filters</a>{% endif %}
+      {{ entries|length }} {{ "entry" if entries|length == 1 else "entries" }}{% if q %} matching &ldquo;{{ q }}&rdquo;{% endif %}{% if language %} in {{ language }}{% endif %}{% if q or language %} {% endif %}
     </p>
 
     <div class="custom-dropdown" id="sort-dropdown">
@@ -60,9 +60,9 @@
   {% else %}
   <p class="empty-note">
     {% if q or language %}
-      Nothing matches yet — <a href="{{ url_for('browse') }}">clear your filters</a>, or <a href="{{ url_for('submit_page') }}">submit this word</a> yourself.
+      <a href="{{ url_for('browse') }}">Clear your filters</a>, or <a href="{{ url_for('submit_page') }}">submit this word</a> yourself.
     {% else %}
-      No approved words yet — be the first to <a href="{{ url_for('submit_page') }}">submit one</a>.
+      Be the first to <a href="{{ url_for('submit_page') }}">submit a word</a>.
     {% endif %}
   </p>
   {% endif %}
