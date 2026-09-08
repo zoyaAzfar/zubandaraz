@@ -27,7 +27,9 @@
         {% endfor %}
       </select>
       <input id="searchInput" name="q" type="text" placeholder="Search for a word…" value="{{ request.args.get('q', '') }}" />
-      <button type="submit" aria-label="Search">⌕</button>
+        <button type="submit" aria-label="Search">
+          <span class="material-symbols-outlined">search</span>
+        </button>    
     </form>
     <nav class="main-nav">
       <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Home</a>
