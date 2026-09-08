@@ -772,14 +772,14 @@ a { color: inherit; }
   text-align: left;
   padding: 8px 0 12px;
 }
-
 .wallotext {
   max-width: 68ch;
-  margin: 0 auto;
+  margin: 0 auto; /* Keeps the container centered on the page */
   padding: 8px 0 40px;
   color: rgba(248,247,245,0.85);
   font-size: 1.02rem;
   line-height: 1.75;
+  text-align: left; /* Explicitly left-aligns all text inside */
 }
 .wallotext p { margin-bottom: 22px; }
 .wallotext p:last-child { margin-bottom: 0; }
