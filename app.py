@@ -200,7 +200,7 @@ def about_page():
 
 
 @app.route("/mod-policy")
-def about_page():
+def mod_pol():
     return render_template("mod-policy.html")
 
 @app.route("/browse")
