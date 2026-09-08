@@ -12,21 +12,22 @@
   <div class="notice-banner">Thank you — your story is in the review queue and will appear here once it's approved.</div>
   {% endif %}
 
-  <div class="entry-head">
-    <p class="script script-{{ script }}" dir="{{ 'rtl' if rtl else 'ltr' }}">{{ entry.word }}</p>
+<div class="entry-head">
+    <div class="entry-word-row">
+      <p class="script script-{{ script }}" dir="{{ 'rtl' if rtl else 'ltr' }}">{{ entry.word }}</p>
+      <button type="button" class="icon-share" id="share-btn" data-url="{{ request.url }}" aria-label="Copy link to this entry">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <circle cx="12" cy="4" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="12" cy="12" r="2"/>
+          <path d="M5.8 7.1l4.4-2.4M5.8 8.9l4.4 2.4"/>
+        </svg>
+        <span class="icon-share-tooltip" id="share-label">Copy link</span>
+      </button>
+    </div>
     {% if entry.transliteration %}<p class="translit">{{ entry.transliteration }}</p>{% endif %}
     <div class="card-tags">
       <span class="tag">{{ entry.language }}</span>
       {% if entry.dialect %}<span class="tag tag-teal">{{ entry.dialect }}</span>{% endif %}
     </div>
-    
-    <button type="button" class="entry-share" id="share-btn" data-url="{{ request.url }}">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
-        <circle cx="12" cy="4" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="12" cy="12" r="2"/>
-        <path d="M5.8 7.1l4.4-2.4M5.8 8.9l4.4 2.4"/>
-      </svg>
-      <span id="share-label">Copy link</span>
-    </button>
   </div>
 
   <div class="entry-tabs">
@@ -34,18 +35,24 @@
     <button class="entry-tab" data-tab="origin">Etymology</button>
     <button class="entry-tab" data-tab="voices">Community stories ({{ stories|length }})</button>
   </div>
-
-  <div class="entry-panel" data-panel="meaning">
-    {% if entry.literal_definition %}
-      <p>{{ entry.literal_definition }}</p>
+  
+<div class="entry-panel" data-panel="voices" hidden>
+    {% if stories %}
+      <div class="voice-grid">
+        {% for story in stories %}
+        <div class="voice-card voice-card-{{ loop.cycle('a', 'b', 'c') }}">
+          <span class="voice-quote-mark" aria-hidden="true">“</span>
+          <p class="voice-content">{{ story.content }}</p>
+          <div class="voice-byline">
+            <span class="voice-avatar">{{ (story.submitted_by[0] if story.submitted_by else "?")|upper }}</span>
+            <span class="voice-name">{{ story.submitted_by if story.submitted_by else "Anonymous" }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
     {% else %}
-      <p class="empty-note">No definition written yet.</p>
+      <p class="empty-note">No stories yet — be the first to share one.</p>
     {% endif %}
-    {% if entry.origin %}
-      <h3>Origin</h3>
-      <p>{{ entry.origin }}</p>
-    {% endif %}
-  </div>
 
   <div class="entry-panel" data-panel="origin" hidden>
     {% if entry.etymology %}
