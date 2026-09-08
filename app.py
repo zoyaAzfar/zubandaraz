@@ -199,6 +199,9 @@ def about_page():
     return render_template("aboutus.html")
 
 
+@app.route("/mod-policy")
+def about_page():
+    return render_template("mod-policy.html")
 
 @app.route("/browse")
 def browse():
