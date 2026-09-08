@@ -88,12 +88,57 @@ a { color: inherit; }
 .logo { display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: var(--paper); flex-shrink: 0; }
 .logo-mark { font-family: var(--script-urdu); font-size: 1.5rem; color: var(--green); line-height: 1; }
 .logo-word { font-family: var(--display); font-size: 1.35rem; letter-spacing: 0.01em; }
+.search { 
+  flex: 1; 
+  display: flex; 
+  align-items: stretch; 
+  background: var(--paper); 
+  border-radius: var(--radius); 
+  overflow: hidden; 
+  max-width: 480px; 
+}
 
-.search { flex: 1; display: flex; align-items: stretch; background: var(--paper); border-radius: var(--radius); overflow: hidden; max-width: 480px; }
-.search select { border: none; background: rgba(10,51,35,0.06); color: var(--ink); font-family: var(--body); font-size: 0.85rem; padding: 0 10px; border-right: 1px solid rgba(10,51,35,0.12); }
-.search input { flex: 1; border: none; padding: 10px 12px; font-family: var(--body); font-size: 0.95rem; color: var(--ink); background: transparent; min-width: 0; }
-.search input:focus, .search select:focus { outline: none; }
-.search button { border: none; background: var(--ink); color: var(--paper); width: 42px; font-size: 1rem; }
+.search select { 
+  border: none; 
+  background: rgba(10,51,35,0.06); 
+  color: var(--ink); 
+  font-family: var(--body); 
+  font-size: 0.85rem; 
+  padding: 0 10px; 
+  border-right: 1px solid rgba(10,51,35,0.12); 
+}
+
+.search input { 
+  flex: 1; 
+  border: none; 
+  padding: 10px 12px; 
+  font-family: var(--body); 
+  font-size: 0.95rem; 
+  color: var(--ink); 
+  background: transparent; 
+  min-width: 0; 
+}
+
+.search input:focus, .search select:focus { 
+  outline: none; 
+}
+
+.search button { 
+  border: none; 
+  background: var(--ink); 
+  color: var(--paper); 
+  width: 48px; /* Increased slightly to accommodate a larger icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Target the Material Icon specifically */
+.search button .material-symbols-outlined {
+  font-size: 1.4rem; /* Controls the size of the search icon */
+}
 
 .main-nav { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .nav-link { background: none; border: none; color: var(--paper); opacity: 0.8; font-size: 0.95rem; padding: 8px 12px; border-radius: var(--radius); text-decoration: none; }
