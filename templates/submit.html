@@ -1,51 +1,79 @@
 {% extends "base.html" %}
-
+{% block title %}Submit a Word — Zuban Daraz{% endblock %}
 {% block content %}
+<div class="entry-detail">
+  <a class="entry-back" href="/">← Back to Zuban Daraz</a>
 
-<div style = "text-align:center; margin-bottom:-30px;">
-<h1 class="loose-letters">
-        <span class="line-1">
-            <span>S</span><span>u</span><span>b</span><span>m</span><span>i</span><span>t</span>
-        </span>
-        
-        <span class="line-2">
-            <span class="small-word">
-                <span>a</span>
-            </span>
+  <div class="edit-head">
+    <h1>Submit a new word</h1>
+    <p class="mission">Add a new word to our archive.</p>
+  </div>
 
-            
-            <span class="space">&nbsp;</span>
-            <span>W</span><span>o</span><span>r</span><span>d</span> 
-        </span>
+  <form method="POST" action="/submit" class="submit-form">
 
-    </h1>
-
-    <p style="margin-top:-50px;">Fill out the form below to submit a word to our dictionary!</p>
-</div>
-
-<div class="form-container">
-    
-    <form action="/submit" method="POST" class="cute-form">
-        
-        <div class="input-group horizontal-group">
-            <label for="word">Word:</label>
-            <input type="text" id="word" name="word" placeholder="e.g., Housewife" maxlength="30">
+    <div class="form-section">
+      <h3>The word</h3>
+      <div class="field-row">
+        <div class="field">
+          <label for="word">Word *</label>
+          <input type="text" id="word" name="word" placeholder="e.g., سکوت" maxlength="100" required>
         </div>
-
-        <div class="input-group horizontal-group">
-            <label for="language">Language:</label>
-            <input type="text" id="language" name="language" placeholder="e.g., English" maxlength="20">
+        <div class="field">
+          <label for="language">Language *</label>
+          <input type="text" id="language" name="language" placeholder="e.g., Urdu" maxlength="100" required>
         </div>
-
-        <div class="input-group">
-            <label for="story">Your story:</label>
-            <textarea id="story" name="story" placeholder="What's it about this word that made you choose it?" maxlength="1000"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="transliteration">Transliteration</label>
+          <input type="text" id="transliteration" name="transliteration" placeholder="e.g., sukoot" maxlength="150">
         </div>
+        <div class="field">
+          <label for="dialect">Dialect or region</label>
+          <input type="text" id="dialect" name="dialect" placeholder="e.g., Lucknowi Urdu" maxlength="100">
+        </div>
+      </div>
+    </div>
 
-        <button type="submit" class="submit-btn">
-            Submit >
-        </button>
-        
-    </form>
+    <div class="form-section">
+      <h3>What it means <span class="optional-tag">optional</span></h3>
+      <div class="field">
+        <label for="literal_definition">Literal definition</label>
+        <textarea id="literal_definition" name="literal_definition" rows="3" placeholder="What does it translate to, roughly?"></textarea>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Where it comes from <span class="optional-tag">optional — no worries if you're not sure</span></h3>
+      <div class="field">
+        <label for="origin">Origin</label>
+        <input type="text" id="origin" name="origin" placeholder="e.g., Persian, via Classical Arabic" maxlength="150">
+      </div>
+      <div class="field">
+        <label for="etymology">Etymology</label>
+        <textarea id="etymology" name="etymology" rows="3" placeholder="Anything you know about where the word comes from"></textarea>
+      </div>
+      <div class="field">
+        <label for="source">Source</label>
+        <input type="text" id="source" name="source" placeholder="A dictionary, book, or person you learned this from" maxlength="250">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Your story <span class="optional-tag">optional</span></h3>
+      <div class="field">
+        <label for="story">Why this word?</label>
+        <textarea id="story" name="story" rows="5" placeholder="What's the story behind why you chose this word?" maxlength="1000"></textarea>
+      </div>
+      <div class="field">
+        <label for="submitted_by">Your name</label>
+        <input type="text" id="submitted_by" name="submitted_by" maxlength="150" placeholder="Anonymous">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Submit for review</button>
+    </div>
+  </form>
 </div>
 {% endblock %}
