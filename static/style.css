@@ -423,3 +423,7 @@ a { color: inherit; }
   }
   .browse-title { font-size: 2rem; }
 }
+
+footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
+.footer-inner { max-width: 1120px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; color: var(--muted); font-size: 0.88rem; }
+.footer-inner a { text-decoration: underline; }
