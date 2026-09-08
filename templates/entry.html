@@ -1,69 +1,86 @@
 {% extends "base.html" %}
+
 {% block title %}{{ entry.word }} — Zuban Daraz{% endblock %}
+
 {% block content %}
-<div class="entry-detail-container">
-    {% if request.args.get('edit_submitted') %}
-        <div class="edit-banner">
-            Your edit has been submitted and is awaiting review. This page still shows the current approved version.
-        </div>
-    {% endif %}
+{% set script, rtl = detect_script(entry.word) %}
+<div class="entry-detail">
+  <a class="entry-back" href="{{ url_for('browse') }}">← Back to the archive</a>
 
-    <div class="entry-detail-header">
-        <h1 class="entry-detail-word">{{ entry.word }}</h1>
-        {% if entry.part_of_speech %}
-            <p class="entry-detail-pos">{{ entry.part_of_speech }}.</p>
-        {% endif %}
-        <div class="entry-detail-lang-row">
-            <span class="lang-pill">{{ entry.language[:2] | upper }}</span>
-            <span class="entry-detail-lang-name">{{ entry.language }}</span>
-            {% if entry.dialect %}<span class="entry-dialect">({{ entry.dialect }})</span>{% endif %}
-        </div>
+  {% if request.args.get('edit_submitted') %}
+  <div class="notice-banner">Your edit has been submitted and is awaiting review. This page still shows the current approved version.</div>
+  {% endif %}
+  {% if request.args.get('story_submitted') %}
+  <div class="notice-banner">Thank you — your story is in the review queue and will appear here once it's approved.</div>
+  {% endif %}
+
+  <div class="entry-head">
+    <p class="script script-{{ script }}" dir="{{ 'rtl' if rtl else 'ltr' }}">{{ entry.word }}</p>
+    {% if entry.transliteration %}<p class="translit">{{ entry.transliteration }}</p>{% endif %}
+    <div class="card-tags">
+      <span class="tag">{{ entry.language }}</span>
+      {% if entry.dialect %}<span class="tag tag-teal">{{ entry.dialect }}</span>{% endif %}
     </div>
+  </div>
 
+  <div class="entry-tabs">
+    <button class="entry-tab active" data-tab="meaning">Meaning &amp; use</button>
+    <button class="entry-tab" data-tab="origin">Etymology</button>
+    <button class="entry-tab" data-tab="voices">Community stories ({{ stories|length }})</button>
+  </div>
+
+  <div class="entry-panel" data-panel="meaning">
     {% if entry.literal_definition %}
-    <section class="entry-section entry-definition">
-        <p>{{ entry.literal_definition }}</p>
-    </section>
+      <p>{{ entry.literal_definition }}</p>
+    {% else %}
+      <p class="empty-note">No definition written yet.</p>
     {% endif %}
+    {% if entry.origin %}
+      <h3>Origin</h3>
+      <p>{{ entry.origin }}</p>
+    {% endif %}
+  </div>
 
+  <div class="entry-panel" data-panel="origin" hidden>
     {% if entry.etymology %}
-    <section class="entry-section entry-etymology">
-        <span class="etymology-tab">Etymology</span>
-        <p>{{ entry.etymology }}</p>
-    </section>
+      <p>{{ entry.etymology }}</p>
+    {% else %}
+      <p class="empty-note">No etymology written yet.</p>
     {% endif %}
+    {% if entry.source %}<p class="entry-source">Source: {{ entry.source }}</p>{% endif %}
+  </div>
 
-
-    {% if entry.origin or entry.source %}
-    <section class="entry-meta">
-        {% if entry.origin %}<p><strong>Origin:</strong> {{ entry.origin }}</p>{% endif %}
-    </section>
+  <div class="entry-panel" data-panel="voices" hidden>
+    {% if stories %}
+      {% for story in stories %}
+      <blockquote class="voice">
+        {{ story.content }}
+        <cite>shared {{ "as " + story.submitted_by if story.submitted_by else "anonymously" }}</cite>
+      </blockquote>
+      {% endfor %}
+    {% else %}
+      <p class="empty-note">No stories yet — be the first to share one.</p>
     {% endif %}
+    <a class="btn-secondary" href="{{ url_for('submit_story', slug=entry.slug) }}">Share your story</a>
+  </div>
 
-    <a href="{{ url_for('edit_entry', slug=entry.slug) }}" class="edit-entry-btn">Edit this entry</a>
-    <a href="{{ url_for('browse') }}" class="back-link">← Back to browse</a>
+  <div class="entry-actions">
+    <a class="link-btn" href="{{ url_for('edit_entry', slug=entry.slug) }}">Suggest an edit to this entry</a>
+  </div>
 </div>
+{% endblock %}
 
-
-    <section class="entry-section entry-detail-container">
-        <h2>Community Stories</h2>
-        
-        {% if stories %}
-            {% for story in stories %}
-                <div class="story-box" style="margin-bottom: 20px; padding-left: 15px; border-left: 3px solid var(--pink);">
-                    <p>{{ story.content }}</p>
-                    {% if story.submitted_by %}
-                        <small style="color: #777; font-family: 'Mondwest', serif;">
-                            — Shared by {{ story.submitted_by }}
-                        </small>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>No stories yet. Be the first to share one!</p>
-        {% endif %}
-        
-        <a href="{{ url_for('submit_story', slug=entry.slug) }}" class="edit-entry-btn" style="background-color: var(--pink);">Share your story</a>
-    </section>
-
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".entry-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".entry-tab").forEach(t => t.classList.toggle("active", t === tab));
+      document.querySelectorAll(".entry-panel").forEach(p => {
+        p.hidden = p.dataset.panel !== tab.dataset.tab;
+      });
+    });
+  });
+});
+</script>
 {% endblock %}
