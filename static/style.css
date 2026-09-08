@@ -302,13 +302,8 @@ a { color: inherit; }
 
 /* ---------- footer ---------- */
 
-footer {
-   text-align:center;
-   background-color:var(--pink);
-   color:var(--green);
-   margin:100px auto auto ;
-   padding: 10px;
-}
+footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
+.footer-inner { max-width: 1120px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; color: var(--muted); font-size: 0.88rem; }
 .footer-inner a { text-decoration: underline; }
 
 /* ---------- modal / form card (reused as a plain page on submit.html etc.) ---------- */
