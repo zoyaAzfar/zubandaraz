@@ -772,7 +772,7 @@ footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
 
 /* ---------- about page ---------- */
 .about-hero {
-  text-align: center;
+  text-align: left;
   padding: 8px 0 12px;
 }
 
