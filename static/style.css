@@ -427,3 +427,97 @@ a { color: inherit; }
 footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
 .footer-inner { max-width: 1120px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; color: var(--muted); font-size: 0.88rem; }
 .footer-inner a { text-decoration: underline; }
+
+/* ---------- notices ---------- */
+.notice-banner {
+  background: rgba(131,153,88,0.14);
+  border-left: 3px solid var(--pink);
+  color: var(--paper);
+  padding: 14px 18px;
+  font-size: 0.92rem;
+  border-radius: var(--radius);
+  margin: 20px 0 0;
+}
+
+/* ---------- entry detail extras ---------- */
+.entry-source {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.entry-actions {
+  margin-top: 8px;
+  padding-top: 24px;
+  border-top: var(--border);
+}
+.entry-actions .link-btn { color: var(--green); }
+.entry-actions .link-btn:hover { color: var(--paper); }
+
+/* ---------- inline story form (voices panel) ---------- */
+.story-form {
+  margin-top: 20px;
+  padding: 24px;
+  background: #12442f;
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius);
+}
+.story-form[hidden] { display: none; }
+.story-form-prompt {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  color: rgba(248,247,245,0.9);
+  margin-bottom: 16px;
+}
+
+/* ---------- shared on-page form fields (dark context) ---------- */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.field input, .field textarea, .field select {
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(248,247,245,0.22);
+  background: rgba(248,247,245,0.06);
+  color: var(--paper);
+  font-family: var(--body);
+  font-size: 0.95rem;
+}
+.field input::placeholder, .field textarea::placeholder { color: rgba(248,247,245,0.35); }
+.field input:focus, .field textarea:focus, .field select:focus {
+  outline: none;
+  border-color: var(--green);
+  background: rgba(248,247,245,0.09);
+}
+.field textarea { resize: vertical; min-height: 90px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field-hint { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 22px;
+}
+.btn-cancel {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+.btn-cancel:hover { color: var(--paper); }
+
+/* ---------- edit page head ---------- */
+.edit-head { padding: 20px 0 8px; }
+.edit-head h1 { font-size: 2rem; }
+.edit-head .word-quote { color: var(--green); }
+
+@media (max-width: 640px) {
+  .field-row { grid-template-columns: 1fr; }
+}
