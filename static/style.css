@@ -427,7 +427,6 @@ a { color: inherit; }
 footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
 .footer-inner { max-width: 1120px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; color: var(--muted); font-size: 0.88rem; }
 .footer-inner a { text-decoration: underline; }
-
 /* ---------- notices ---------- */
 .notice-banner {
   background: rgba(131,153,88,0.14);
@@ -453,6 +452,23 @@ footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
 }
 .entry-actions .link-btn { color: var(--green); }
 .entry-actions .link-btn:hover { color: var(--paper); }
+
+.entry-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 1px solid rgba(248,247,245,0.25);
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  padding: 7px 13px;
+  border-radius: var(--radius);
+  margin-top: 16px;
+}
+.entry-share:hover { border-color: var(--green); color: var(--paper); }
+.entry-share.copied { border-color: var(--green); color: var(--green); }
+.entry-share svg { width: 13px; height: 13px; }
 
 /* ---------- inline story form (voices panel) ---------- */
 .story-form {
@@ -521,3 +537,4 @@ footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
 @media (max-width: 640px) {
   .field-row { grid-template-columns: 1fr; }
 }
+
