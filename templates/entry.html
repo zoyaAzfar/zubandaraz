@@ -29,14 +29,34 @@
       {% if entry.dialect %}<span class="tag tag-teal">{{ entry.dialect }}</span>{% endif %}
     </div>
   </div>
-
-  <div class="entry-tabs">
+<div class="entry-tabs">
     <button class="entry-tab active" data-tab="meaning">Meaning &amp; use</button>
     <button class="entry-tab" data-tab="origin">Etymology</button>
     <button class="entry-tab" data-tab="voices">Community stories ({{ stories|length }})</button>
   </div>
-  
-<div class="entry-panel" data-panel="voices" hidden>
+
+  <div class="entry-panel" data-panel="meaning">
+    {% if entry.literal_definition %}
+      <p>{{ entry.literal_definition }}</p>
+    {% else %}
+      <p class="empty-note">No definition written yet.</p>
+    {% endif %}
+    {% if entry.origin %}
+      <h3>Origin</h3>
+      <p>{{ entry.origin }}</p>
+    {% endif %}
+  </div>
+
+  <div class="entry-panel" data-panel="origin" hidden>
+    {% if entry.etymology %}
+      <p>{{ entry.etymology }}</p>
+    {% else %}
+      <p class="empty-note">No etymology written yet.</p>
+    {% endif %}
+    {% if entry.source %}<p class="entry-source">Source: {{ entry.source }}</p>{% endif %}
+  </div>
+
+  <div class="entry-panel" data-panel="voices" hidden>
     {% if stories %}
       <div class="voice-grid">
         {% for story in stories %}
@@ -53,29 +73,6 @@
     {% else %}
       <p class="empty-note">No stories yet — be the first to share one.</p>
     {% endif %}
-
-  <div class="entry-panel" data-panel="origin" hidden>
-    {% if entry.etymology %}
-      <p>{{ entry.etymology }}</p>
-    {% else %}
-      <p class="empty-note">No etymology written yet.</p>
-    {% endif %}
-    {% if entry.source %}<p class="entry-source">Source: {{ entry.source }}</p>{% endif %}
-  </div>
-
-  <div class="entry-panel" data-panel="voices" hidden>
-    {% if stories %}
-      {% for story in stories %}
-      <blockquote class="voice">
-        {{ story.content }}
-        shared {{ "as " + story.submitted_by if story.submitted_by else "anonymously" }}
-      </blockquote>
-      {% endfor %}
-    {% else %}
-      <p class="empty-note">No stories yet — be the first to share one.</p>
-    {% endif %}
-
-    <button type="button" class="btn-secondary" id="story-toggle">Share your story</button>
 
     <form method="POST" action="{{ url_for('submit_story', slug=entry.slug) }}" class="story-form" id="story-form" hidden>
       <p class="story-form-prompt">How do you use this word? Is there a memory attached to it?</p>
@@ -101,9 +98,9 @@
   </div>
 
   <div class="entry-actions">
+    <button type="button" class="link-btn" id="story-toggle">Share your story</button>
     <a class="link-btn" href="{{ url_for('edit_entry', slug=entry.slug) }}">Suggest an edit to this entry</a>
   </div>
-</div>
 {% endblock %}
 
 {% block extra_scripts %}
