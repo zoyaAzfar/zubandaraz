@@ -23,13 +23,13 @@ class Entry(db.Model):
     status = db.Column(db.String(20), default="pending")  # pending | approved
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-
 class EntryEdit(db.Model):
+    __tablename__ = 'entry_edits'
+
     id = db.Column(db.Integer, primary_key=True)
-    
-    # <-- Updated ForeignKey to point to 'entries.id' instead of 'entry.id'
-    entry_id = db.Column(db.Integer, db.ForeignKey("entries.id"), nullable=False)
-    entry = db.relationship("Entry", backref="pending_edits")
+    entry_id = db.Column(db.Integer, db.ForeignKey('entries.id'), nullable=False)
+
+    transliteration = db.Column(db.String(100), nullable=True)
 
     word = db.Column(db.String(100), nullable=True)
     language = db.Column(db.String(100), nullable=True)
@@ -39,7 +39,8 @@ class EntryEdit(db.Model):
     origin = db.Column(db.String(150), nullable=True)
     dialect = db.Column(db.String(100), nullable=True)
     source = db.Column(db.String(250), nullable=True)
-
-    submitted_by = db.Column(db.String(150), nullable=True)   
-    status = db.Column(db.String(20), default="pending")   
+    submitted_by = db.Column(db.String(100), nullable=True)
+    status = db.Column(db.String(20), default="pending")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    entry = db.relationship('Entry', backref=db.backref('edits', lazy=True))
