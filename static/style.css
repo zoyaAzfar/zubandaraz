@@ -478,7 +478,6 @@ a { color: inherit; }
 .entry-word-card {
   background: var(--paper);
   border-radius: var(--radius);
-  border-bottom: 4px solid var(--green);
   padding: 40px 44px;
 }
 .entry-word-card .script {
