@@ -769,3 +769,34 @@ footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
   letter-spacing: 0.05em;
   color: var(--muted);
 }
+
+/* ---------- about page ---------- */
+.about-hero {
+  text-align: center;
+  padding: 8px 0 12px;
+}
+
+.wallotext {
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: 8px 0 40px;
+  color: rgba(248,247,245,0.85);
+  font-size: 1.02rem;
+  line-height: 1.75;
+}
+.wallotext p { margin-bottom: 22px; }
+.wallotext p:last-child { margin-bottom: 0; }
+.wallotext .closing-line { color: var(--paper); }
+
+.pull-quote {
+  margin: 0 0 32px;
+  padding: 24px 28px;
+  background: rgba(248,247,245,0.04);
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius);
+  font-family: var(--display);
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: rgba(248,247,245,0.92);
+}
+.pull-quote p { margin: 0; }
