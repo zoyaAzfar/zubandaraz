@@ -800,3 +800,37 @@ footer { border-top: var(--border); padding: 40px 32px; margin-top: 20px; }
   color: rgba(248,247,245,0.92);
 }
 .pull-quote p { margin: 0; }
+
+
+footer {
+  border-top: 2px solid var(--green);
+  padding: 56px 32px 48px;
+  margin-top: 20px;
+  text-align: center;
+}
+footer h1 {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+footer p {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 18px;
+}
+footer span {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+footer span a {
+  color: var(--green);
+  text-decoration: none;
+}
+footer span a:hover {
+  color: var(--paper);
+  text-decoration: underline;
+}
