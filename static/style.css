@@ -16,11 +16,11 @@
   --muted: var(--yellow);
 
   --display: "Mondwest", "Fraunces", Georgia, serif;
-  --script-urdu: "Noto Nastaliq Urdu", serif;
+ /* --script-urdu: "Noto Nastaliq Urdu", serif;
   --script-deva: "Noto Sans Devanagari", sans-serif;
   --script-beng: "Noto Sans Bengali", sans-serif;
   --script-guru: "Noto Sans Gurmukhi", sans-serif;
-  --script-tamil: "Noto Sans Tamil", sans-serif;
+  --script-tamil: "Noto Sans Tamil", sans-serif; */
   --body: "Inter", sans-serif;
 
   --radius: 3px;
