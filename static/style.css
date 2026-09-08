@@ -181,6 +181,7 @@ a { color: inherit; }
   font-size: 4.4rem; 
   line-height: 1.6; /* Increased line-height to prevent vertical clipping */
   padding: 8px 0;   /* Gives room for tall ascenders/descenders */
+  font-family: var(--body);
 }
 
 /* Ensure script-arabic specifically has breathing room across the site */
