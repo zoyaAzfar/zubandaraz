@@ -139,13 +139,13 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   storyToggle.addEventListener("click", () => {
-    storyForm.hidden = false;
-    storyToggle.hidden = true;
-    document.getElementById("content").focus();
+      activate("voices");
+      storyForm.hidden = false;
+      document.getElementById("content").focus();
+      storyForm.scrollIntoView({ behavior: "smooth", block: "center" });
   });
   storyCancel.addEventListener("click", () => {
-    storyForm.hidden = true;
-    storyToggle.hidden = false;
+      storyForm.hidden = true;
   });
 });
 </script>
