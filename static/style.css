@@ -245,10 +245,25 @@ a { color: inherit; }
 
 /* ---------- entry grid (home preview + browse) ---------- */
 .browse-preview, .browse-full { max-width: 1120px; margin: 0 auto; padding: 0 32px 72px; }
-.section-heading-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
-.section-heading-row .link-btn { color: var(--paper); }
-.section-heading-row .link-btn:hover { color: var(--green); }
+.section-heading-row { 
+  display: flex; 
+  align-items: baseline; 
+  justify-content: space-between; 
+  margin-bottom: 14px; 
+}
 
+/* Ensure section-label inside heading row doesn't add extra bottom margin */
+.section-heading-row .section-label { 
+  margin-bottom: 0; 
+}
+
+.section-heading-row .link-btn { 
+  color: var(--paper); 
+}
+
+.section-heading-row .link-btn:hover { 
+  color: var(--green); 
+}
 .entry-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 @media (max-width: 880px) { .entry-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .entry-grid { grid-template-columns: 1fr; } }
