@@ -28,8 +28,7 @@ class Entry(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class EntryEdit(db.Model):
-    __tablename__ = 'entry_edit' 
-
+    __tablename__ = 'entry_edits'
     id = db.Column(db.Integer, primary_key=True)
     entry_id = db.Column(db.Integer, db.ForeignKey('entries.id'), nullable=False)
 
