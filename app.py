@@ -274,6 +274,15 @@ def submit_story(slug):
 
     return render_template('submit-story.html', entry=entry)
 
+@app.route("/approve_story/<int:story_id>", methods=["POST"])
+@auth.login_required
+def approve_story(story_id):
+    db.session.execute(
+        text("UPDATE stories SET is_approved = 1 WHERE id = :id"),
+        {"id": story_id}
+    )
+    db.session.commit()
+    return redirect("/admin")
 
 @app.route(
     "/entry/<slug>/edit",
