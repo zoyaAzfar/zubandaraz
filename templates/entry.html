@@ -126,6 +126,19 @@ document.addEventListener("DOMContentLoaded", function () {
   const storyForm = document.getElementById("story-form");
   const storyCancel = document.getElementById("story-cancel");
 
+  const shareBtn = document.getElementById("share-btn");
+  const shareLabel = document.getElementById("share-label");
+  shareBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(shareBtn.dataset.url).then(() => {
+      shareBtn.classList.add("copied");
+      shareLabel.textContent = "Copied!";
+      setTimeout(() => {
+        shareBtn.classList.remove("copied");
+        shareLabel.textContent = "Copy link";
+      }, 1800);
+    });
+  });
+
   storyToggle.addEventListener("click", () => {
     storyForm.hidden = false;
     storyToggle.hidden = true;
