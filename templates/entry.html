@@ -19,6 +19,19 @@
       <span class="tag">{{ entry.language }}</span>
       {% if entry.dialect %}<span class="tag tag-teal">{{ entry.dialect }}</span>{% endif %}
     </div>
+
+    <div class="card-tags">
+      <span class="tag">{{ entry.language }}</span>
+      {% if entry.dialect %}<span class="tag tag-teal">{{ entry.dialect }}</span>{% endif %}
+    </div>
+    
+    <button type="button" class="entry-share" id="share-btn" data-url="{{ request.url }}">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="12" cy="4" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="12" cy="12" r="2"/>
+        <path d="M5.8 7.1l4.4-2.4M5.8 8.9l4.4 2.4"/>
+      </svg>
+      <span id="share-label">Copy link</span>
+    </button>
   </div>
 
   <div class="entry-tabs">
