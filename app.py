@@ -137,6 +137,7 @@ _SCRIPT_RANGES = [
     ("bengali", 0x0980, 0x09FF, False),
     ("gurmukhi", 0x0A00, 0x0A7F, False),
     ("tamil", 0x0B80, 0x0BFF, False),
+    ("telugu", 0x0C00, 0x0C7F, False)
 ]
 
 
