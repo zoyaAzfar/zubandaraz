@@ -18,7 +18,7 @@ class Entry(db.Model):
 
     literal_definition = db.Column(db.Text, nullable=True)
     etymology = db.Column(db.Text, nullable=True)
-    story = db.Column(db.Text, nullable=False)
+    story = db.Column(db.Text, nullable=True)
 
     origin = db.Column(db.String(150), nullable=True)
     dialect = db.Column(db.String(100), nullable=True)
