@@ -106,12 +106,12 @@
     {% else %}
       <div class="voice-empty">
         <p>No stories yet.</p>
-        <p class="voice-empty-sub">Be the first to share how you use this word.</p>
+        <p class="voice-empty-sub">Be the first to share your experience with this word.</p>
       </div>
     {% endif %}
 
     <form method="POST" action="{{ url_for('submit_story', slug=entry.slug) }}" class="story-form" id="story-form" hidden>
-      <p class="story-form-prompt">How do you use this word? Is there a memory attached to it?</p>
+      <p class="story-form-prompt">Where have you heard this word? Is there a memory attached to it?</p>
       <div class="field">
         <label for="content">Your story</label>
         <textarea id="content" name="content" rows="6" required placeholder="Write your story or memory here…"></textarea>
