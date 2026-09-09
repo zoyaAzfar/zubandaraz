@@ -372,9 +372,8 @@ def submit():
     if (
         not word
         or not language
-        or not story
         or len(word) > 100
-        or len(story) > 2000
+        or len(story or "") > 2000
     ):
         return "Invalid input length", 400
 
