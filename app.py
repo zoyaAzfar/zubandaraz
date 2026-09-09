@@ -103,9 +103,12 @@ def verify_password(username, password):
 #with app.app_context():
 #    db.create_all()
 
-
 def make_unique_slug(word, exclude_entry_id=None):
-    base = slugify(word)
+    base = slugify(word, allow_unicode=True)
+
+    if not base:
+        base = word.strip()
+
     slug = base
     i = 1
 
@@ -120,7 +123,6 @@ def make_unique_slug(word, exclude_entry_id=None):
         slug = f"{base}-{i}"
 
     return slug
-
 
 # Best-effort script detection, so a word renders in the right font and
 # direction without needing a dedicated "script" column per entry — useful
