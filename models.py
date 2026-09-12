@@ -1,4 +1,3 @@
-# models.py
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -22,7 +21,8 @@ class Entry(db.Model):
 
     origin = db.Column(db.String(150), nullable=True)
     dialect = db.Column(db.String(100), nullable=True)
-    source = db.Column(db.String(250), nullable=True)
+
+    pos = db.Column(db.String(50), nullable=True)
 
     status = db.Column(db.String(20), default="pending")  # pending | approved
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -40,7 +40,9 @@ class EntryEdit(db.Model):
     story = db.Column(db.Text, nullable=True)
     origin = db.Column(db.String(150), nullable=True)
     dialect = db.Column(db.String(100), nullable=True)
-    source = db.Column(db.String(250), nullable=True)
+
+    pos = db.Column(db.String(50), nullable=True)
+
     submitted_by = db.Column(db.String(100), nullable=True)
     
     status = db.Column(db.String(20), default="pending")
