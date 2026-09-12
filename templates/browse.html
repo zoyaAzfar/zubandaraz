@@ -48,6 +48,7 @@
         <div class="entry-row-meta">
           <span class="tag">{{ entry.language }}</span>
           {% if entry.dialect %}<span class="tag tag-teal">{{ entry.dialect }}</span>{% endif %}
+          {% if entry.pos %}<span class="tag tag-pos">{{ entry.pos }}</span>{% endif %}
         </div>
         <p class="entry-row-snippet">
           {% if entry.literal_definition %}{{ entry.literal_definition }}{% else %}{{ entry.story | truncate(160) }}{% endif %}
