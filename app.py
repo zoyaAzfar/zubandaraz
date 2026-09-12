@@ -124,10 +124,6 @@ def make_unique_slug(word, exclude_entry_id=None):
 
     return slug
 
-# Best-effort script detection, so a word renders in the right font and
-# direction without needing a dedicated "script" column per entry — useful
-# since e.g. Punjabi can show up in either Gurmukhi (LTR) or Shahmukhi
-# (Arabic script, RTL) depending on who submitted it.
 _SCRIPT_RANGES = [
     ("arabic", 0x0600, 0x06FF, True),
     ("arabic", 0x0750, 0x077F, True),
@@ -260,18 +256,12 @@ def submit_story(slug):
 
     if request.method == 'POST':
         content = (request.form.get('content') or "").strip()
+
         submitted_by = request.form.get('submitted_by') or None  # blank = anonymous
 
-        # FIX: no validation at all before — an empty or absurdly long
-        # story could be inserted.
         if not content or len(content) > 2000:
             return "Invalid input length", 400
 
-        # FIX: is_approved was left out of this INSERT entirely, so new
-        # stories landed as NULL. The admin queue below filters on
-        # "is_approved = 0", and NULL never matches that — new
-        # submissions were invisible to moderators. Setting it explicitly
-        # here puts them back in the queue.
         db.session.execute(
             text("""
                 INSERT INTO stories (entry_id, content, submitted_by, is_approved)
@@ -329,7 +319,7 @@ def edit_entry(slug):
             story=request.form.get("story") or None,
             origin=request.form.get("origin") or None,
             dialect=request.form.get("dialect") or None,
-            source=request.form.get("source") or None,
+            pos=request.form.get("pos") or None,
             submitted_by=(
                 request.form.get("submitted_by")
                 or None
@@ -362,13 +352,9 @@ def submit():
     transliteration = request.form.get("transliteration") or None
     origin = request.form.get("origin") or None
     dialect = request.form.get("dialect") or None
-    source = request.form.get("source") or None
-    # FIX: this was never being read from the form at all, which is why
-    # approve() below had nothing to credit and fell back to a hardcoded
-    # placeholder name for every single entry.
+    pos = request.form.get("pos") or None
     submitted_by = request.form.get("submitted_by") or None
 
-    # Basic input validation
     if (
         not word
         or not language
@@ -396,7 +382,7 @@ def submit():
 
         origin=origin,
         dialect=dialect,
-        source=source,
+        pos=pos,
         submitted_by=submitted_by,
 
         status="pending"
@@ -448,16 +434,10 @@ def approve(id):
     entry.etymology = request.form.get("etymology") or None
     entry.origin = request.form.get("origin") or None
     entry.dialect = request.form.get("dialect") or None
-    entry.source = request.form.get("source") or None
+    entry.pos = request.form.get("pos") or None
     entry.status = "approved"
 
     if entry.story:
-        # FIX: this used to hardcode submitted_by to the literal string
-        # 'Original Submitter' for every entry, regardless of whether the
-        # person who submitted it asked to be credited or to stay
-        # anonymous. It now uses whatever they actually chose, and only
-        # falls back to "Anonymous" (matching how every later story is
-        # labeled) when they left it blank.
         db.session.execute(
             text("""
                 INSERT INTO stories (entry_id, content, submitted_by, is_approved) 
@@ -520,7 +500,7 @@ def approve_edit(id):
         "story",
         "origin",
         "dialect",
-        "source"
+        "pos"
     ]
 
     old_word = entry.word
@@ -532,13 +512,9 @@ def approve_edit(id):
         if value is not None:
             setattr(entry, field, value)
 
-    # FIX: an approved word-text edit was never reflected in the URL —
-    # the slug stayed whatever it was at creation, silently drifting out
-    # of sync with the displayed word.
     if entry.word != old_word:
         entry.slug = make_unique_slug(entry.word, exclude_entry_id=entry.id)
 
-    # Mark the edit as approved
     edit.status = "approved"
 
     db.session.commit()
@@ -563,7 +539,6 @@ def reject_edit(id):
 
 @app.route("/setup-db-secret")
 def setup_db():
-    # This manually creates the tables in Turso
     with app.app_context():
         db.create_all()
     return "dbs made."
