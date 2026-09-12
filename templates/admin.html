@@ -216,9 +216,9 @@
 
 
 
-                        <label for="source-{{ entry.id }}">
+                        <label for="pos-{{ entry.id }}">
 
-                            <strong>Source:</strong>
+                            <strong>Part of Speech:</strong>
 
                         </label>
 
@@ -232,13 +232,13 @@
 
                             type="text"
 
-                            id="source-{{ entry.id }}"
+                            id="pos-{{ entry.id }}"
 
-                            name="source"
+                            name="pos"
 
-                            value="{{ entry.source or '' }}"
+                            value="{{ entry.pos or '' }}"
 
-                            placeholder="e.g. Oral tradition, Book Title"
+                            placeholder="e.g. noun, verb, idiom, phrase"
 
                         >
 
@@ -766,11 +766,11 @@
 
 
 
-                <!-- SOURCE -->
+                <!-- PART OF SPEECH -->
 
 
 
-                {% if edit.source is not none %}
+                {% if edit.pos is not none %}
 
 
 
@@ -778,7 +778,7 @@
 
 
 
-                        <strong>Source</strong>
+                        <strong>Part of Speech</strong>
 
 
 
@@ -786,7 +786,7 @@
 
                             <strong>Current:</strong>
 
-                            {{ edit.entry.source or "—" }}
+                            {{ edit.entry.pos or "—" }}
 
                         </p>
 
@@ -796,7 +796,7 @@
 
                             <strong>Proposed:</strong>
 
-                            {{ edit.source }}
+                            {{ edit.pos }}
 
                         </p>
 
@@ -1052,5 +1052,4 @@
 
 
 
-{% endblock %} 
-
+{% endblock %}
