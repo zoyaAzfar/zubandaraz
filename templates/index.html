@@ -40,6 +40,7 @@
       <div class="wotd-tags">
         <span class="tag">{{ word_of_day.language }}</span>
         {% if word_of_day.dialect %}<span class="tag tag-teal">{{ word_of_day.dialect }}</span>{% endif %}
+        {% if word_of_day.pos %}<span class="tag tag-pos">{{ word_of_day.pos }}</span>{% endif %}
       </div>
     </div>
     <div class="wotd-body">
@@ -88,6 +89,7 @@
         <div class="card-tags">
           <span class="tag">{{ entry.language }}</span>
           {% if entry.dialect %}<span class="tag tag-teal">{{ entry.dialect }}</span>{% endif %}
+          {% if entry.pos %}<span class="tag tag-pos">{{ entry.pos }}</span>{% endif %}
         </div>
       </a>
       {% endfor %}
@@ -98,4 +100,3 @@
   </section>
 </main>
 {% endblock %}
-
