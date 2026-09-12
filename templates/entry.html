@@ -28,6 +28,7 @@
       <div class="card-tags">
         <span class="tag">{{ entry.language }}</span>
         {% if entry.dialect %}<span class="tag tag-teal">{{ entry.dialect }}</span>{% endif %}
+        {% if entry.pos %}<span class="tag tag-pos">{{ entry.pos }}</span>{% endif %}
       </div>
     </div>
 
@@ -48,10 +49,10 @@
           <dt>Script</dt>
           <dd>{{ script|capitalize }}</dd>
         </div>
-        {% if entry.source %}
+        {% if entry.pos %}
         <div class="facts-row">
-          <dt>Source</dt>
-          <dd>{{ entry.source }}</dd>
+          <dt>Part of speech</dt>
+          <dd>{{ entry.pos }}</dd>
         </div>
         {% endif %}
         <div class="facts-row facts-count">
@@ -86,7 +87,6 @@
     {% else %}
       <p class="empty-note">No etymology written yet.</p>
     {% endif %}
-    {% if entry.source %}<p class="entry-source">Source: {{ entry.source }}</p>{% endif %}
   </div>
 
   <div class="entry-panel" data-panel="voices" role="tabpanel" hidden>
@@ -117,7 +117,7 @@
         <textarea id="content" name="content" rows="6" required placeholder="Write your story or memory here…"></textarea>
       </div>
       <div class="field">
-        <label for="submitted_by">Your name (optional)</label>
+        <label for="submitted_by">What do you identify as? (optional)</label>
         <input type="text" id="submitted_by" name="submitted_by" maxlength="150" placeholder="Anonymous">
       </div>
       <div class="form-actions">
