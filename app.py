@@ -88,6 +88,7 @@ users = {
 }
 
 
+
 @auth.verify_password
 def verify_password(username, password):
     if (
@@ -150,9 +151,27 @@ def detect_script(word):
 
 app.jinja_env.globals["detect_script"] = detect_script
 
+@app.context_processor
+def inject_languages():
+    try:
+        results = (
+            db.session.query(Entry.language)
+            .filter(
+                Entry.status == "approved",
+                Entry.language.isnot(None),
+                Entry.language != ""
+            )
+            .distinct()
+            .order_by(Entry.language)
+            .all()
+        )
+        languages = [r[0] for r in results]
+    except Exception:
+        languages = ["Urdu", "Hindi", "Punjabi", "Bengali", "Tamil"]
+
+    return dict(available_languages=languages)
 
 def pick_word_of_day(approved_entries):
-    """Deterministic per-day pick so it doesn't change on every refresh."""
     if not approved_entries:
         return None
     rng = random.Random(date.today().isoformat())
