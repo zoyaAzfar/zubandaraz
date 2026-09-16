@@ -142,11 +142,11 @@ document.addEventListener("DOMContentLoaded", function () {
     sorted.forEach(row => entryIndex.appendChild(row));
   }
 
-   dropdownBtn.addEventListener('click', (e) => {
+   filterBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (filterDropdown) filterDropdown.classList.remove('open');
-      dropdown.classList.toggle('open');
-    });
+      dropdown.classList.remove('open');
+      filterDropdown.classList.toggle('open');
+    });    
     
     document.addEventListener('click', () => {
       dropdown.classList.remove('open');
