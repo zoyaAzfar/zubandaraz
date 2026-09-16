@@ -22,14 +22,6 @@
     </a>
     <form class="search" action="{{ url_for('browse') }}" method="get">
       <label class="visually-hidden" for="searchInput">Search the archive</label>
-      <select name="language" aria-label="Filter by language">
-          <option value="">All languages</option>
-          {% for lang in available_languages %}
-          <option value="{{ lang }}" {% if request.args.get('language') == lang %}selected{% endif %}>
-            {{ lang }}
-          </option>
-          {% endfor %}
-      </select>
       <input id="searchInput" name="q" type="text" placeholder="Search for a word…" value="{{ request.args.get('q', '') }}" />
         <button type="submit" aria-label="Search">
           <span class="material-symbols-outlined">search</span>
