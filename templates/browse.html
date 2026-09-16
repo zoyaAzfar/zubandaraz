@@ -98,21 +98,22 @@ document.addEventListener("DOMContentLoaded", function () {
   const rows = Array.from(document.querySelectorAll('.entry-row'));
 
   const filterDropdown = document.getElementById('filter-dropdown');
-    if (filterDropdown) {
-      const filterBtn = document.getElementById('filter-dropdown-btn');
-      const filterItems = filterDropdown.querySelectorAll('.dropdown-menu li');
-    
-      filterBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        filterDropdown.classList.toggle('open');
+  if (filterDropdown) {
+    const filterBtn = document.getElementById('filter-dropdown-btn');
+    const filterItems = filterDropdown.querySelectorAll('.dropdown-menu li');
+
+    filterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.classList.remove('open');
+      filterDropdown.classList.toggle('open');
+    });
+
+    filterItems.forEach(item => {
+      item.addEventListener('click', () => {
+        window.location.href = item.dataset.href;
       });
-    
-      filterItems.forEach(item => {
-        item.addEventListener('click', () => {
-          window.location.href = item.dataset.href;
-        });
-      });
-    }          
+    });
+  }
 
   function sortRows(criteria) {
     let sorted;
@@ -142,25 +143,24 @@ document.addEventListener("DOMContentLoaded", function () {
     sorted.forEach(row => entryIndex.appendChild(row));
   }
 
-   filterBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dropdown.classList.remove('open');
-      filterDropdown.classList.toggle('open');
-    });    
-    
-    document.addEventListener('click', () => {
-      dropdown.classList.remove('open');
-      if (filterDropdown) filterDropdown.classList.remove('open');
-    });
-    
-    menuItems.forEach(item => {
-      item.addEventListener('click', () => {
-        selectedOption.textContent = 'Sort: ' + item.textContent;
-        dropdown.classList.remove('open');
-        sortRows(item.dataset.value);
-      });
-    });
+  dropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (filterDropdown) filterDropdown.classList.remove('open');
+    dropdown.classList.toggle('open');
+  });
 
+  document.addEventListener('click', () => {
+    dropdown.classList.remove('open');
+    if (filterDropdown) filterDropdown.classList.remove('open');
+  });
+
+  menuItems.forEach(item => {
+    item.addEventListener('click', () => {
+      selectedOption.textContent = 'Sort: ' + item.textContent;
+      dropdown.classList.remove('open');
+      sortRows(item.dataset.value);
+    });
+  });
 });
 </script>
 {% endblock %}
