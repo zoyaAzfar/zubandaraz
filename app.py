@@ -62,10 +62,6 @@ def unauthorized():
     return response
 
 
-# FIX: no more shared hardcoded fallback password. If the env var isn't set
-# we generate a one-time password and log it loudly instead of silently
-# booting with a value that's now sitting in this file (and possibly a
-# public repo). Admin and moderator also get independent passwords.
 def _resolve_password(env_var):
     value = os.environ.get(env_var)
     if value:
@@ -161,11 +157,14 @@ def inject_languages():
                 Entry.language.isnot(None),
                 Entry.language != ""
             )
-            .distinct()
-            .order_by(Entry.language)
             .all()
         )
-        languages = [r[0] for r in results]
+        seen = {}
+        for (lang,) in results:
+            if lang and lang.strip():
+                key = lang.strip().lower()
+                seen.setdefault(key, lang.strip())
+        languages = sorted(seen.values())
     except Exception:
         languages = ["Urdu", "Hindi", "Punjabi", "Bengali", "Tamil"]
 
@@ -326,7 +325,7 @@ def edit_entry(slug):
 
             word=request.form.get("word") or None,
             transliteration=request.form.get("transliteration") or None,
-            language=request.form.get("language") or None,
+            language=(request.form.get("language") or "").strip() or None,            
             literal_definition=(
                 request.form.get("literal_definition")
                 or None
@@ -363,11 +362,10 @@ def edit_entry(slug):
 
 @app.route("/submit", methods=["POST"])
 def submit():
-
+    
     word = request.form.get("word")
-    language = request.form.get("language")
+    language = (request.form.get("language") or "").strip()
     story = request.form.get("story")
-
     transliteration = request.form.get("transliteration") or None
     origin = request.form.get("origin") or None
     dialect = request.form.get("dialect") or None
@@ -448,8 +446,8 @@ def admin():
 @auth.login_required
 def approve(id):
     entry = Entry.query.get_or_404(id)
-
-    entry.language = request.form.get("language") or entry.language
+    
+    entry.language = (request.form.get("language") or "").strip() or entry.language
     entry.etymology = request.form.get("etymology") or None
     entry.origin = request.form.get("origin") or None
     entry.dialect = request.form.get("dialect") or None
@@ -555,6 +553,19 @@ def reject_edit(id):
     db.session.commit()
 
     return redirect("/admin")
+
+@app.route("/cleanup-languages-secret")
+@auth.login_required
+def cleanup_languages():
+    entries = Entry.query.filter(Entry.language.isnot(None)).all()
+    changed = 0
+    for e in entries:
+        stripped = e.language.strip()
+        if stripped != e.language:
+            e.language = stripped
+            changed += 1
+    db.session.commit()
+    return f"Cleaned {changed} entries."
 
 @app.route("/setup-db-secret")
 def setup_db():
