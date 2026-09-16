@@ -554,24 +554,6 @@ def reject_edit(id):
 
     return redirect("/admin")
 
-@app.route("/cleanup-languages-secret")
-@auth.login_required
-def cleanup_languages():
-    entries = Entry.query.filter(Entry.language.isnot(None)).all()
-    changed = 0
-    for e in entries:
-        stripped = e.language.strip()
-        if stripped != e.language:
-            e.language = stripped
-            changed += 1
-    db.session.commit()
-    return f"Cleaned {changed} entries."
-
-@app.route("/setup-db-secret")
-def setup_db():
-    with app.app_context():
-        db.create_all()
-    return "dbs made."
 
 if __name__ == "__main__":
     app.run(debug=False)
