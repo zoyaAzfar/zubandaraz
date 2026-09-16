@@ -206,8 +206,15 @@ a { color: inherit; }
 
 /* ---------- word of the day ---------- */
 .wotd { max-width: 1120px; margin: 0 auto; padding: 0 32px 64px; }
-.wotd-card { background: var(--paper); color: var(--ink); border-radius: var(--radius); padding: 36px 40px; display: grid; grid-template-columns: 260px 1fr; gap: 40px; }
-.wotd-word-col { border-right: 1px solid rgba(10,51,35,0.12); padding-right: 32px; }
+.wotd-card {
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 36px 40px;
+  display: grid;
+  grid-template-columns: 340px 1fr;  /* was 260px 1fr */
+  gap: 40px;
+}.wotd-word-col { border-right: 1px solid rgba(10,51,35,0.12); padding-right: 32px; }
 .wotd-script { font-size: 2.6rem; }
 .wotd-translit { font-size: 1rem; color: #5b6b62; margin-top: 6px; }
 .wotd-tags { margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
@@ -362,10 +369,9 @@ a { color: inherit; }
   flex-direction: column;
   gap: 10px;
 }
-
 .entry-row {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 260px 1fr;  /* was 200px 1fr */
   gap: 28px;
   padding: 24px 24px;
   background: #12442f;
@@ -374,6 +380,7 @@ a { color: inherit; }
   color: var(--paper);
   border-left: 3px solid transparent;
 }
+
 .entry-row:hover {
   background: #17573c;
   border-left-color: var(--green);
