@@ -331,6 +331,9 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   gap: 8px;
+    position: relative;
+  z-index: 21;
+
 }
 .dropdown-button:hover,
 .custom-dropdown.open .dropdown-button { background: #17573c; }
