@@ -142,27 +142,25 @@ document.addEventListener("DOMContentLoaded", function () {
     sorted.forEach(row => entryIndex.appendChild(row));
   }
 
-  dropdownBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dropdown.classList.toggle('open');
-  });
-
-  document.addEventListener('click', () => {
-    dropdown.classList.remove('open');
-    if (filterDropdown) filterDropdown.classList.remove('open');
-  });
-
-  menuItems.forEach(item => {
-    item.addEventListener('click', () => {
-      selectedOption.textContent = 'Sort: ' + item.textContent;
-      dropdown.classList.remove('open');
-      sortRows(item.dataset.value);
+   dropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (filterDropdown) filterDropdown.classList.remove('open');
+      dropdown.classList.toggle('open');
     });
-  });
+    
+    document.addEventListener('click', () => {
+      dropdown.classList.remove('open');
+      if (filterDropdown) filterDropdown.classList.remove('open');
+    });
+    
+    menuItems.forEach(item => {
+      item.addEventListener('click', () => {
+        selectedOption.textContent = 'Sort: ' + item.textContent;
+        dropdown.classList.remove('open');
+        sortRows(item.dataset.value);
+      });
+    });
 
-  document.addEventListener('click', () => {
-    dropdown.classList.remove('open');
-  });
 });
 </script>
 {% endblock %}
