@@ -29,7 +29,8 @@
     </form>
     <nav class="main-nav">
       <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Home</a>
-      <a class="nav-link {% if request.endpoint == 'browse' %}active{% endif %}" href="{{ url_for('browse') }}">Browse</a>
+      <a class="nav-link {% if request.endpoint == 'browse' %}active{% endif %}" href="{{ url_for('browse') }}">Stories</a>
+        <a class="nav-link {% if request.endpoint == 'idioms' %}active{% endif %}" href="{{ url_for('idioms') }}">Archive</a>
       <a class="nav-link {% if request.endpoint == 'about_page' %}active{% endif %}" href="{{ url_for('about_page') }}">About</a>
       <a class="btn-submit" href="{{ url_for('submit_page') }}">Submit a word</a>
     </nav>
