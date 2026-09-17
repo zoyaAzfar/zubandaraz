@@ -50,14 +50,16 @@ else:
 
 db.init_app(app)
 
-print("Loading NLP model...")
-try:
-    embed_model = SentenceTransformer('all-MiniLM-L6-v2')
-except Exception as e:
-    print(f"Could not load model: {e}")
-    embed_model = None
+embed_model = None
 
-auth = HTTPBasicAuth()
+def get_embed_model():
+    """Loads the model only when requested, and keeps it in memory for next time."""
+    global embed_model
+    if embed_model is None:
+        print("Loading NLP model for the first time...")
+        from sentence_transformers import SentenceTransformer
+        embed_model = SentenceTransformer('all-MiniLM-L6-v2')
+    return embed_model
 
 @auth.error_handler
 def unauthorized():
@@ -286,10 +288,12 @@ def idioms():
     entries = query.order_by(Entry.word).all()
     graph_json = None
 
-    if entries and embed_model and len(entries) > 2:
-        # Strictly run embeddings on the translation (literal_definition)
+    if entries and len(entries) > 2:
+        # Load the model here instead
+        model = get_embed_model()
+        
         texts = [e.literal_definition or "" for e in entries]
-        embeddings = embed_model.encode(texts)
+        embeddings = model.encode(texts)
         sim_matrix = cosine_similarity(embeddings)
 
         G = nx.Graph()
