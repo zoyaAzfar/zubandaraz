@@ -101,73 +101,78 @@
 
 {% block extra_scripts %}
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% block extra_scripts %}
+<!-- Load Plotly for the 3D Graph -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   // --- SORT & FILTER LOGIC ---
   const dropdown = document.getElementById('sort-dropdown');
-  if (!dropdown) return;
-
   const dropdownBtn = document.getElementById('sort-dropdown-btn');
   const selectedOption = document.getElementById('sort-selected-option');
-  const menuItems = dropdown.querySelectorAll('.dropdown-menu li');
-  const entryIndex = document.querySelector('.entry-index');
-  const rows = Array.from(document.querySelectorAll('.entry-row'));
+  
+  if (dropdown && dropdownBtn && selectedOption) {
+    const menuItems = dropdown.querySelectorAll('.dropdown-menu li');
+    const entryIndex = document.querySelector('.entry-index');
+    const rows = Array.from(document.querySelectorAll('.entry-row'));
+    const filterDropdown = document.getElementById('filter-dropdown');
 
-  const filterDropdown = document.getElementById('filter-dropdown');
-  if (filterDropdown) {
-    const filterBtn = document.getElementById('filter-dropdown-btn');
-    const filterItems = filterDropdown.querySelectorAll('.dropdown-menu li');
+    if (filterDropdown) {
+      const filterBtn = document.getElementById('filter-dropdown-btn');
+      const filterItems = filterDropdown.querySelectorAll('.dropdown-menu li');
 
-    filterBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dropdown.classList.remove('open');
-      filterDropdown.classList.toggle('open');
-    });
-
-    filterItems.forEach(item => {
-      item.addEventListener('click', () => {
-        window.location.href = item.dataset.href;
+      filterBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.remove('open');
+        filterDropdown.classList.toggle('open');
       });
-    });
-  }
 
-  function sortRows(criteria) {
-    let sorted;
-    if (criteria === 'language') {
-      sorted = rows.slice().sort((a, b) => {
-        const langA = a.getAttribute('data-language') || '';
-        const langB = b.getAttribute('data-language') || '';
-        if (langA === langB) {
-          return (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '');
-        }
-        return langA.localeCompare(langB);
+      filterItems.forEach(item => {
+        item.addEventListener('click', () => {
+          window.location.href = item.dataset.href;
+        });
       });
-    } else {
-      sorted = rows.slice().sort((a, b) =>
-        (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '')
-      );
     }
-    sorted.forEach(row => entryIndex.appendChild(row));
-  }
 
-  dropdownBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (filterDropdown) filterDropdown.classList.remove('open');
-    dropdown.classList.toggle('open');
-  });
+    function sortRows(criteria) {
+      let sorted;
+      if (criteria === 'language') {
+        sorted = rows.slice().sort((a, b) => {
+          const langA = a.getAttribute('data-language') || '';
+          const langB = b.getAttribute('data-language') || '';
+          if (langA === langB) {
+            return (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '');
+          }
+          return langA.localeCompare(langB);
+        });
+      } else {
+        sorted = rows.slice().sort((a, b) =>
+          (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '')
+        );
+      }
+      sorted.forEach(row => entryIndex.appendChild(row));
+    }
 
-  document.addEventListener('click', () => {
-    dropdown.classList.remove('open');
-    if (filterDropdown) filterDropdown.classList.remove('open');
-  });
-
-  menuItems.forEach(item => {
-    item.addEventListener('click', () => {
-      selectedOption.textContent = 'Sort: ' + item.textContent;
-      dropdown.classList.remove('open');
-      sortRows(item.dataset.value);
+    dropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (filterDropdown) filterDropdown.classList.remove('open');
+      dropdown.classList.toggle('open');
     });
-  });
+
+    document.addEventListener('click', () => {
+      dropdown.classList.remove('open');
+      if (filterDropdown) filterDropdown.classList.remove('open');
+    });
+
+    menuItems.forEach(item => {
+      item.addEventListener('click', () => {
+        selectedOption.textContent = 'Sort: ' + item.textContent;
+        dropdown.classList.remove('open');
+        sortRows(item.dataset.value);
+      });
+    });
+  }
 
   // --- GALAXY VIEW TOGGLE LOGIC ---
   const viewToggleBtn = document.getElementById('view-toggle-btn');
@@ -176,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const toggleText = document.getElementById('view-toggle-text');
   let graphRendered = false;
 
-  if (viewToggleBtn) {
+  if (viewToggleBtn && listView && networkView) {
     viewToggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       
@@ -191,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
         networkView.style.display = 'block';
         toggleText.textContent = 'View: List';
 
-        // Initialize Plotly only on the first click
+        // Initialize Plotly only on the first click so it fits the container
         if (!graphRendered) {
           const graphData = {{ graph_json | safe }};
           Plotly.newPlot('plotly-graph', graphData.data, graphData.layout, {responsive: true});
@@ -200,6 +205,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
-}); // Everything ends cleanly here!
+});
 </script>
 {% endblock %}
