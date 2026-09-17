@@ -15,6 +15,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
+auth = HTTPBasicAuth()
 
 db_url = os.environ.get("TURSO_DATABASE_URL")
 auth_token = os.environ.get("TURSO_AUTH_TOKEN")
