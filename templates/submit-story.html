@@ -1,35 +1,152 @@
 {% extends "base.html" %}
 
-{% block title %}Share a Story for {{ entry.word }} — Zuban Daraz{% endblock %}
+{% block title %}Idioms — Zuban Daraz{% endblock %}
 
 {% block content %}
-<div class="entry-detail-container edit-mode-container">
-    
-    <div class="entry-detail-header">
-        <h1 class="entry-detail-word">Share a Story: "{{ entry.word }}"</h1>
-        <p style="font-family: 'Mondwest', serif; font-size: 1.2rem; color: #555; margin-top: 10px;">
-            How do you use this word? Do you have a memory attached to it?
-        </p>
+<div class="browse-full">
+
+  <div class="browse-heading">
+    <h1 class="browse-title">Idioms.</h1>
+    <p class="browse-sub">A directory of idioms and set phrases from the archive. These are listed here rather than as full entries, since they don't carry a full etymology or community stories.</p>
+  </div>
+
+  <div class="browse-toolbar">
+  <p class="result-count">
+    {{ entries|length }} {{ "idiom" if entries|length == 1 else "idioms" }}{% if q %} matching &ldquo;{{ q }}&rdquo;{% endif %}{% if language %} in {{ language }}{% endif %}
+  </p>
+
+  <div class="toolbar-controls">
+    <div class="custom-dropdown" id="filter-dropdown">
+      <button type="button" class="dropdown-button" id="filter-dropdown-btn">
+        <span id="filter-selected-option">{{ 'Language: ' + language if language else 'All languages' }}</span>
+        <span class="arrow">▾</span>
+      </button>
+      <ul class="dropdown-menu" id="filter-dropdown-menu">
+        <li data-href="{{ url_for('idioms', q=q) if q else url_for('idioms') }}" class="{{ 'active' if not language }}">All languages</li>
+        {% for lang in available_languages %}
+        <li data-href="{{ url_for('idioms', language=lang, q=q) if q else url_for('idioms', language=lang) }}" class="{{ 'active' if lang == language }}">{{ lang }}</li>
+        {% endfor %}
+      </ul>
     </div>
 
-    <form method="POST" action="{{ url_for('submit_story', slug=entry.slug) }}" class="wiki-edit-form">
-
-        <label for="content" class="section-label">Your Story</label>
-        <textarea id="content" name="content" rows="8" required placeholder="Write your story or memory here..."></textarea>
-
-        <div class="form-row" style="margin-top: 15px;">
-            <div class="form-group">
-                <label for="submitted_by">Your name or email (optional)</label>
-                <input type="text" id="submitted_by" name="submitted_by" maxlength="150" placeholder="e.g., Anonymous or Ayesha">
-            </div>
-        </div>
-
-        <div class="edit-form-actions">
-            <!-- I made the button pink to match the 'Share your story' button! -->
-            <button type="submit" class="save-btn" style="background-color: var(--pink);">Submit for review</button>
-            <a href="{{ url_for('entry_detail', slug=entry.slug) }}" class="cancel-link">Cancel</a>
-        </div>
-
-    </form>
+    <div class="custom-dropdown" id="sort-dropdown">
+      <button type="button" class="dropdown-button" id="sort-dropdown-btn">
+        <span id="sort-selected-option">Sort: Alphabetical</span>
+        <span class="arrow">▾</span>
+      </button>
+      <ul class="dropdown-menu" id="sort-dropdown-menu">
+        <li data-value="alphabetical">Alphabetical</li>
+        <li data-value="language">Language</li>
+      </ul>
+    </div>
+  </div>
 </div>
+
+  {% if entries %}
+  <div class="entry-index">
+    {% for entry in entries %}
+    {% set e_script, e_rtl = detect_script(entry.word) %}
+    <div class="entry-row idiom-row"
+       data-word="{{ entry.word | lower }}"
+       data-language="{{ entry.language | lower }}">
+
+      <div class="entry-row-word">
+        <span class="script script-{{ e_script }}" dir="{{ 'rtl' if e_rtl else 'ltr' }}">{{ entry.word }}</span>
+        {% if entry.transliteration %}<span class="translit">{{ entry.transliteration }}</span>{% endif %}
+      </div>
+
+      <div class="entry-row-body">
+        <div class="entry-row-meta">
+          <span class="tag">{{ entry.language }}</span>
+          {% if entry.dialect %}<span class="tag tag-teal">{{ entry.dialect }}</span>{% endif %}
+          <span class="tag tag-pos">Idiom</span>
+        </div>
+        <p class="entry-row-snippet">
+          {% if entry.literal_definition %}{{ entry.literal_definition }}{% else %}{{ entry.story | truncate(160) }}{% endif %}
+        </p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-note">
+    {% if q or language %}
+      <a href="{{ url_for('idioms') }}">Clear your filters</a>, or <a href="{{ url_for('submit_page') }}">submit this idiom</a> yourself.
+    {% else %}
+      Be the first to <a href="{{ url_for('submit_page') }}">submit an idiom</a>.
+    {% endif %}
+  </p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const dropdown = document.getElementById('sort-dropdown');
+  if (!dropdown) return;
+
+  const dropdownBtn = document.getElementById('sort-dropdown-btn');
+  const selectedOption = document.getElementById('sort-selected-option');
+  const menuItems = dropdown.querySelectorAll('.dropdown-menu li');
+  const entryIndex = document.querySelector('.entry-index');
+  const rows = Array.from(document.querySelectorAll('.entry-row'));
+
+  const filterDropdown = document.getElementById('filter-dropdown');
+  if (filterDropdown) {
+    const filterBtn = document.getElementById('filter-dropdown-btn');
+    const filterItems = filterDropdown.querySelectorAll('.dropdown-menu li');
+
+    filterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.classList.remove('open');
+      filterDropdown.classList.toggle('open');
+    });
+
+    filterItems.forEach(item => {
+      item.addEventListener('click', () => {
+        window.location.href = item.dataset.href;
+      });
+    });
+  }
+
+  function sortRows(criteria) {
+    let sorted;
+    if (criteria === 'language') {
+      sorted = rows.slice().sort((a, b) => {
+        const langA = a.getAttribute('data-language') || '';
+        const langB = b.getAttribute('data-language') || '';
+        if (langA === langB) {
+          return (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '');
+        }
+        return langA.localeCompare(langB);
+      });
+    } else {
+      sorted = rows.slice().sort((a, b) =>
+        (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '')
+      );
+    }
+    sorted.forEach(row => entryIndex.appendChild(row));
+  }
+
+  dropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (filterDropdown) filterDropdown.classList.remove('open');
+    dropdown.classList.toggle('open');
+  });
+
+  document.addEventListener('click', () => {
+    dropdown.classList.remove('open');
+    if (filterDropdown) filterDropdown.classList.remove('open');
+  });
+
+  menuItems.forEach(item => {
+    item.addEventListener('click', () => {
+      selectedOption.textContent = 'Sort: ' + item.textContent;
+      dropdown.classList.remove('open');
+      sortRows(item.dataset.value);
+    });
+  });
+});
+</script>
 {% endblock %}
