@@ -8,3 +8,7 @@ psycopg2-binary
 sqlalchemy-libsql
 libsql
 python-slugify
+networkx 
+plotly 
+sentence-transformers 
+scikit-learn
