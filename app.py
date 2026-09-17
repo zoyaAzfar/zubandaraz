@@ -8,11 +8,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import text
 from models import db, Entry, EntryEdit
 from slugify import slugify
-import networkx as nx
-import plotly.graph_objects as go
-import plotly.io as pio
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
@@ -290,6 +285,11 @@ def idioms():
     graph_json = None
 
     if entries and len(entries) > 2:
+        import networkx as nx
+        import plotly.graph_objects as go
+        import plotly.io as pio
+        from sklearn.metrics.pairwise import cosine_similarity
+        
         # Load the model here instead
         model = get_embed_model()
         
