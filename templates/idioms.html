@@ -15,7 +15,16 @@
     {{ entries|length }} {{ "idiom" if entries|length == 1 else "idioms" }}{% if q %} matching &ldquo;{{ q }}&rdquo;{% endif %}{% if language %} in {{ language }}{% endif %}
   </p>
 
-  <div class="toolbar-controls">
+  
+      <div class="toolbar-controls">
+    {% if graph_json %}
+    <div class="custom-dropdown">
+      <button type="button" class="dropdown-button" id="view-toggle-btn">
+        <span id="view-toggle-text">View: Galaxy</span>
+      </button>
+    </div>
+    {% endif %}
+      
     <div class="custom-dropdown" id="filter-dropdown">
       <button type="button" class="dropdown-button" id="filter-dropdown-btn">
         <span id="filter-selected-option">{{ 'Language: ' + language if language else 'All languages' }}</span>
@@ -42,9 +51,11 @@
   </div>
 </div>
 
-  {% if entries %}
-  <div class="entry-index">
-    {% for entry in entries %}
+{% if entries %}
+  <!-- List View (Visible by default) -->
+  <div id="list-view-container">
+    <div class="entry-index">
+      {% for entry in entries %}    
     {% set e_script, e_rtl = detect_script(entry.word) %}
     <div class="entry-row idiom-row"
        data-word="{{ entry.word | lower }}"
@@ -66,8 +77,16 @@
         </p>
       </div>
     </div>
-    {% endfor %}
+{% endfor %}
+    </div>
   </div>
+
+    {% if graph_json %}
+  <div id="network-view-container" style="display: none; width: 100%; height: 70vh; background-color: #0a0a0a; border-radius: 8px; margin-top: 1rem; overflow: hidden;">
+    <div id="plotly-graph" style="width: 100%; height: 100%;"></div>
+  </div>
+  {% endif %}
+  
   {% else %}
   <p class="empty-note">
     {% if q or language %}
@@ -81,8 +100,10 @@
 {% endblock %}
 
 {% block extra_scripts %}
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+  // --- SORT & FILTER LOGIC ---
   const dropdown = document.getElementById('sort-dropdown');
   if (!dropdown) return;
 
@@ -147,6 +168,38 @@ document.addEventListener("DOMContentLoaded", function () {
       sortRows(item.dataset.value);
     });
   });
-});
+
+  // --- GALAXY VIEW TOGGLE LOGIC ---
+  const viewToggleBtn = document.getElementById('view-toggle-btn');
+  const listView = document.getElementById('list-view-container');
+  const networkView = document.getElementById('network-view-container');
+  const toggleText = document.getElementById('view-toggle-text');
+  let graphRendered = false;
+
+  if (viewToggleBtn) {
+    viewToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      
+      if (listView.style.display === 'none') {
+        // Switch to List View
+        listView.style.display = 'block';
+        networkView.style.display = 'none';
+        toggleText.textContent = 'View: Galaxy';
+      } else {
+        // Switch to Galaxy View
+        listView.style.display = 'none';
+        networkView.style.display = 'block';
+        toggleText.textContent = 'View: List';
+
+        // Initialize Plotly only on the first click
+        if (!graphRendered) {
+          const graphData = {{ graph_json | safe }};
+          Plotly.newPlot('plotly-graph', graphData.data, graphData.layout, {responsive: true});
+          graphRendered = true;
+        }
+      }
+    });
+  }
+}); // Everything ends cleanly here!
 </script>
 {% endblock %}
