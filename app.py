@@ -2,13 +2,17 @@ import os
 import random
 import secrets
 from datetime import date
-
 from flask import Flask, render_template, request, redirect, make_response, url_for, abort
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import text
 from models import db, Entry, EntryEdit
 from slugify import slugify
+import networkx as nx
+import plotly.graph_objects as go
+import plotly.io as pio
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
 
@@ -46,9 +50,14 @@ else:
 
 db.init_app(app)
 
+print("Loading NLP model...")
+try:
+    embed_model = SentenceTransformer('all-MiniLM-L6-v2')
+except Exception as e:
+    print(f"Could not load model: {e}")
+    embed_model = None
 
 auth = HTTPBasicAuth()
-
 
 @auth.error_handler
 def unauthorized():
