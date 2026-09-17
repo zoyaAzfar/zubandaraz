@@ -263,7 +263,7 @@ def browse():
         language=language,
         story_counts=story_counts,
     )
-
+    
 @app.route("/idioms")
 def idioms():
     q = (request.args.get("q") or "").strip()
@@ -284,12 +284,77 @@ def idioms():
         )
 
     entries = query.order_by(Entry.word).all()
+    graph_json = None
+
+    if entries and embed_model and len(entries) > 2:
+        # Strictly run embeddings on the translation (literal_definition)
+        texts = [e.literal_definition or "" for e in entries]
+        embeddings = embed_model.encode(texts)
+        sim_matrix = cosine_similarity(embeddings)
+
+        G = nx.Graph()
+        
+        # Pink and Green Color Palette
+        palette = ["#FF69B4", "#FF1493", "#FFB6C1", "#2ECC71", "#00FF7F", "#3CB371"]
+
+        for i, e in enumerate(entries):
+            color = palette[hash(e.language or "") % len(palette)]
+            # Display the translation in the hover text to verify the connections
+            hover_text = (e.literal_definition or "No translation available")[:60]
+            if len(e.literal_definition or "") > 60:
+                hover_text += "..."
+            G.add_node(i, text=e.word, hover=hover_text, color=color)
+
+        THRESHOLD = 0.40 # Adjust to control connection sensitivity
+        for i in range(len(entries)):
+            for j in range(i + 1, len(entries)):
+                if sim_matrix[i][j] > THRESHOLD:
+                    G.add_edge(i, j)
+
+        pos = nx.spring_layout(G, dim=3, seed=42)
+
+        edge_x, edge_y, edge_z = [], [], []
+        for edge in G.edges():
+            x0, y0, z0 = pos[edge[0]]
+            x1, y1, z1 = pos[edge[1]]
+            edge_x.extend([x0, x1, None])
+            edge_y.extend([y0, y1, None])
+            edge_z.extend([z0, z1, None])
+
+        edges_trace = go.Scatter3d(
+            x=edge_x, y=edge_y, z=edge_z, mode='lines',
+            line=dict(color='#444444', width=1), hoverinfo='none'
+        )
+
+        node_x = [pos[k][0] for k in G.nodes()]
+        node_y = [pos[k][1] for k in G.nodes()]
+        node_z = [pos[k][2] for k in G.nodes()]
+        node_text = [f"<b>{G.nodes[k]['text']}</b><br>{G.nodes[k]['hover']}" for k in G.nodes()]
+        node_colors = [G.nodes[k]['color'] for k in G.nodes()]
+
+        nodes_trace = go.Scatter3d(
+            x=node_x, y=node_y, z=node_z, mode='markers',
+            hoverinfo='text', text=node_text,
+            marker=dict(showscale=False, color=node_colors, size=6, line=dict(width=0))
+        )
+
+        fig = go.Figure(data=[edges_trace, nodes_trace])
+        axis_style = dict(showgrid=False, zeroline=False, showticklabels=False, showbackground=False, title='', visible=False)
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', 
+            plot_bgcolor='rgba(0,0,0,0)',
+            margin=dict(l=0, r=0, b=0, t=0),
+            showlegend=False,
+            scene=dict(xaxis=axis_style, yaxis=axis_style, zaxis=axis_style, dragmode='turntable')
+        )
+        graph_json = pio.to_json(fig)
 
     return render_template(
         "idioms.html",
         entries=entries,
         q=q,
         language=language,
+        graph_json=graph_json
     )
 
 @app.route('/entry/<slug>')
