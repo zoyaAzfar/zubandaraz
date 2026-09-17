@@ -224,8 +224,10 @@ def mod_policy():
 def browse():
     q = (request.args.get("q") or "").strip()
     language = (request.args.get("language") or "").strip()
- 
-    query = Entry.query.filter_by(status="approved")
+
+    query = Entry.query.filter_by(status="approved").filter(
+        db.or_(Entry.pos.is_(None), db.not_(Entry.pos.ilike("idiom")))
+    )
     if language:
         query = query.filter(Entry.language == language)
     if q:
@@ -238,13 +240,13 @@ def browse():
                 Entry.story.ilike(like),
             )
         )
- 
+
     entries = query.order_by(Entry.word).all()
- 
+
     story_counts = dict(db.session.execute(
         text("SELECT entry_id, COUNT(*) FROM stories WHERE is_approved = 1 GROUP BY entry_id")
     ).all())
- 
+
     return render_template(
         "browse.html",
         entries=entries,
@@ -252,9 +254,34 @@ def browse():
         language=language,
         story_counts=story_counts,
     )
- 
- 
 
+@app.route("/idioms")
+def idioms():
+    q = (request.args.get("q") or "").strip()
+    language = (request.args.get("language") or "").strip()
+
+    query = Entry.query.filter_by(status="approved").filter(Entry.pos.ilike("idiom"))
+    if language:
+        query = query.filter(Entry.language == language)
+    if q:
+        like = f"%{q}%"
+        query = query.filter(
+            db.or_(
+                Entry.word.ilike(like),
+                Entry.transliteration.ilike(like),
+                Entry.literal_definition.ilike(like),
+                Entry.story.ilike(like),
+            )
+        )
+
+    entries = query.order_by(Entry.word).all()
+
+    return render_template(
+        "idioms.html",
+        entries=entries,
+        q=q,
+        language=language,
+    )
 
 @app.route('/entry/<slug>')
 def entry_detail(slug):
