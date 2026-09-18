@@ -312,30 +312,26 @@ def entry_detail(slug):
     return render_template('entry.html', entry=entry, stories=stories)
 
 
-@app.route('/entry/<slug>/submit-story', methods=['GET', 'POST'])
+@app.route('/entry/<slug>/submit-story', methods=['POST'])
 def submit_story(slug):
     entry = Entry.query.filter_by(slug=slug, status="approved").first_or_404()
 
-    if request.method == 'POST':
-        content = (request.form.get('content') or "").strip()
+    content = (request.form.get('content') or "").strip()
+    submitted_by = request.form.get('submitted_by') or None  # blank = anonymous
 
-        submitted_by = request.form.get('submitted_by') or None  # blank = anonymous
+    if not content or len(content) > 2000:
+        return "Invalid input length", 400
 
-        if not content or len(content) > 2000:
-            return "Invalid input length", 400
+    db.session.execute(
+        text("""
+            INSERT INTO stories (entry_id, content, submitted_by, is_approved)
+            VALUES (:entry_id, :content, :submitted_by, 0)
+        """),
+        {"entry_id": entry.id, "content": content, "submitted_by": submitted_by}
+    )
+    db.session.commit()
 
-        db.session.execute(
-            text("""
-                INSERT INTO stories (entry_id, content, submitted_by, is_approved)
-                VALUES (:entry_id, :content, :submitted_by, 0)
-            """),
-            {"entry_id": entry.id, "content": content, "submitted_by": submitted_by}
-        )
-        db.session.commit()
-
-        return redirect(url_for('entry_detail', slug=slug, story_submitted=True))
-
-    return render_template('submit-story.html', entry=entry)
+    return redirect(url_for('entry_detail', slug=slug, story_submitted=True))
 
 @app.route("/approve_story/<int:story_id>", methods=["POST"])
 @auth.login_required
