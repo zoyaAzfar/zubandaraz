@@ -31,9 +31,23 @@
         <span class="arrow">▾</span>
       </button>
       <ul class="dropdown-menu" id="filter-dropdown-menu">
-        <li data-href="{{ url_for('idioms', q=q) if q else url_for('idioms') }}" class="{{ 'active' if not language }}">All languages</li>
+        <li data-href="{{ url_for('idioms', q=q, theme=theme_filter) }}" class="{{ 'active' if not language }}">All languages</li>
         {% for lang in available_languages %}
-        <li data-href="{{ url_for('idioms', language=lang, q=q) if q else url_for('idioms', language=lang) }}" class="{{ 'active' if lang == language }}">{{ lang }}</li>
+        <li data-href="{{ url_for('idioms', language=lang, q=q, theme=theme_filter) }}" class="{{ 'active' if lang == language }}">{{ lang }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- NEW THEME FILTER -->
+    <div class="custom-dropdown" id="theme-dropdown">
+      <button type="button" class="dropdown-button" id="theme-dropdown-btn">
+        <span id="theme-selected-option">{{ 'Theme: ' + theme_filter if theme_filter else 'All Themes' }}</span>
+        <span class="arrow">▾</span>
+      </button>
+      <ul class="dropdown-menu" id="theme-dropdown-menu">
+        <li data-href="{{ url_for('idioms', q=q, language=language) }}" class="{{ 'active' if not theme_filter }}">All Themes</li>
+        {% for t in available_themes %}
+        <li data-href="{{ url_for('idioms', theme=t, language=language, q=q) }}" class="{{ 'active' if t == theme_filter }}">{{ t }}</li>
         {% endfor %}
       </ul>
     </div>
@@ -46,8 +60,10 @@
       <ul class="dropdown-menu" id="sort-dropdown-menu">
         <li data-value="alphabetical">Alphabetical</li>
         <li data-value="language">Language</li>
+        <li data-value="theme">Theme</li> <!-- ADDED SORT OPTION -->
       </ul>
     </div>
+</div>
   </div>
 </div>
 
@@ -55,11 +71,14 @@
   <!-- List View (Visible by default) -->
   <div id="list-view-container">
     <div class="entry-index">
-      {% for entry in entries %}    
+      {% for entry in entries %}  
     {% set e_script, e_rtl = detect_script(entry.word) %}
+    {% set entry_theme = word_to_theme.get(entry.word|lower, 'Uncategorized') %} <!-- Pulls the theme -->
+    
     <div class="entry-row idiom-row"
-       data-word="{{ entry.word | lower }}"
-       data-language="{{ entry.language | lower }}">
+         data-word="{{ entry.word | lower }}"
+         data-language="{{ entry.language | lower }}"
+         data-theme="{{ entry_theme }}"> <!-- Adds data attribute for sorting -->
 
       <div class="entry-row-word">
         <span class="script script-{{ e_script }}" dir="{{ 'rtl' if e_rtl else 'ltr' }}">{{ entry.word }}</span>
@@ -71,6 +90,10 @@
           <span class="tag">{{ entry.language }}</span>
           {% if entry.dialect %}<span class="tag tag-teal">{{ entry.dialect }}</span>{% endif %}
           <span class="tag tag-pos">Idiom</span>
+          <!-- NEW THEME TAG VISUAL -->
+          {% if entry_theme != 'Uncategorized' %}
+          <span class="tag" style="background-color: var(--yellow); color: #333;">{{ entry_theme }}</span>
+          {% endif %}
         </div>
         <p class="entry-row-snippet">
           {% if entry.literal_definition %}{{ entry.literal_definition }}{% else %}{{ entry.story | truncate(160) }}{% endif %}
@@ -118,7 +141,26 @@ document.addEventListener("DOMContentLoaded", function () {
     if (filterDropdown) {
       const filterBtn = document.getElementById('filter-dropdown-btn');
       const filterItems = filterDropdown.querySelectorAll('.dropdown-menu li');
-
+      const themeDropdown = document.getElementById('theme-dropdown');
+      
+      if (themeDropdown) {
+        const themeBtn = document.getElementById('theme-dropdown-btn');
+        const themeItems = themeDropdown.querySelectorAll('.dropdown-menu li');
+      
+        themeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdown.classList.remove('open');
+          if (filterDropdown) filterDropdown.classList.remove('open');
+          themeDropdown.classList.toggle('open');
+        });
+      
+        themeItems.forEach(item => {
+          item.addEventListener('click', () => {
+            window.location.href = item.dataset.href;
+          });
+        });
+      }
+            
       filterBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         dropdown.classList.remove('open');
@@ -138,10 +180,15 @@ document.addEventListener("DOMContentLoaded", function () {
         sorted = rows.slice().sort((a, b) => {
           const langA = a.getAttribute('data-language') || '';
           const langB = b.getAttribute('data-language') || '';
-          if (langA === langB) {
-            return (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '');
-          }
+          if (langA === langB) return (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '');
           return langA.localeCompare(langB);
+        });
+      } else if (criteria === 'theme') {
+        sorted = rows.slice().sort((a, b) => {
+          const themeA = a.getAttribute('data-theme') || '';
+          const themeB = b.getAttribute('data-theme') || '';
+          if (themeA === themeB) return (a.getAttribute('data-word') || '').localeCompare(b.getAttribute('data-word') || '');
+          return themeA.localeCompare(themeB);
         });
       } else {
         sorted = rows.slice().sort((a, b) =>
