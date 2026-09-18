@@ -263,10 +263,14 @@ def browse():
         story_counts=story_counts,
     )
 
+import json
+import re
+
 @app.route("/idioms")
 def idioms():
     q = (request.args.get("q") or "").strip()
     language = (request.args.get("language") or "").strip()
+    theme_filter = (request.args.get("theme") or "").strip()
 
     query = Entry.query.filter_by(status="approved").filter(Entry.pos.ilike("idiom"))
     if language:
@@ -283,21 +287,59 @@ def idioms():
         )
 
     entries = query.order_by(Entry.word).all()
+    
     graph_json = None
+    word_to_theme = {}
+    available_themes = set()
+    
+    # Map your raw Colab names to clean UI names here!
+    theme_map = {
+              "Harlot / Prostitution / Chastity / Modesty": "Chastity & Modesty",
+              "Laughter / Talking / Tongue" : "Talkativeness",
+              "Devil / Cunning / Wiles / Evil": "Cunning & Evil",
+              "Bride / Wife": "Bride & Wife",
+              "In Laws": "In-Laws",
+              "Food / Eating": "Eating Habits",
+              "Idle / Useless": "Idle & Useless",
+              "Leadership and Authority": "Authority",
+              "Smart / Intelligence": "Intelligence",
+              "Youth / Old ": "Age",
+              "Property and Wealth": "Property & Wealth",
+              "Daughter / Sons / Children": "Children",
+              "Animals (deer, buffalo, cows)": "Animals"
+    }
 
-    # Load the pre-calculated 3D galaxy
     try:
         with open('galaxy_graph.json', 'r') as f:
             graph_json = f.read()
-    except FileNotFoundError:
-        print("Galaxy JSON not found.")
+            data = json.loads(graph_json)
+            for trace in data.get('data', []):
+                if trace.get('mode') == 'markers':
+                    for t in trace.get('text', []):
+                        match = re.search(r'<b>(.*?)</b><br><b>\[(.*?)\]</b>', t)
+                        if match:
+                            word = match.group(1).lower()
+                            raw_theme = match.group(2)
+                            clean_theme = theme_map.get(raw_theme, raw_theme)
+                            word_to_theme[word] = clean_theme
+                            available_themes.add(clean_theme)
+    except Exception as e:
+        print("Galaxy JSON not found or error parsing:", e)
+
+    available_themes = sorted(list(available_themes))
+
+    if theme_filter:
+        entries = [e for e in entries if word_to_theme.get(e.word.lower(), "Uncategorized") == theme_filter]
 
     return render_template(
         "idioms.html",
         entries=entries,
         q=q,
         language=language,
-        graph_json=graph_json
+        theme_filter=theme_filter,
+        graph_json=graph_json,
+        word_to_theme=word_to_theme,
+        available_themes=available_themes
     )
     
 @app.route('/entry/<slug>')
