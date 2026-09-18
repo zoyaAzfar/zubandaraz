@@ -196,6 +196,57 @@ document.addEventListener("DOMContentLoaded", function () {
         // Initialize Plotly only on the first click so it fits the container
         if (!graphRendered) {
           const graphData = {{ graph_json | safe }};
+        
+          // 1. ADJUST ZOOM: Override the camera eye (lower numbers = zoomed in closer)
+          if (graphData.layout.scene) {
+            graphData.layout.scene.camera = { eye: { x: 0.5, y: 0.5, z: 0.5 } }; 
+          }
+        
+          // 2. RENAME THEMES: Map your raw Colab labels to clean frontend names
+          const themeMap = {
+              "Harlot / Prostitution / Chastity / Modesty": "Chastity & Modesty",
+              "Laughter / Talking / Tongue" : "Talkativeness",
+              "Devil / Cunning / Wiles / Evil": "Cunning & Evil",
+              "Bride / Wife": "Bride & Wife",
+              "In Laws": "In-Laws",
+              "Food / Eating": "Eating Habits",
+              "Idle / Useless": "Idle & Useless",
+              "Leadership and Authority": "Authority",
+              "Smart / Intelligence": "Intelligence",
+              "Youth / Old ": "Age",
+              "Property and Wealth": "Property & Wealth",
+              "Daughter / Sons / Children": "Children",
+              "Animals (deer, buffalo, cows)": "Animals"
+          };
+        
+          // Loop through the graph data to apply visual and text overrides
+          graphData.data.forEach(trace => {
+            if (trace.mode === 'markers') {
+              
+              // 3. ADJUST NODE SIZE: Override the marker size
+              if (trace.marker) {
+                trace.marker.size = 12; // Change this number to make them bigger or smaller
+              }
+        
+              // 4. CLEAN HOVER TEXT: Swap the raw labels for your mapped names
+              if (trace.text) {
+                trace.text = trace.text.map(hoverText => {
+                  let newText = hoverText;
+                  
+                  for (const [raw, clean] of Object.entries(themeMap)) {
+                    newText = newText.replace(`[${raw}]`, `[${clean}]`);
+                  }
+                  
+                  // NOTE: If you decide you want to hide the themes entirely instead of renaming them, 
+                  // just delete the loop above and uncomment the line below:
+                  // newText = newText.replace(/<b>\[.*?\]<\/b><br>/, '');
+                  
+                  return newText;
+                });
+              }
+            }
+          });
+        
           Plotly.newPlot('plotly-graph', graphData.data, graphData.layout, {responsive: true});
           graphRendered = true;
         }
