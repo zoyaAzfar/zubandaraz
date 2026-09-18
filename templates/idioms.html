@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
           // 1. ADJUST ZOOM: Override the camera eye (lower numbers = zoomed in closer)
           if (graphData.layout.scene) {
-            graphData.layout.scene.camera = { eye: { x: 0.5, y: 0.5, z: 0.5 } }; 
+            graphData.layout.scene.camera = { eye: { x: 0.8, y: 0.8, z: 0.8 } }; 
           }
         
           // 2. RENAME THEMES: Map your raw Colab labels to clean frontend names
@@ -225,7 +225,7 @@ document.addEventListener("DOMContentLoaded", function () {
               
               // 3. ADJUST NODE SIZE: Override the marker size
               if (trace.marker) {
-                trace.marker.size = 12; // Change this number to make them bigger or smaller
+                trace.marker.size = 6; // Change this number to make them bigger or smaller
               }
         
               // 4. CLEAN HOVER TEXT: Swap the raw labels for your mapped names
