@@ -217,93 +217,131 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
- // --- GALAXY VIEW TOGGLE LOGIC ---
-const viewToggleBtn = document.getElementById('view-toggle-btn');
-const listView = document.getElementById('list-view-container');
-const networkView = document.getElementById('network-view-container');
-const toggleText = document.getElementById('view-toggle-text');
-let graphRendered = false;
+  // --- GALAXY VIEW TOGGLE LOGIC ---
+  const viewToggleBtn = document.getElementById('view-toggle-btn');
+  const listView = document.getElementById('list-view-container');
+  const networkView = document.getElementById('network-view-container');
+  const toggleText = document.getElementById('view-toggle-text');
+  let graphRendered = false;
 
-if (viewToggleBtn && listView && networkView) {
-  viewToggleBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    
-    if (listView.style.display === 'none') {
-      listView.style.display = 'block';
-      networkView.style.display = 'none';
-      toggleText.textContent = 'View: Galaxy';
-    } else {
-      listView.style.display = 'none';
-      networkView.style.display = 'block';
-      toggleText.textContent = 'View: List';
-
-      if (!graphRendered) {
-        const graphData = {{ graph_json | safe }};
+  if (viewToggleBtn && listView && networkView) {
+    viewToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       
-        if (graphData.layout.scene) {
-          graphData.layout.scene.camera = { eye: { x: 0.8, y: 0.8, z: 0.8 } }; 
+      if (listView.style.display === 'none') {
+        listView.style.display = 'block';
+        networkView.style.display = 'none';
+        toggleText.textContent = 'View: Galaxy';
+      } else {
+        listView.style.display = 'none';
+        networkView.style.display = 'block';
+        toggleText.textContent = 'View: List';
+
+        if (!graphRendered) {
+          const graphData = {{ graph_json | safe }};
+        
+          if (graphData.layout.scene) {
+            graphData.layout.scene.camera = { eye: { x: 0.8, y: 0.8, z: 0.8 } }; 
+          }
+
+          // Enable and style legend
+          graphData.layout.showlegend = true;
+          graphData.layout.legend = {
+            title: { text: 'Themes' },
+            itemsizing: 'constant'
+          };
+        
+          const themeMap = {
+              "Harlot / Prostitution / Chastity / Modesty": "Chastity & Modesty",
+              "Laughter / Talking / Tongue" : "Talkativeness",
+              "Devil / Cunning / Wiles / Evil": "Cunning & Evil",
+              "Bride / Wife": "Bride & Wife",
+              "In Laws": "In-Laws",
+              "Food / Eating": "Eating Habits",
+              "Idle / Useless": "Idle & Useless",
+              "Leadership and Authority": "Authority",
+              "Smart / Intelligence": "Intelligence",
+              "Youth / Old ": "Age",
+              "Youth / Old": "Age",
+              "Property and Wealth": "Property & Wealth",
+              "Daughter / Sons / Children": "Children",
+              "Animals (deer, buffalo, cows)": "Animals"
+          };
+        
+          const newTraces = [];
+
+          graphData.data.forEach(trace => {
+            // Hide network connection lines from the legend
+            if (!trace.mode || !trace.mode.includes('markers')) {
+              trace.showlegend = false;
+              newTraces.push(trace);
+              return;
+            }
+
+            // Split single marker trace into separate theme traces
+            const groups = {};
+            const xArr = trace.x || [];
+            const yArr = trace.y || [];
+            const zArr = trace.z || null;
+            const textArr = trace.text || [];
+            const colorArr = (trace.marker && Array.isArray(trace.marker.color)) ? trace.marker.color : null;
+
+            for (let i = 0; i < xArr.length; i++) {
+              let hoverText = textArr[i] || '';
+              
+              let cleanTheme = 'Uncategorized';
+              const match = hoverText.match(/\[(.*?)\]/);
+              if (match && match[1]) {
+                const rawTheme = match[1].trim();
+                cleanTheme = themeMap[rawTheme] || rawTheme;
+                hoverText = hoverText.replace(`[${rawTheme}]`, `[${cleanTheme}]`);
+              }
+
+              if (!groups[cleanTheme]) {
+                groups[cleanTheme] = {
+                  x: [],
+                  y: [],
+                  z: zArr ? [] : null,
+                  text: [],
+                  colors: []
+                };
+              }
+
+              groups[cleanTheme].x.push(xArr[i]);
+              groups[cleanTheme].y.push(yArr[i]);
+              if (zArr) groups[cleanTheme].z.push(zArr[i]);
+              groups[cleanTheme].text.push(hoverText);
+              if (colorArr) groups[cleanTheme].colors.push(colorArr[i]);
+            }
+
+            // Create a trace for each individual theme
+            for (const [themeName, grp] of Object.entries(groups)) {
+              const themeTrace = JSON.parse(JSON.stringify(trace));
+              themeTrace.name = themeName;
+              themeTrace.x = grp.x;
+              themeTrace.y = grp.y;
+              if (grp.z) themeTrace.z = grp.z;
+              themeTrace.text = grp.text;
+              themeTrace.showlegend = true;
+
+              if (!themeTrace.marker) themeTrace.marker = {};
+              themeTrace.marker.size = 6;
+              if (colorArr && grp.colors.length > 0) {
+                themeTrace.marker.color = grp.colors;
+              }
+
+              newTraces.push(themeTrace);
+            }
+          });
+
+          graphData.data = newTraces;
+        
+          Plotly.newPlot('plotly-graph', graphData.data, graphData.layout, {responsive: true});
+          graphRendered = true;
         }
-
-        // 1. Enable and style the legend in the Plotly layout
-        graphData.layout.showlegend = true;
-        graphData.layout.legend = {
-          title: { text: 'Themes' },
-          itemsizing: 'constant' // Prevents legend icons from scaling down
-        };
-      
-        const themeMap = {
-            "Harlot / Prostitution / Chastity / Modesty": "Chastity & Modesty",
-            "Laughter / Talking / Tongue" : "Talkativeness",
-            "Devil / Cunning / Wiles / Evil": "Cunning & Evil",
-            "Bride / Wife": "Bride & Wife",
-            "In Laws": "In-Laws",
-            "Food / Eating": "Eating Habits",
-            "Idle / Useless": "Idle & Useless",
-            "Leadership and Authority": "Authority",
-            "Smart / Intelligence": "Intelligence",
-            "Youth / Old ": "Age",
-            "Youth / Old": "Age",
-            "Property and Wealth": "Property & Wealth",
-            "Daughter / Sons / Children": "Children",
-            "Animals (deer, buffalo, cows)": "Animals"
-        };
-      
-        graphData.data.forEach(trace => {
-          // 2. Map trace names to clean theme names for the legend items
-          if (trace.name) {
-            const rawName = trace.name.trim();
-            if (themeMap[rawName]) {
-              trace.name = themeMap[rawName];
-            } else if (themeMap[trace.name]) {
-              trace.name = themeMap[trace.name];
-            }
-          }
-
-          if (trace.mode && trace.mode.includes('markers')) {
-            if (trace.marker) {
-              trace.marker.size = 6;
-            }
-      
-            if (trace.text) {
-              trace.text = trace.text.map(hoverText => {
-                let newText = hoverText;
-                
-                for (const [raw, clean] of Object.entries(themeMap)) {
-                  newText = newText.replace(`[${raw}]`, `[${clean}]`);
-                }
-                
-                return newText;
-              });
-            }
-          }
-        });
-      
-        Plotly.newPlot('plotly-graph', graphData.data, graphData.layout, {responsive: true});
-        graphRendered = true;
       }
-    }
-  });
-}
+    });
+  }
 });
 </script>
 {% endblock %}
