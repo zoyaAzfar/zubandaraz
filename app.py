@@ -431,9 +431,13 @@ def edit_entry(slug):
         db.session.add(edit)
         db.session.commit()
 
-        return redirect(
-            f"/entry/{slug}?edit_submitted=1"
-        )
+        next_url = (request.form.get("next") or "").rstrip("?")
+        # only allow local paths (blocks open redirects like //evil.com)
+        if next_url.startswith("/") and not next_url.startswith(("//", "/\\")):
+            sep = "&" if "?" in next_url else "?"
+            return redirect(f"{next_url}{sep}edit_submitted=1")
+        
+        return redirect(f"/entry/{slug}?edit_submitted=1")
 
     return render_template(
         "edit_entry.html",
