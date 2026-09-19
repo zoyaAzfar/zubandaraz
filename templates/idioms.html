@@ -9,7 +9,10 @@
     <h1 class="browse-title">Idioms.</h1>
     <p class="browse-sub">A directory of idioms and set phrases from our archive.</p>
   </div>
-
+{% if request.args.get('edit_submitted') %}
+<div class="notice-banner">Thanks! Your edit was submitted for review.</div>
+{% endif %}
+  
   <div class="browse-toolbar">
     <p class="result-count">
       {{ entries|length }} {{ "idiom" if entries|length == 1 else "idioms" }}{% if q %} matching &ldquo;{{ q }}&rdquo;{% endif %}{% if language %} in {{ language }}{% endif %}
@@ -96,6 +99,17 @@
               {% if entry.literal_definition %}{{ entry.literal_definition }}{% else %}{{ entry.story | truncate(160) }}{% endif %}
             </p>
           </div>
+          <button type="button" class="btn-edit-idiom"
+        data-slug="{{ entry.slug }}"
+        data-word="{{ entry.word }}"
+        data-transliteration="{{ entry.transliteration or '' }}"
+        data-language="{{ entry.language or '' }}"
+        data-dialect="{{ entry.dialect or '' }}"
+        data-origin="{{ entry.origin or '' }}"
+        data-literal="{{ entry.literal_definition or '' }}"
+        data-etymology="{{ entry.etymology or '' }}"
+        data-story="{{ entry.story or '' }}"
+        aria-label="Edit {{ entry.word }}">Edit</button>
         </div>
       {% endfor %}
     </div>
@@ -116,7 +130,43 @@
     {% endif %}
   </p>
 {% endif %}
+<dialog id="edit-dialog" class="edit-dialog">
+  <form method="POST" id="edit-form">
+    <input type="hidden" name="next" value="{{ request.full_path }}">
+    <h2>Edit idiom</h2>
+    <div class="notice-banner">Changes are reviewed before going live. The current entry stays visible in the meantime.</div>
 
+    <div class="field-row">
+      <div class="field"><label for="ed-word">Word</label>
+        <input type="text" id="ed-word" name="word" maxlength="100"></div>
+      <div class="field"><label for="ed-language">Language</label>
+        <input type="text" id="ed-language" name="language" maxlength="100"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label for="ed-dialect">Dialect</label>
+        <input type="text" id="ed-dialect" name="dialect" maxlength="100"></div>
+      <div class="field"><label for="ed-origin">Origin</label>
+        <input type="text" id="ed-origin" name="origin" maxlength="150"></div>
+    </div>
+    <div class="field"><label for="ed-transliteration">Transliteration</label>
+      <input type="text" id="ed-transliteration" name="transliteration" maxlength="150"></div>
+    <div class="field"><label for="ed-literal">Literal definition</label>
+      <textarea id="ed-literal" name="literal_definition" rows="3"></textarea></div>
+    <div class="field"><label for="ed-etymology">Etymology</label>
+      <textarea id="ed-etymology" name="etymology" rows="3"></textarea></div>
+    <div class="field"><label for="ed-story">Story</label>
+      <textarea id="ed-story" name="story" rows="3"></textarea></div>
+    <input type="hidden" name="pos" value="idiom">
+    <div class="field"><label for="ed-by">Your name or email (optional)</label>
+      <input type="text" id="ed-by" name="submitted_by" maxlength="150"></div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Submit edit for review</button>
+      <button type="button" class="btn-cancel" id="edit-cancel">Cancel</button>
+    </div>
+  </form>
+</dialog>
+  
 </div> <!-- Closed browse-full here -->
 {% endblock %}
 
@@ -217,6 +267,31 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // --- INLINE EDIT MODAL ---
+    const editDialog = document.getElementById('edit-dialog');
+    const editForm = document.getElementById('edit-form');
+    if (editDialog && editForm) {
+      document.querySelectorAll('.btn-edit-idiom').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const d = btn.dataset;
+          editForm.action = `/entry/${encodeURIComponent(d.slug)}/edit`;
+          document.getElementById('ed-word').value = d.word;
+          document.getElementById('ed-language').value = d.language;
+          document.getElementById('ed-dialect').value = d.dialect;
+          document.getElementById('ed-origin').value = d.origin;
+          document.getElementById('ed-transliteration').value = d.transliteration;
+          document.getElementById('ed-literal').value = d.literal;
+          document.getElementById('ed-etymology').value = d.etymology;
+          document.getElementById('ed-story').value = d.story;
+          editDialog.showModal();
+        });
+      });
+      document.getElementById('edit-cancel').addEventListener('click', () => editDialog.close());
+      // click on the backdrop closes it
+      editDialog.addEventListener('click', (e) => { if (e.target === editDialog) editDialog.close(); });
+    }
+      
   // --- GALAXY VIEW TOGGLE LOGIC ---
   const viewToggleBtn = document.getElementById('view-toggle-btn');
   const listView = document.getElementById('list-view-container');
@@ -247,7 +322,9 @@ document.addEventListener("DOMContentLoaded", function () {
           // Enable and style legend
           graphData.layout.showlegend = true;
           graphData.layout.legend = {
-            title: { text: 'Themes' },
+            title: { text: 'Themes', font: { color: '#ffffff' } },
+            font: { color: '#ffffff' },
+            bgcolor: 'rgba(0,0,0,0)',
             itemsizing: 'constant'
           };
         
