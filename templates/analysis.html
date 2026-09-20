@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+{% block title %}Urdu Newspaper Analysis — Zuban Daraz{% endblock %}
+{% block content %}
+<div class="entry-detail">
+ <div class="browse-heading">
+    <h1 class="browse-title">Our Analyses</h1>
+  </div>
+
+
+  <h2>Urdu Newspaper Analysis</h2>
+  <p>
+    We looked at 111,861 Urdu newspaper articles through four different lenses to see whether women and men are written about differently. 
+  </p>
+
+<style>
+/* Zuban Daraz: Urdu newspaper analysis. Everything is scoped under .ua so it cannot leak into the rest of the site. */
+.ua{
+  /* your palette, renamed by what each colour does. Falls back to the hex values if base.html doesn't define them. */
+  --ink:var(--blue,#0a3323);
+  --rose:var(--green,#d3968c);
+  --olive:var(--pink,#839958);
+  --paper:var(--white,#f8f7f5);
+  --grey:var(--yellow,rgb(198,201,200));
+  --teal:var(--red,#105666);
+  --olive-light:#c8d3a6;
+  --urdu:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Noto Naskh Arabic","Segoe UI",Tahoma,serif;
+
+  background:var(--paper);
+  color:var(--ink);
+  border:1px solid var(--grey);
+  border-radius:14px;
+  padding:clamp(1.1rem,3.2vw,2.3rem);
+  margin:1.4rem 0 3rem;
+  max-width:50rem;
+  line-height:1.65;
+  text-align:left;
+}
+.ua *,.ua *::before,.ua *::after{box-sizing:border-box}
+.ua h3{font-size:1.4rem;line-height:1.25;margin:2.6rem 0 .6rem;color:var(--ink)}
+.ua h3:first-child{margin-top:0}
+.ua h4{font-size:1.1rem;line-height:1.3;margin:2.2rem 0 .5rem;color:var(--ink)}
+.ua p,.ua ul,.ua ol,.ua dl{color:var(--ink)}
+.ua p{max-width:44rem;margin:.6rem 0}
+.ua ul.ua-list{max-width:44rem;padding-left:1.2rem;margin:.6rem 0}
+.ua ul.ua-list li{margin:.5rem 0}
+.ua a{color:var(--teal);text-decoration:underline;text-underline-offset:.16em}
+.ua a:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:2px}
+.ua small{font-size:.85em}
+
+/* Urdu text */
+.ua .ur{font-family:var(--urdu);font-size:1.18em;line-height:1.3;unicode-bidi:isolate}
+
+/* colour keys shared by every chart: rose = female terms, teal = male terms */
+.ua .f{--c:var(--rose)}
+.ua .m{--c:var(--teal)}
+.ua-sw{display:inline-block;width:.8rem;height:.8rem;border-radius:50%;background:var(--c);margin:0 .4rem;vertical-align:-.1rem;border:1.5px solid var(--ink)}
+
+/* verdict markers: the same filled / half / empty language is reused in the waffle */
+.ua-v{display:block;width:1.05rem;height:1.05rem;border-radius:50%;border:2px solid var(--ink);margin-top:.38rem}
+.ua-v-full{background:var(--ink)}
+.ua-v-half{background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}
+.ua-v-empty{background:transparent}
+.ua-v-desc{background:transparent;border-style:dashed}
+.ua-glance{list-style:none;margin:1rem 0 .4rem;padding:0;max-width:46rem}
+.ua-glance li{display:grid;grid-template-columns:1.1rem 1fr;gap:.85rem;padding:.7rem 0;border-bottom:1px solid var(--grey)}
+.ua-glance li:first-child{border-top:1px solid var(--grey)}
+.ua-glance b{font-weight:650}
+.ua-vkey{display:flex;flex-wrap:wrap;gap:.4rem 1.3rem;font-size:.88rem;margin:.6rem 0 0}
+.ua-vkey span{display:inline-flex;align-items:center;gap:.4rem}
+.ua-vkey .ua-v{margin:0;width:.85rem;height:.85rem}
+
+/* methods */
+.ua-dl{display:grid;grid-template-columns:8.5rem 1fr;gap:.55rem 1.2rem;max-width:46rem;margin:.8rem 0}
+.ua-dl dt{font-weight:650}
+.ua-dl dd{margin:0}
+@media (max-width:560px){.ua-dl{grid-template-columns:1fr;gap:.1rem}.ua-dl dd{margin-bottom:.7rem}}
+
+/* figures */
+.ua figure{margin:1.6rem 0;padding:.9rem 0 0;border-top:1px solid var(--grey)}
+.ua figcaption{font-size:.9rem;max-width:44rem;margin-top:.8rem;line-height:1.5}
+.ua figcaption b{font-weight:650}
+.ua-hero{background:rgba(131,153,88,.13);border:0!important;border-radius:16px;padding:1.1rem 1.2rem 1rem!important}
+.ua-note{border-left:3px solid var(--olive);padding:.15rem 0 .15rem .9rem;margin:1.1rem 0;max-width:44rem}
+.ua-note p{margin:.3rem 0}
+
+/* Venn */
+.ua-venn{display:block;width:100%;max-width:520px;height:auto;margin:0 auto}
+.ua-venn text{font-family:inherit;fill:var(--ink)}
+.ua-venn .vt{font-size:19px;font-weight:600}
+.ua-venn .vn{font-size:30px;font-weight:700}
+.ua-venn .vs{font-size:17px}
+.ua-venn .vw{fill:#fff}
+
+/* the word strip (the memorable one) */
+.ua-strip-top{display:flex;justify-content:space-between;gap:1rem;font-size:.9rem;font-weight:600}
+.ua-strip-top .ua-sw{margin:0 .4rem}
+.ua-strip-top span:first-child .ua-sw{margin-left:0}
+.ua-strip-top span:last-child .ua-sw{margin-right:0}
+.ua-strip-body{margin-top:.5rem}
+.ua-lane{padding:.5rem 0 .2rem;border-bottom:1px dotted var(--olive)}
+.ua-lane:last-child{border-bottom:0}
+.ua-lane-t{font-weight:650;font-size:.95rem}
+.ua-lane-t span{font-weight:400;font-size:.85rem;color:var(--teal);margin-left:.6rem}
+.ua-track{position:relative}
+.ua-g0,.ua-gb{position:absolute;top:0;bottom:0;width:0}
+.ua-g0{border-left:1.5px solid var(--ink)}
+.ua-gb{border-left:2px dashed var(--olive)}
+.ua-dot{position:absolute;transform:translate(-50%,-50%);width:13px;height:13px;border-radius:50%;background:var(--c);outline:2px solid var(--paper);cursor:default;z-index:1}
+.ua-dot.sig{width:26px;height:26px;border:2px solid var(--ink);outline:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--ink);z-index:2}
+.ua-dot.sig.m{color:#fff}
+.ua-dot::after{content:attr(data-w) "  " attr(data-d);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--ink);color:var(--paper);padding:.1rem .55rem;border-radius:6px;font-family:var(--urdu);font-size:.95rem;font-weight:400;line-height:1.5;direction:ltr;opacity:0;pointer-events:none;z-index:9}
+.ua-dot:hover{z-index:8}
+.ua-dot:hover::after{opacity:1}
+.ua-mean{position:absolute;bottom:0;width:3px;height:15px;margin-left:-1.5px;background:var(--ink);border-radius:2px;z-index:1}
+.ua-ticks{position:relative;height:1.4rem;font-size:.8rem;margin-top:.15rem}
+.ua-ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.ua-strip-axis{font-size:.85rem;text-align:center;margin-top:.1rem}
+.ua-key{display:flex;flex-wrap:wrap;gap:.35rem 1.2rem;font-size:.84rem;margin-top:.9rem;align-items:center}
+.ua-key span{display:inline-flex;align-items:center;gap:.4rem}
+.ua-k-dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--olive);outline:2px solid var(--paper)}
+.ua-k-sig{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--olive);border:2px solid var(--ink);font-size:.7rem;font-weight:700;font-style:normal}
+.ua-k-mean{display:inline-block;width:3px;height:14px;background:var(--ink);border-radius:2px}
+.ua-k-base{display:inline-block;width:0;height:14px;border-left:2px dashed var(--olive)}
+
+/* tables */
+.ua-tw{overflow-x:auto;margin:.8rem 0;max-width:46rem}
+.ua table{border-collapse:collapse;width:100%;font-size:.93rem}
+.ua th,.ua td{padding:.42rem .65rem;border-bottom:1px solid var(--grey);text-align:left;vertical-align:middle}
+.ua th{font-weight:650;border-bottom:2px solid var(--ink)}
+.ua td.n,.ua th.n{text-align:right;font-variant-numeric:tabular-nums}
+.ua caption{caption-side:bottom;text-align:left;font-size:.88rem;padding-top:.6rem}
+
+/* agency: interval plot + waffle */
+.ua-int{margin:.9rem 0 .2rem}
+.ua-int-l{font-size:.95rem}
+.ua-int-l span,.ua-int-r{font-size:.85rem}
+.ua-int-track{position:relative;height:26px;margin:.15rem 0}
+.ua-int-track::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid var(--grey)}
+.ua-int-half{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed var(--olive)}
+.ua-int-range{position:absolute;top:50%;height:9px;transform:translateY(-50%);border-radius:5px;background:var(--c);opacity:.55}
+.ua-int-pt{position:absolute;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);border-radius:50%;background:var(--c);border:2px solid var(--ink)}
+.ua-ticks-s{margin-bottom:.6rem}
+.ua-wf{margin:1rem 0}
+.ua-wf-l{font-size:.95rem;margin-bottom:.4rem}
+.ua-wf-l span{font-size:.85rem;margin-left:.5rem}
+.ua-wf-g{display:flex;flex-wrap:wrap;gap:4px;max-width:34rem}
+.ua-sq{display:block;width:18px;height:18px;border-radius:5px;border:2px solid var(--c);background:transparent}
+.ua-sq.full{background:var(--c)}
+.ua-sq.half{background:linear-gradient(90deg,var(--c) 50%,transparent 50%)}
+.ua-sq-key{display:inline-block;vertical-align:-.25rem;margin:0 .3rem 0 .8rem;--c:var(--ink)}
+.ua-tests{list-style:none;margin:.7rem 0;padding:0;max-width:46rem}
+.ua-tests li{display:grid;grid-template-columns:1.1rem 1fr;gap:.85rem;padding:.55rem 0;border-bottom:1px solid var(--grey)}
+.ua-tests li:first-child{border-top:1px solid var(--grey)}
+.ua-tests small{display:block}
+
+/* topics */
+.ua-tb{margin:.8rem 0}
+.ua-tb-l{font-weight:650;font-size:.95rem;margin-bottom:.25rem}
+.ua-tb-bar{display:flex;height:46px;border-radius:10px;overflow:hidden;border:1.5px solid var(--ink)}
+.ua-seg{display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:650;border-right:2px solid var(--paper);min-width:0}
+.ua-seg:last-child{border-right:0}
+.ua-seg.ent,.ua-sw2.ent{background:var(--olive);color:var(--ink)}
+.ua-seg.spt,.ua-sw2.spt{background:var(--ink);color:var(--paper)}
+.ua-seg.law,.ua-sw2.law{background:var(--olive-light);color:var(--ink)}
+.ua-seg.eco,.ua-sw2.eco{background:var(--grey);color:var(--ink)}
+.ua-seg.oth,.ua-sw2.oth{background:repeating-linear-gradient(45deg,var(--grey) 0 5px,var(--paper) 5px 10px);color:var(--ink)}
+.ua-seg.oth span{background:var(--paper);padding:0 .35rem;border-radius:4px}
+.ua-sw2{display:inline-block;width:.95rem;height:.95rem;border-radius:4px;border:1.5px solid var(--ink)}
+.ua-key-t{margin-top:.8rem}
+.ua-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0 1rem}
+.ua-chips-l{font-weight:650;font-size:.92rem;margin-top:1rem}
+.ua-chip{border:1.5px solid var(--ink);border-radius:999px;padding:.05rem .7rem;font-size:.88rem;background:var(--paper)}
+.ua-chip b{font-weight:650;margin-left:.3rem}
+
+/* adjective butterfly */
+.ua-bf-head{display:flex;justify-content:space-between;font-size:.9rem;font-weight:600;margin-bottom:.2rem}
+.ua-bf-head .ua-sw{margin:0 .4rem}
+.ua-bf-head span:first-child .ua-sw{margin-left:0}
+.ua-bf-head span:last-child .ua-sw{margin-right:0}
+.ua-bf-cap{font-size:.88rem;font-weight:650;margin:1rem 0 .3rem;padding-top:.6rem;border-top:1px solid var(--grey)}
+.ua-bf-row{display:grid;grid-template-columns:1fr minmax(8.5rem,12rem) 1fr;gap:.6rem;align-items:center;padding:.2rem 0}
+.ua-bf-f,.ua-bf-m{display:flex;align-items:center;gap:.45rem;font-weight:650;font-size:.92rem;font-variant-numeric:tabular-nums}
+.ua-bf-f{flex-direction:row-reverse;justify-content:flex-start}
+.ua-bf-f b,.ua-bf-m b{display:block;min-width:9px;height:22px;border-radius:6px;flex:none;border:1.5px solid var(--ink)}
+.ua-bf-f b{background:var(--rose)}
+.ua-bf-m b{background:var(--teal)}
+.ua-bf-c{text-align:center;line-height:1.25}
+.ua-bf-c small{display:block;font-size:.74rem;line-height:1.25;opacity:.8}
+.ua-bf-row.merged .ua-bf-c{font-weight:650}
+
+@media (max-width:560px){
+  .ua th.hm,.ua td.hm{display:none}
+  .ua th,.ua td{padding:.4rem .45rem}
+  .ua-bf-row{grid-template-columns:1fr 6.5rem 1fr;gap:.35rem}
+  .ua-bf-c small{display:none}
+  .ua-dot.sig{width:24px;height:24px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .ua-dot,.ua-sq{transition:transform .14s ease}
+  .ua-dot::after{transition:opacity .12s ease}
+}
+.ua-dot:hover{transform:translate(-50%,-50%) scale(1.3)}
+.ua-sq:hover{transform:scale(1.25)}
+
+</style>
+
+<article class="ua">
+
+  <h3>At a glance</h3>
+  <ul class="ua-glance">
+    <li><span class="ua-v ua-v-full" role="img" aria-label="Holds up"></span>
+      <div><b>Word associations.</b> Six of 94 concept words lean reliably toward one gender’s terms. Chairman, business, office and livelihood sit nearer to men’s terms; domestic and victim words sit nearer to women’s.</div></li>
+    <li><span class="ua-v ua-v-half" role="img" aria-label="Borderline"></span>
+      <div><b>Who does the acting.</b> Women’s terms are grammatical subjects a little less often than men’s (47% against 57%). The gap sits at the edge of significance and changes with the test used.</div></li>
+    <li><span class="ua-v ua-v-empty" role="img" aria-label="Did not hold"></span>
+      <div><b>Adjectives.</b> The two adjectives that survived correction, <span class="ur" lang="ur" dir="rtl">بڑا</span> and <span class="ur" lang="ur" dir="rtl">چھوٹا</span>, are masculine forms whose feminine twins sit on the other side. That is grammar, not description.</div></li>
+    <li><span class="ua-v ua-v-desc" role="img" aria-label="Descriptive, not tested"></span>
+      <div><b>Topics.</b> Articles with female terms lean toward entertainment (57% against 40%) and have almost no economy, technology or science coverage (3% against 21%).</div></li>
+  </ul>
+  <div class="ua-vkey" aria-hidden="true">
+    <span><i class="ua-v ua-v-full"></i>holds up</span>
+    <span><i class="ua-v ua-v-half"></i>borderline</span>
+    <span><i class="ua-v ua-v-empty"></i>did not hold</span>
+    <span><i class="ua-v ua-v-desc"></i>descriptive, not tested</span>
+  </div>
+
+  <h3>What is new here</h3>
+  <p>As far as we could find, studies of gender in Urdu newspapers have been critical-discourse and collocation studies on hundreds to low thousands of articles; one recent comparison of Urdu and English papers used 1,440. This corpus is about 78 times larger, and the approach differs in four ways.</p>
+  <ul class="ua-list">
+    <li><b>Four lenses on one corpus.</b> Syntax (who is the grammatical subject), embeddings (which words live near which), topics (what the stories are about) and word choice (which adjectives attach). When the lenses disagree, we say so.</li>
+    <li><b>Corrections for multiple testing throughout.</b> We ran 94 word-association tests and 63 adjective tests. Before correction, 25 of the 94 look significant; about 5 would by chance.</li>
+    <li><b>Grammatical gender treated as a hazard.</b> Urdu adjectives change form with the gender of the noun, so a naive “which adjectives describe women” test partly measures agreement. Work on other languages has found that grammatical gender can swamp topical gender signals in embeddings, and we show what that looks like in Urdu.</li>
+    <li><b>More than one unit of analysis.</b> For agency we report pooled mentions and per-article rates, because the answer changes between them.</li>
+  </ul>
+  <p>The main embedding pattern, work and leadership words with men and family words with women, is consistent with what has been reported for Arabic-language news, so it may be regional rather than a quirk of this corpus.</p>
+
+  <h3>Data and methods</h3>
+  <p>The corpus is 111,861 Urdu news articles. We matched articles against lists of female and male terms, then ran four analyses. Random seed 42, 10,000 permutations, and a 5% false discovery rate (Benjamini–Hochberg) throughout.</p>
+  <dl class="ua-dl">
+    <dt>Agency</dt>
+    <dd>Stanza dependency parses of 200 articles with female terms and 200 with male terms. Each gendered word was marked as a grammatical subject or as an object or passive. Agency rate is subjects divided by subjects plus objects and passives, per article, compared with a permutation test over articles.</dd>
+    <dt>Word associations</dt>
+    <dd>A word2vec model trained on the whole corpus (minimum count 20; 37 female and 34 male terms in its vocabulary). For 93 concept words in five themes, we compared similarity to the female terms against similarity to the male terms. Significance comes from 10,000 random relabelings of the terms. <span class="ur" lang="ur" dir="rtl">عدالت</span> appears in two themes, so there are 94 tests.</dd>
+    <dt>Topics</dt>
+    <dd>BERTopic on 500 articles with female terms and 500 with male terms, fitted separately. Topic labels are ours, from top keywords and representative articles, and we grouped them into five broad themes by hand.</dd>
+    <dt>Adjectives</dt>
+    <dd>Adjectives attached to gendered words, 63 of them appearing at least twice. Log-odds scores and Fisher’s exact tests, with false discovery rate correction.</dd>
+  </dl>
+
+  <h3>Results</h3>
+
+  <h4>The corpus</h4>
+  <p>Of the 111,861 articles, 14,289 contain a female term and 15,530 a male term, and 7,060 contain both. That is 22,759 gendered articles, about a fifth of the corpus; the rest contain none of our terms. Everything below describes those articles.</p>
+  <figure>
+    <svg class="ua-venn" viewBox="0 0 500 389" role="img" aria-labelledby="venn-t venn-d">
+  <title id="venn-t">Articles containing female terms, male terms, or both</title>
+  <desc id="venn-d">Two overlapping circles sized by article count. 7,229 articles contain only female terms, 7,060 contain both, and 8,470 contain only male terms.</desc>
+  <circle cx="181.0" cy="201.4" r="151.0" fill="var(--rose)" fill-opacity=".78" stroke="var(--ink)" stroke-width="1.5"/>
+  <circle cx="312.6" cy="201.4" r="157.4" fill="var(--teal)" fill-opacity=".62" stroke="var(--ink)" stroke-width="1.5"/>
+  <text class="vt" x="128" y="24" text-anchor="middle">Female terms: 14,289</text>
+  <text class="vt" x="368" y="24" text-anchor="middle">Male terms: 15,530</text>
+  <text class="vn" x="93" y="205" text-anchor="middle">7,229</text>
+  <text class="vs" x="93" y="227" text-anchor="middle">female only</text>
+  <text class="vn vw" x="244" y="205" text-anchor="middle">7,060</text>
+  <text class="vs vw" x="244" y="227" text-anchor="middle">both</text>
+  <text class="vn vw" x="401" y="205" text-anchor="middle">8,470</text>
+  <text class="vs vw" x="401" y="227" text-anchor="middle">male only</text>
+</svg>
+    <figcaption><b>Figure 1.</b> Articles by gendered terms present. Circle areas are proportional to article counts, and the overlap is drawn to scale. The parsed sample is 400 articles, under 2% of the gendered articles.</figcaption>
+  </figure>
+
+  <h4>Word associations: office and business lean male, home and victimhood lean female</h4>
+  <p>For each concept word we asked whether it sits nearer the female terms or the male terms. Six of 94 comparisons survive correction (Table 1). Four are about work and authority and lean male; two, one about the household and one about victimhood, lean female. Twenty-five of the 94 clear p &lt; .05 before correction, against about five expected by chance, so this is more than noise.</p>
+  <figure class="ua-hero">
+    <div class="ua-strip" role="img" aria-label="Dot plot of 94 concept words in five themes, positioned by whether they sit closer to male or female terms. Six words are statistically reliable; they are listed in Table 1.">
+  <div class="ua-strip-top"><span><i class="ua-sw m"></i>Closer to male terms</span><span>Closer to female terms<i class="ua-sw f"></i></span></div>
+  <div class="ua-strip-body"><div class="ua-lane"><div class="ua-lane-t">Leadership and power <span>17 of 20 lean male</span></div><div class="ua-track" style="height:118px"><i class="ua-g0" style="left:52.63%"></i><i class="ua-gb" style="left:47.00%"></i><span class="ua-dot m" style="left:52.28%;top:59px" data-w="قیادت" data-d="−0.001"></span><span class="ua-dot m" style="left:49.77%;top:23px" data-w="حکمران" data-d="−0.005"></span><span class="ua-dot m" style="left:26.22%;top:32px" data-w="افسر" data-d="−0.050"></span><span class="ua-dot f" style="left:66.38%;top:59px" data-w="سیاست" data-d="+0.026"></span><span class="ua-dot m" style="left:29.88%;top:41px" data-w="وزیر" data-d="−0.043"></span><span class="ua-dot m" style="left:24.98%;top:50px" data-w="صدر" data-d="−0.053"></span><span class="ua-dot f" style="left:61.68%;top:59px" data-w="حکومت" data-d="+0.017"></span><span class="ua-dot m" style="left:29.04%;top:59px" data-w="سربراہ" data-d="−0.045"></span><span class="ua-dot m" style="left:49.58%;top:41px" data-w="انتظامیہ" data-d="−0.006"></span><span class="ua-dot m" style="left:46.94%;top:59px" data-w="عدالت" data-d="−0.011"></span><span class="ua-dot m" style="left:25.64%;top:68px" data-w="وزیراعظم" data-d="−0.051"></span><span class="ua-dot m" style="left:35.46%;top:41px" data-w="رہنما" data-d="−0.033"></span><span class="ua-dot m" style="left:27.18%;top:86px" data-w="قائد" data-d="−0.048"></span><span class="ua-dot m" style="left:21.55%;top:59px" data-w="ڈائریکٹر" data-d="−0.059"></span><span class="ua-dot m" style="left:49.70%;top:77px" data-w="حکومتی" data-d="−0.006"></span><span class="ua-dot m" style="left:40.81%;top:59px" data-w="اقتدار" data-d="−0.022"></span><span class="ua-dot m" style="left:31.19%;top:77px" data-w="عہدیدار" data-d="−0.041"></span><span class="ua-dot m" style="left:34.80%;top:59px" data-w="فیصلہ" data-d="−0.034"></span><span class="ua-dot f" style="left:75.83%;top:59px" data-w="طاقت" data-d="+0.044"></span><span class="ua-dot sig m" style="left:8.82%;top:59px" data-w="چیئرمین" data-d="−0.083">1</span><span class="ua-mean" style="left:39.39%" title="theme average"></span></div></div><div class="ua-lane"><div class="ua-lane-t">Work and business <span>11 of 18 lean male</span></div><div class="ua-track" style="height:118px"><i class="ua-g0" style="left:52.63%"></i><i class="ua-gb" style="left:47.00%"></i><span class="ua-dot m" style="left:46.73%;top:77px" data-w="ملازمت" data-d="−0.011"></span><span class="ua-dot f" style="left:65.89%;top:50px" data-w="ترقی" data-d="+0.025"></span><span class="ua-dot f" style="left:74.17%;top:59px" data-w="کمائی" data-d="+0.041"></span><span class="ua-dot f" style="left:67.24%;top:68px" data-w="صنعت" data-d="+0.028"></span><span class="ua-dot f" style="left:58.76%;top:59px" data-w="دکان" data-d="+0.012"></span><span class="ua-dot f" style="left:62.67%;top:59px" data-w="پیشہ" data-d="+0.019"></span><span class="ua-dot m" style="left:44.44%;top:59px" data-w="نوکری" data-d="−0.016"></span><span class="ua-dot m" style="left:31.50%;top:41px" data-w="تاجر" data-d="−0.040"></span><span class="ua-dot m" style="left:39.97%;top:59px" data-w="مزدور" data-d="−0.024"></span><span class="ua-dot m" style="left:48.05%;top:23px" data-w="تنخواہ" data-d="−0.009"></span><span class="ua-dot f" style="left:79.19%;top:59px" data-w="معیشت" data-d="+0.050"></span><span class="ua-dot m" style="left:50.92%;top:59px" data-w="تجارتی" data-d="−0.003"></span><span class="ua-dot m" style="left:45.58%;top:41px" data-w="ملازم" data-d="−0.013"></span><span class="ua-dot f" style="left:62.89%;top:41px" data-w="کمپنی" data-d="+0.019"></span><span class="ua-dot m" style="left:28.66%;top:59px" data-w="کاروباری" data-d="−0.046"></span><span class="ua-dot sig m" style="left:20.23%;top:59px" data-w="کاروبار" data-d="−0.062">2</span><span class="ua-dot sig m" style="left:23.51%;top:86px" data-w="دفتر" data-d="−0.055">4</span><span class="ua-dot sig m" style="left:20.28%;top:23px" data-w="روزگار" data-d="−0.061">3</span><span class="ua-mean" style="left:48.37%" title="theme average"></span></div></div><div class="ua-lane"><div class="ua-lane-t">Crime and law <span>18 of 19 lean male</span></div><div class="ua-track" style="height:154px"><i class="ua-g0" style="left:52.63%"></i><i class="ua-gb" style="left:47.00%"></i><span class="ua-dot m" style="left:29.58%;top:113px" data-w="جرم" data-d="−0.044"></span><span class="ua-dot m" style="left:28.50%;top:95px" data-w="ملزم" data-d="−0.046"></span><span class="ua-dot m" style="left:38.71%;top:77px" data-w="گرفتار" data-d="−0.026"></span><span class="ua-dot m" style="left:46.94%;top:113px" data-w="عدالت" data-d="−0.011"></span><span class="ua-dot m" style="left:45.26%;top:41px" data-w="پولیس" data-d="−0.014"></span><span class="ua-dot m" style="left:35.00%;top:95px" data-w="مقدمہ" data-d="−0.033"></span><span class="ua-dot m" style="left:42.85%;top:59px" data-w="تفتیش" data-d="−0.019"></span><span class="ua-dot m" style="left:28.44%;top:59px" data-w="قانون" data-d="−0.046"></span><span class="ua-dot m" style="left:51.38%;top:77px" data-w="سزا" data-d="−0.002"></span><span class="ua-dot m" style="left:42.81%;top:77px" data-w="حراست" data-d="−0.019"></span><span class="ua-dot m" style="left:28.73%;top:41px" data-w="ضمانت" data-d="−0.045"></span><span class="ua-dot m" style="left:34.04%;top:59px" data-w="وکیل" data-d="−0.035"></span><span class="ua-dot m" style="left:26.76%;top:77px" data-w="جج" data-d="−0.049"></span><span class="ua-dot m" style="left:30.18%;top:23px" data-w="مجرم" data-d="−0.043"></span><span class="ua-dot m" style="left:44.37%;top:95px" data-w="تھانہ" data-d="−0.016"></span><span class="ua-dot m" style="left:46.33%;top:68px" data-w="کارروائی" data-d="−0.012"></span><span class="ua-dot m" style="left:48.18%;top:86px" data-w="تفتیشی" data-d="−0.008"></span><span class="ua-dot m" style="left:33.85%;top:77px" data-w="جرمانہ" data-d="−0.036"></span><span class="ua-dot f" style="left:70.47%;top:77px" data-w="قید" data-d="+0.034"></span><span class="ua-mean" style="left:39.60%" title="theme average"></span></div></div><div class="ua-lane"><div class="ua-lane-t">Victimhood and vulnerability <span>10 of 18 lean male</span></div><div class="ua-track" style="height:100px"><i class="ua-g0" style="left:52.63%"></i><i class="ua-gb" style="left:47.00%"></i><span class="ua-dot m" style="left:44.33%;top:32px" data-w="ہلاک" data-d="−0.016"></span><span class="ua-dot m" style="left:36.28%;top:23px" data-w="زخمی" data-d="−0.031"></span><span class="ua-dot m" style="left:37.88%;top:77px" data-w="قتل" data-d="−0.028"></span><span class="ua-dot m" style="left:41.63%;top:50px" data-w="لاپتہ" data-d="−0.021"></span><span class="ua-dot m" style="left:34.40%;top:41px" data-w="نقصان" data-d="−0.035"></span><span class="ua-dot m" style="left:45.66%;top:50px" data-w="حادثہ" data-d="−0.013"></span><span class="ua-dot f" style="left:53.12%;top:41px" data-w="متاثرہ" data-d="+0.001"></span><span class="ua-dot m" style="left:49.28%;top:41px" data-w="شدید" data-d="−0.006"></span><span class="ua-dot f" style="left:54.69%;top:59px" data-w="خوف" data-d="+0.004"></span><span class="ua-dot m" style="left:50.53%;top:59px" data-w="نشانہ" data-d="−0.004"></span><span class="ua-dot f" style="left:68.38%;top:50px" data-w="تشدد" data-d="+0.030"></span><span class="ua-dot m" style="left:36.01%;top:59px" data-w="ہسپتال" data-d="−0.032"></span><span class="ua-dot m" style="left:30.63%;top:50px" data-w="انتقال" data-d="−0.042"></span><span class="ua-dot f" style="left:58.60%;top:50px" data-w="امداد" data-d="+0.011"></span><span class="ua-dot f" style="left:63.82%;top:50px" data-w="زیادتی" data-d="+0.021"></span><span class="ua-dot f" style="left:56.79%;top:32px" data-w="ظلم" data-d="+0.008"></span><span class="ua-dot f" style="left:53.43%;top:23px" data-w="تکلیف" data-d="+0.002"></span><span class="ua-dot sig f" style="left:88.60%;top:50px" data-w="مظلوم" data-d="+0.068">6</span><span class="ua-mean" style="left:50.22%" title="theme average"></span></div></div><div class="ua-lane"><div class="ua-lane-t">Domestic and family <span>12 of 19 lean female</span></div><div class="ua-track" style="height:82px"><i class="ua-g0" style="left:52.63%"></i><i class="ua-gb" style="left:47.00%"></i><span class="ua-dot m" style="left:21.86%;top:41px" data-w="گھر" data-d="−0.058"></span><span class="ua-dot m" style="left:41.11%;top:59px" data-w="خاندان" data-d="−0.022"></span><span class="ua-dot f" style="left:89.61%;top:23px" data-w="ازدواجی" data-d="+0.070"></span><span class="ua-dot m" style="left:51.20%;top:41px" data-w="بچے" data-d="−0.003"></span><span class="ua-dot f" style="left:78.30%;top:23px" data-w="پرورش" data-d="+0.049"></span><span class="ua-dot f" style="left:78.25%;top:41px" data-w="شادی" data-d="+0.049"></span><span class="ua-dot f" style="left:55.31%;top:50px" data-w="خاندانی" data-d="+0.005"></span><span class="ua-dot f" style="left:68.49%;top:41px" data-w="رہائش" data-d="+0.030"></span><span class="ua-dot m" style="left:39.17%;top:41px" data-w="تعلقات" data-d="−0.026"></span><span class="ua-dot m" style="left:22.23%;top:23px" data-w="رشتہ" data-d="−0.058"></span><span class="ua-dot f" style="left:54.34%;top:32px" data-w="سسرال" data-d="+0.003"></span><span class="ua-dot f" style="left:62.54%;top:41px" data-w="طلاق" data-d="+0.019"></span><span class="ua-dot m" style="left:32.42%;top:41px" data-w="والدین" data-d="−0.038"></span><span class="ua-dot f" style="left:79.16%;top:59px" data-w="اولاد" data-d="+0.050"></span><span class="ua-dot f" style="left:63.44%;top:23px" data-w="نجی" data-d="+0.021"></span><span class="ua-dot f" style="left:69.02%;top:23px" data-w="تقریب" data-d="+0.031"></span><span class="ua-dot f" style="left:70.98%;top:59px" data-w="بچوں" data-d="+0.035"></span><span class="ua-dot m" style="left:40.85%;top:23px" data-w="رشتے" data-d="−0.022"></span><span class="ua-dot sig f" style="left:84.73%;top:41px" data-w="گھریلو" data-d="+0.061">5</span><span class="ua-mean" style="left:58.05%" title="theme average"></span></div></div></div>
+  <div class="ua-ticks"><span style="left:0.00%">−0.10</span><span style="left:26.32%">−0.05</span><span style="left:52.63%">0</span><span style="left:78.95%">+0.05</span></div>
+  <div class="ua-strip-axis">Similarity to female terms minus similarity to male terms</div>
+</div>
+<div class="ua-key">
+  <span><i class="ua-k-dot"></i>one concept word (hover for the word)</span>
+  <span><i class="ua-k-sig">1</i>survives correction</span>
+  <span><i class="ua-k-mean"></i>theme average</span>
+  <span><i class="ua-k-base"></i>average of all 94 comparisons (−0.011)</span>
+</div>
+    <figcaption><b>Figure 2.</b> Each dot is one concept word, placed by how much closer it sits to female terms than to male terms. Rose leans female, teal leans male. Numbered dots survive correction and are listed in Table 1.</figcaption>
+  </figure>
+  <p>There is a catch. Male terms sit slightly closer to nearly everything (dashed line, average −0.011), so “leans male” has to be read against that baseline. Relative to it, domestic and family words are the clearest female-leaning theme (about +0.02), while leadership, and crime and law, lean male by about 0.014. The counts on each row are descriptive: words within a theme are related, so they are not independent tests.</p>
+  <figure>
+    <div class="ua-tw"><table><thead><tr><th>#</th><th>Word</th><th>Meaning</th><th class="hm">Leans toward</th><th class="n">Difference</th><th class="n">q-value</th></tr></thead><tbody><tr><td>1</td><td><span class="ur" lang="ur" dir="rtl">چیئرمین</span></td><td>chairman</td><td class="hm">men</td><td class="n">−0.083</td><td class="n">0.035</td></tr><tr><td>2</td><td><span class="ur" lang="ur" dir="rtl">کاروبار</span></td><td>business</td><td class="hm">men</td><td class="n">−0.062</td><td class="n">0.031</td></tr><tr><td>3</td><td><span class="ur" lang="ur" dir="rtl">روزگار</span></td><td>livelihood, employment</td><td class="hm">men</td><td class="n">−0.061</td><td class="n">0.042</td></tr><tr><td>4</td><td><span class="ur" lang="ur" dir="rtl">دفتر</span></td><td>office</td><td class="hm">men</td><td class="n">−0.055</td><td class="n">0.031</td></tr><tr><td>5</td><td><span class="ur" lang="ur" dir="rtl">گھریلو</span></td><td>domestic, household</td><td class="hm">women</td><td class="n">+0.061</td><td class="n">0.028</td></tr><tr><td>6</td><td><span class="ur" lang="ur" dir="rtl">مظلوم</span></td><td>oppressed, wronged</td><td class="hm">women</td><td class="n">+0.068</td><td class="n">0.042</td></tr></tbody></table></div>
+    <figcaption><b>Table 1.</b> Concept words that survive false discovery rate correction. The difference is similarity to female terms minus similarity to male terms.</figcaption>
+  </figure>
+
+  <h4>Who does the acting: a borderline gap</h4>
+  <p>In the 400 parsed articles, women’s terms were grammatical subjects 47% of the time (48 of 103 classified mentions) and men’s 57% (39 of 69). Only about a quarter of gendered mentions could be classified as subject or object, so this rests on 172 mentions.</p>
+  <figure>
+    <div class="ua-int"><div class="ua-int-l"><b>Female terms</b> are subjects <b>46.6%</b> of the time <span>(48 of 103 classified mentions; 95% interval 37% to 56%)</span></div>
+<div class="ua-int-track"><i class="ua-int-half" style="left:44.44%"></i><i class="ua-int-range f" style="left:16.14%;width:42.04%"></i>
+<i class="ua-int-pt f" style="left:36.89%"></i></div></div><div class="ua-int"><div class="ua-int-l"><b>Male terms</b> are subjects <b>56.5%</b> of the time <span>(39 of 69 classified mentions; 95% interval 45% to 68%)</span></div>
+<div class="ua-int-track"><i class="ua-int-half" style="left:44.44%"></i><i class="ua-int-range m" style="left:32.86%;width:50.62%"></i>
+<i class="ua-int-pt m" style="left:58.94%"></i></div></div><div class="ua-ticks ua-ticks-s"><span style="left:0.00%">30%</span><span style="left:22.22%">40%</span><span style="left:44.44%">50%</span><span style="left:66.67%">60%</span><span style="left:88.89%">70%</span></div>
+    <figcaption><b>Figure 3.</b> Share of classified mentions in which the gendered word is the subject, with 95% Wilson intervals. The intervals overlap. Dashed line marks 50%.</figcaption>
+  </figure>
+  <p>Most articles contribute a single classified mention, so article-level rates are nearly all 0 or 1 (Figure 4). A long article counts the same as a short one.</p>
+  <figure>
+    <div class="ua-wf f"><div class="ua-wf-l"><b>Articles with female terms</b> <span>62 articles with a usable rate</span></div><div class="ua-wf-g"><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 2 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 3 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 4 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 6 as object or passive"></i><i class="ua-sq half" title="1 as subject, 2 as object or passive"></i><i class="ua-sq half" title="1 as subject, 1 as object or passive"></i><i class="ua-sq half" title="1 as subject, 1 as object or passive"></i><i class="ua-sq half" title="1 as subject, 1 as object or passive"></i><i class="ua-sq half" title="1 as subject, 1 as object or passive"></i><i class="ua-sq half" title="1 as subject, 1 as object or passive"></i><i class="ua-sq half" title="2 as subject, 2 as object or passive"></i><i class="ua-sq half" title="3 as subject, 2 as object or passive"></i><i class="ua-sq half" title="2 as subject, 1 as object or passive"></i><i class="ua-sq half" title="2 as subject, 1 as object or passive"></i><i class="ua-sq half" title="3 as subject, 1 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="2 as subject, 0 as object or passive"></i><i class="ua-sq full" title="5 as subject, 0 as object or passive"></i><i class="ua-sq full" title="5 as subject, 0 as object or passive"></i></div></div><div class="ua-wf m"><div class="ua-wf-l"><b>Articles with male terms</b> <span>49 articles with a usable rate</span></div><div class="ua-wf-g"><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 1 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 3 as object or passive"></i><i class="ua-sq empty" title="0 as subject, 3 as object or passive"></i><i class="ua-sq half" title="1 as subject, 2 as object or passive"></i><i class="ua-sq half" title="1 as subject, 2 as object or passive"></i><i class="ua-sq half" title="1 as subject, 1 as object or passive"></i><i class="ua-sq half" title="1 as subject, 1 as object or passive"></i><i class="ua-sq half" title="1 as subject, 1 as object or passive"></i><i class="ua-sq half" title="1 as subject, 1 as object or passive"></i><i class="ua-sq half" title="2 as subject, 2 as object or passive"></i><i class="ua-sq half" title="2 as subject, 1 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="1 as subject, 0 as object or passive"></i><i class="ua-sq full" title="2 as subject, 0 as object or passive"></i><i class="ua-sq full" title="2 as subject, 0 as object or passive"></i><i class="ua-sq full" title="2 as subject, 0 as object or passive"></i></div></div>
+    <div class="ua-vkey" style="margin-top:.8rem" aria-hidden="true">
+      <span><i class="ua-sq full ua-sq-key"></i>always a subject</span>
+      <span><i class="ua-sq half ua-sq-key"></i>mixed</span>
+      <span><i class="ua-sq ua-sq-key"></i>only ever an object or passive</span>
+    </div>
+    <figcaption><b>Figure 4.</b> One square per article, sorted from lowest to highest agency rate. Hover for the counts.</figcaption>
+  </figure>
+  <p>Three defensible tests of the same gap give three different verdicts:</p>
+  <ul class="ua-tests">
+    <li><span class="ua-v ua-v-half" role="img" aria-label="Borderline"></span><div>Permutation test on article-level rates, 10,000 shuffles: mean difference −0.17, p = 0.050.</div></li>
+    <li><span class="ua-v ua-v-half" role="img" aria-label="Borderline"></span><div>Bootstrap 95% interval for that difference: −0.34 to −0.005.<small>A check we added for this report.</small></div></li>
+    <li><span class="ua-v ua-v-empty" role="img" aria-label="Did not hold"></span><div>Fisher’s exact test on pooled mentions (48 of 103 against 39 of 69): p = 0.22.<small>A check we added for this report.</small></div></li>
+  </ul>
+  <p>Our reading: a small difference in the expected direction, sensitive to how it is measured. One possible driver is subject matter. Abuse and harassment coverage makes up 39 of the 500 articles in the female topic sample, and in those stories women are often the ones acted upon.</p>
+
+  <h4>Topics: a portrait, not a test</h4>
+  <p>Both samples are dominated by entertainment, and Bollywood is everywhere, but the rest of the mix differs. Articles with female terms are 57% entertainment and lifestyle, 21% sport and 15% harassment, court cases and rights campaigns. Articles with male terms are 40% entertainment and 23% cricket, and about a fifth cover economy, technology, science and national affairs, themes with almost no counterpart on the female side. The share of women’s sport is likely inflated by naming: women’s teams are called women’s teams, while men’s teams usually are not.</p>
+  <figure>
+    <div class="ua-tb"><div class="ua-tb-l">Articles with female terms</div><div class="ua-tb-bar"><div class="ua-seg ent" style="width:56.6%" title="Entertainment and lifestyle: 56.6%"><span>57%</span></div><div class="ua-seg spt" style="width:20.8%" title="Sport: 20.8%"><span>21%</span></div><div class="ua-seg law" style="width:14.6%" title="Law, crime and harassment: 14.6%"><span>15%</span></div><div class="ua-seg eco" style="width:3.2%" title="Economy, tech, science and national affairs: 3.2%"><span>3%</span></div><div class="ua-seg oth" style="width:4.8%" title="Family, loss and other: 4.8%"><span>5%</span></div></div></div><div class="ua-tb"><div class="ua-tb-l">Articles with male terms</div><div class="ua-tb-bar"><div class="ua-seg ent" style="width:40.4%" title="Entertainment and lifestyle: 40.4%"><span>40%</span></div><div class="ua-seg spt" style="width:23.0%" title="Sport: 23.0%"><span>23%</span></div><div class="ua-seg law" style="width:6.4%" title="Law, crime and harassment: 6.4%"><span>6%</span></div><div class="ua-seg eco" style="width:21.4%" title="Economy, tech, science and national affairs: 21.4%"><span>21%</span></div><div class="ua-seg oth" style="width:8.8%" title="Family, loss and other: 8.8%"><span>9%</span></div></div></div><div class="ua-key ua-key-t"><span><i class="ua-sw2 ent"></i>Entertainment and lifestyle</span><span><i class="ua-sw2 spt"></i>Sport</span><span><i class="ua-sw2 law"></i>Law, crime and harassment</span><span><i class="ua-sw2 eco"></i>Economy, tech, science and national affairs</span><span><i class="ua-sw2 oth"></i>Family, loss and other</span></div>
+    <div class="ua-chips-l">Largest topics with female terms</div>
+    <div class="ua-chips">
+      <span class="ua-chip">film and actress talk<b>115</b></span><span class="ua-chip">women’s cricket<b>45</b></span><span class="ua-chip">Bollywood<b>40</b></span><span class="ua-chip">harassment and #MeToo<b>39</b></span><span class="ua-chip">tennis<b>37</b></span>
+    </div>
+    <div class="ua-chips-l">Largest topics with male terms</div>
+    <div class="ua-chips">
+      <span class="ua-chip">cricket and captains<b>60</b></span><span class="ua-chip">film actors, Shah Rukh Khan<b>50</b></span><span class="ua-chip">Pakistan and national news<b>49</b></span><span class="ua-chip">Salman Khan films<b>41</b></span><span class="ua-chip">actresses, films, husbands<b>40</b></span>
+    </div>
+    <figcaption><b>Figure 5.</b> Share of 500 sampled articles per group falling in each broad theme. Topics were fitted separately for each group and grouped into themes by hand, so read this as description.</figcaption>
+  </figure>
+
+  <h4>Adjectives: a lesson in grammar</h4>
+  <p>Of 63 adjectives that appeared at least twice, two survived correction, both on the male side: <span class="ur" lang="ur" dir="rtl">بڑا</span> (1 female against 12 male) and <span class="ur" lang="ur" dir="rtl">چھوٹا</span> (1 against 11). But Urdu adjectives take the ending alif (<span class="ur" lang="ur" dir="rtl">ا</span>) before masculine nouns and ye (<span class="ur" lang="ur" dir="rtl">ی</span>) before feminine ones, and the feminine twins <span class="ur" lang="ur" dir="rtl">بڑی</span> and <span class="ur" lang="ur" dir="rtl">چھوٹی</span> are among the top female-side adjectives. The test is picking up agreement. Add that these adjectives often mean elder and younger in family contexts, and the pattern is as much about kinship words as about description.</p>
+  <figure>
+    <div class="ua-bf-head"><span><i class="ua-sw f"></i>Female terms</span><span>Male terms<i class="ua-sw m"></i></span></div><div class="ua-bf-cap">As tested: each form counted separately</div><div class="ua-bf-row"><div class="ua-bf-f"><b style="width:65.0%"></b><span>10</span></div><div class="ua-bf-c"><span class="ur" lang="ur" dir="rtl">بڑی</span><small>feminine form of big, elder</small></div><div class="ua-bf-m"><span>0</span></div></div><div class="ua-bf-row"><div class="ua-bf-f"><b style="width:6.5%"></b><span>1</span></div><div class="ua-bf-c"><span class="ur" lang="ur" dir="rtl">بڑا</span><small>masculine form of big, elder</small></div><div class="ua-bf-m"><b style="width:78.0%"></b><span>12</span></div></div><div class="ua-bf-row"><div class="ua-bf-f"><b style="width:26.0%"></b><span>4</span></div><div class="ua-bf-c"><span class="ur" lang="ur" dir="rtl">چھوٹی</span><small>feminine form of small, younger</small></div><div class="ua-bf-m"><span>0</span></div></div><div class="ua-bf-row"><div class="ua-bf-f"><b style="width:6.5%"></b><span>1</span></div><div class="ua-bf-c"><span class="ur" lang="ur" dir="rtl">چھوٹا</span><small>masculine form of small, younger</small></div><div class="ua-bf-m"><b style="width:71.5%"></b><span>11</span></div></div><div class="ua-bf-cap">After merging the two forms of each adjective</div><div class="ua-bf-row merged"><div class="ua-bf-f"><b style="width:71.5%"></b><span>11</span></div><div class="ua-bf-c"><span class="ur" lang="ur" dir="rtl">بڑا / بڑی</span><small>both forms added together</small></div><div class="ua-bf-m"><b style="width:78.0%"></b><span>12</span></div></div><div class="ua-bf-row merged"><div class="ua-bf-f"><b style="width:32.5%"></b><span>5</span></div><div class="ua-bf-c"><span class="ur" lang="ur" dir="rtl">چھوٹا / چھوٹی</span><small>both forms added together</small></div><div class="ua-bf-m"><b style="width:71.5%"></b><span>11</span></div></div>
+    <figcaption><b>Figure 6.</b> Counts of each adjective form next to female and male terms. Merged rows add the two forms. Merging does not settle the question, since female terms attract more modifiers overall and that changes what counts as surprising on each side, but it removes the grammatical split.</figcaption>
+  </figure>
+  <p>The other candidates never came close. On the female side, young (<span class="ur" lang="ur" dir="rtl">نوجوان</span>) and beautiful (<span class="ur" lang="ur" dir="rtl">خوبصورت</span>) have q-values of 0.40 and 0.72, and none of the female-side adjectives went below 0.30. The nearest male-side candidate after the two grammatical ones, <span class="ur" lang="ur" dir="rtl">مبتلا</span> (afflicted), has q = 0.07. We treat this section as a methods note, not a finding.</p>
+
+  <h3>Limits and next steps</h3>
+  <ul class="ua-list">
+    <li><b>Small parsed sample.</b> 400 articles, and only about a quarter of gendered mentions received a subject or object label. A larger parse would tighten the agency estimates.</li>
+    <li><b>Female-term article is not the same as an article about a woman.</b> Some articles appear to enter a sample through family words; one topic in the female sample covers a male cricketer’s family.</li>
+    <li><b>Missing letters.</b> Many words in the source text have lost the letter <span class="ur" lang="ur" dir="rtl">آ</span> (<span class="ur" lang="ur" dir="rtl">اج</span> for <span class="ur" lang="ur" dir="rtl">آج</span>, <span class="ur" lang="ur" dir="rtl">سٹریلیا</span> for <span class="ur" lang="ur" dir="rtl">آسٹریلیا</span>). This blurs some word pairs and hurts parsing. The text needs repair and the analyses need re-running.</li>
+    <li><b>Adjective p-values.</b> The p-values need to be checked against the counts shown; on some rows the counts and p-values do not line up.</li>
+    <li><b>Separate topic models.</b> Fitting one joint model with gender as a covariate would allow direct comparison.</li>
+    <li><b>Association is not intent.</b> Embeddings reflect which words appear together in what gets reported. They show patterns in coverage, not what editors meant.</li>
+  </ul>
+  <!-- TODO: link the term lists and the analysis code here -->
+
+  <h3>What we would and would not say</h3>
+  <ul class="ua-list">
+    <li><b>Confidently:</b> in this corpus, words about business, office, employment and chairmanship live nearer to men’s terms, and household and victim words nearer to women’s.</li>
+    <li><b>Cautiously:</b> women’s terms may be slightly less often grammatical subjects.</li>
+    <li><b>Not yet:</b> anything about which adjectives describe women, until grammatical gender is handled.</li>
+  </ul>
+
+  <h3>Related reading</h3>
+  <ul class="ua-list">
+    <li><a href="https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0319301">Detecting gender bias in Arabic text through word embeddings</a> (PLOS One, 2025)</li>
+    <li><a href="https://arxiv.org/pdf/2005.08864">Grammatical gender associations outweigh topical gender bias in crosslinguistic word embeddings</a> (arXiv)</li>
+    <li><a href="https://www.researchgate.net/publication/396567745_Gender_Representation_in_Media_Content_A_Comparative_Critical_Discourse_Analysis_of_Pakistani_Urdu_and_English_Print_Media_Outlets">Gender representation in media content: a comparative critical discourse analysis of Pakistani Urdu and English print media</a> (2025)</li>
+  </ul>
+
+</article>
+</div>
+{% endblock %}
