@@ -20,17 +20,19 @@
       <span class="logo-mark">ز</span>
       <span class="logo-word">Zuban Daraz</span>
     </a>
-    <form class="search" action="{{ url_for('browse') }}" method="get">
+    <!--<form class="search" action="{{ url_for('browse') }}" method="get">
       <label class="visually-hidden" for="searchInput">Search the archive</label>
       <input id="searchInput" name="q" type="text" placeholder="Search for a word…" value="{{ request.args.get('q', '') }}" />
         <button type="submit" aria-label="Search">
           <span class="material-symbols-outlined">search</span>
         </button>    
-    </form>
+    </form>-->
     <nav class="main-nav">
       <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Home</a>
       <a class="nav-link {% if request.endpoint == 'browse' %}active{% endif %}" href="{{ url_for('browse') }}">Words</a>
         <a class="nav-link {% if request.endpoint == 'idioms' %}active{% endif %}" href="{{ url_for('idioms') }}">Idioms</a>
+        <a class="nav-link {% if request.endpoint == 'corpora' %}active{% endif %}" href="{{ url_for('corpora') }}">Corpora</a>
+
       <a class="nav-link {% if request.endpoint == 'about_page' %}active{% endif %}" href="{{ url_for('about_page') }}">About</a>
       <a class="btn-submit" href="{{ url_for('submit_page') }}">Submit a word</a>
     </nav>
