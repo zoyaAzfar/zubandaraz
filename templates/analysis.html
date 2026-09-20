@@ -7,6 +7,7 @@
 <h1 class="browse-title">Newspaper Corpus Analysis</h1>
 </div>
 
+  <div class = "wallotext">
 <p>Large bodies of work can also carry linguistic bias, and newspapers are an excellent example. Are women written about as people who "do" things, or as people to whom things happen? Are certain words used around women that rarely appear around men? This kind of linguistic bias has been studied in English, and more recently in Arabic, Turkish and Hindi. Urdu, spoken by over 250 million people worldwide, has received far less attention.</p>
 
 <p>In this analysis we ask a simple question: how do the words used around men and women in Urdu news differ? We measured four things: grammatical agency (is a gendered term more often the subject or the object?), modifiers (which adjectives cluster around female versus male terms?), semantic association (in a Word2Vec space, which concepts sit closer to female or male terms?), and topics (what do articles about men and women actually talk about?).</p>
@@ -68,7 +69,7 @@
 <h2>Future work</h2>
 
 <p>Lemmatizing modifiers would stop grammatical gender agreement from showing up as a false bias signal. Retraining Word2Vec over several seeds and reporting the spread in similarity, rather than a single run, would give a better sense of how stable these associations are. Parsing and sampling more articles would improve statistical power on the borderline results. And comparing these findings against English-medium Pakistani papers would be an interesting extension.</p>
-
+  </div>
 </div>
 
 {% endblock %}
