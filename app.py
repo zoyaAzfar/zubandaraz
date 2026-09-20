@@ -223,7 +223,7 @@ def submit_page():
 def about_page():
     return render_template("aboutus.html")
 
-@app.route("/corpus")
+@app.route("/corpora")
 def corpus_page():
     return render_template("analysis.html")
 
