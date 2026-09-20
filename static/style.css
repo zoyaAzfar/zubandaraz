@@ -138,7 +138,13 @@ a { color: inherit; }
   font-size: 1.4rem; /* Controls the size of the search icon */
 }
 
-.main-nav { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.main-nav { 
+  display: flex; 
+  align-items: center; 
+  gap: 6px; 
+  flex-shrink: 0; 
+  margin-left: auto; /* Pushes the nav to the far right */
+}
 .nav-link { background: none; border: none; color: var(--paper); opacity: 0.8; font-size: 0.95rem; padding: 8px 12px; border-radius: var(--radius); text-decoration: none; }
 .nav-link:hover, .nav-link.active { opacity: 1; background: rgba(248,247,245,0.08); }
 .btn-submit { background: var(--green); color: var(--ink); border: none; font-weight: 600; font-size: 0.9rem; padding: 9px 16px; border-radius: var(--radius); margin-left: 4px; text-decoration: none; display: inline-block; }
