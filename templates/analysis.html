@@ -30,7 +30,7 @@
 
 <p>Across all parsed mentions, female terms were grammatical subjects 48 times and objects or passives 55 times (46.6% agentive). Male terms split 39 and 30 (56.6% agentive).</p>
 
-<img src="{{ url_for('static', filename='images/chart_agency.png') }}" alt="Bar chart showing female articles at 46.6% subject / 53.4% object-passive, and male articles at 56.5% subject / 43.5% object-passive">
+<img src="{{ url_for('static', filename='chart_agency.png') }}" alt="Bar chart showing female articles at 46.6% subject / 53.4% object-passive, and male articles at 56.5% subject / 43.5% object-passive">
 
 <p>At the document level, mean agency rate was 0.44 for female articles and 0.61 for male articles — a difference of −0.173 (permutation p = 0.050). A bootstrap over the same 111 documents gives a 95% interval of roughly −0.34 to −0.005 for that difference, which only just excludes zero; treating each mention as independent instead of each document, the same comparison is not significant (Fisher's exact p ≈ 0.22). Since mentions inside one article aren't independent, the document-level test is the better one, but this remains a suggestive rather than a settled result given the small sample.</p>
 
@@ -38,7 +38,7 @@
 
 <p>Urdu grammar itself is gendered, which made this the hardest test to run cleanly: adjectives that scored as strongly feminine or masculine, such as بڑی and بڑا ("big," feminine and masculine forms), often just reflect grammatical agreement with whoever is being described rather than any real bias. With no ready-made list of gendered Urdu terms to exclude, we relied on manually built stopword lists, which are imperfect — so the two most frequent words below are exactly this grammatical-agreement artifact, not a distinctive-usage finding.</p>
 
-<img src="{{ url_for('static', filename='images/chart_modifiers.png') }}" alt="Two bar charts showing the most frequent modifiers attached to female terms and to male terms">
+<img src="{{ url_for('static', filename='chart_modifiers.png') }}" alt="Two bar charts showing the most frequent modifiers attached to female terms and to male terms">
 
 <p>By log-odds score — a better measure of distinctiveness than raw frequency — female terms leaned toward words such as سوتیلی ("step-"), نوجوان ("young"), and خوبصورت ("beautiful"), against more ordinary male-leaning terms like مبتلا ("afflicted"), شفیق ("kind"), and انجہانی ("the late," i.e. deceased). None of these correlations reached FDR significance, so read them as descriptive rather than confirmed.</p>
 
@@ -46,7 +46,7 @@
 
 <p>Across all 94 tests, the average Δ was −0.011, and 63 of 94 concepts sat closer to the male attribute set. Leadership/Power (17 of 20) and Crime/Legal (18 of 19) were almost exclusively male-leaning, though individual effect sizes are small and most words don't survive correction. Domestic/Family was the only category where more concepts leaned female than male (12 of 19).</p>
 
-<img src="{{ url_for('static', filename='images/chart_word2vec.png') }}" alt="Diverging bar chart showing the share of Word2Vec concept tests leaning female or male, by category">
+<img src="{{ url_for('static', filename='chart_word2vec.png') }}" alt="Diverging bar chart showing the share of Word2Vec concept tests leaning female or male, by category">
 
 <p>Six associations survived FDR correction (q &lt; 0.05). Male-leaning: چیئرمین ("chairman," Δ −0.083), کاروبار ("business," Δ −0.062), روزگار ("employment," Δ −0.061), and دفتر ("office," Δ −0.055) — all professional/career vocabulary. Female-leaning: گھریلو ("domestic," Δ +0.061) and مظلوم ("oppressed/wronged," Δ +0.068) — domestic and victimhood vocabulary. Similarities across these six terms ranged 0.095–0.221 on the male-leaning side and 0.272–0.382 on the female-leaning side.</p>
 
@@ -54,7 +54,7 @@
 
 <p>Film and celebrity coverage was the largest theme in both samples (34% female, 32% male), followed by sport (21% vs. 23%). The gap between the two samples shows up in the smaller themes: articles mentioning women included more crime stories (11% vs. 6%), driven largely by harassment and assault cases, as well as more fashion and culture coverage. Articles mentioning men spread further into a broad bucket of general Pakistan news: technology, science, economics, and COVID-19.</p>
 
-<img src="{{ url_for('static', filename='images/chart_topics.png') }}" alt="Grouped bar chart comparing article share by theme for female-term and male-term articles">
+<img src="{{ url_for('static', filename='chart_topics.png') }}" alt="Grouped bar chart comparing article share by theme for female-term and male-term articles">
 
 <h2>Discussion</h2>
 
