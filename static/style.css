@@ -963,6 +963,13 @@ a { color: inherit; }
 .wallotext p:last-child { margin-bottom: 0; }
 .wallotext .closing-line { color: var(--paper); }
 
+.wallotext img {
+  display: block;
+  max-width: 100%;
+  height: auto;          /* keeps the aspect ratio */
+  margin: 1.5rem auto;   /* optional: centres it with some breathing room */
+}
+
 .pull-quote {
   margin: 0 0 32px;
   padding: 24px 28px;
