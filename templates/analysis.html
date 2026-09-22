@@ -2,74 +2,462 @@
 {% block title %}Corpora — Zuban Daraz{% endblock %}
 {% block content %}
 
-<div class="entry-detail">
-<div class="browse-heading">
-<h1 class="browse-title">Newspaper Corpus Analysis</h1>
-</div>
 
-  <div class = "wallotext">
-<p>Large bodies of work can also carry linguistic bias, and newspapers are an excellent example. Are women written about as people who "do" things, or as people to whom things happen? Are certain words used around women that rarely appear around men? This kind of linguistic bias has been studied in English, and more recently in Arabic, Turkish and Hindi. Urdu, spoken by over 250 million people worldwide, has received far less attention.</p>
+{# Sheet: Metadata #}
+{% set corpus = {'total': 111861, 'female': 14289, 'male': 15530, 'both': 7060, 'f_only': 7229, 'm_only': 8470} %}
+{% set flagged = corpus.f_only + corpus.both + corpus.m_only %}
+{% set flagged_pct = flagged / corpus.total * 100 %}
 
-<p>In this analysis we ask a simple question: how do the words used around men and women in Urdu news differ? We measured four things: grammatical agency (is a gendered term more often the subject or the object?), modifiers (which adjectives cluster around female versus male terms?), semantic association (in a Word2Vec space, which concepts sit closer to female or male terms?), and topics (what do articles about men and women actually talk about?).</p>
+{# Sheet: Agency Summary #}
+{% set ag = {'f_subj': 48, 'f_obj': 55, 'm_subj': 39, 'm_obj': 30,
+             'f_docs': 62, 'm_docs': 49, 'f_mean': 0.44, 'm_mean': 0.61,
+             'diff': -0.173, 'ci_lo': -0.34, 'ci_hi': -0.005, 'p': 0.050} %}
+{% set f_rate = ag.f_subj / (ag.f_subj + ag.f_obj) * 100 %}
+{% set m_rate = ag.m_subj / (ag.m_subj + ag.m_obj) * 100 %}
 
-<h2>Data &amp; methods</h2>
+{# Sheet: Modifiers — words with the same count are kept together. agree = gender-agreement form #}
+{% set mod_f = [
+  {'w': 'پاکستانی', 'en': 'Pakistani',         'n': 9},
+  {'w': 'سوتیلی',   'en': 'step- (f.)',        'n': 5},
+  {'w': 'نوجوان',   'en': 'young, teenage',    'n': 4},
+  {'w': 'امریکی',   'en': 'American',          'n': 4},
+  {'w': 'بڑی',      'en': 'big (f.)',          'n': 4, 'agree': true},
+  {'w': 'مزاج',     'en': 'temperament',       'n': 3},
+  {'w': 'مخنث',     'en': 'transgender',       'n': 3},
+  {'w': 'مسلم',     'en': 'Muslim',            'n': 3}] %}
+{% set mod_m = [
+  {'w': 'بڑا',      'en': 'big (m.)',          'n': 8, 'agree': true},
+  {'w': 'چھوٹا',    'en': 'small (m.)',        'n': 5, 'agree': true},
+  {'w': 'مبتلا',    'en': 'afflicted',         'n': 5},
+  {'w': 'نیا',      'en': 'new (m.)',          'n': 2, 'agree': true},
+  {'w': 'امریکی',   'en': 'American',          'n': 2},
+  {'w': 'شفیق',     'en': 'kind',              'n': 2},
+  {'w': 'انجہانی',  'en': 'the late',          'n': 2},
+  {'w': 'ننھا',     'en': 'little (m.)',       'n': 2, 'agree': true}] %}
+{% set mod_scale = 10 %}
+{% set distinct_f = [{'w': 'سوتیلی', 'en': 'step-'}, {'w': 'نوجوان', 'en': 'young'}, {'w': 'خوبصورت', 'en': 'beautiful'}] %}
+{% set distinct_m = [{'w': 'مبتلا', 'en': 'afflicted'}, {'w': 'شفیق', 'en': 'kind'}, {'w': 'انجہانی', 'en': 'the late'}] %}
 
-<p>The articles come from a public dataset of 111,861 Urdu news articles spanning Business &amp; Economics, Science &amp; Technology, Entertainment, and Sports. Each article was flagged against a list of female and male terms: 14,289 articles contained a female term and 15,530 a male term; 7,060 contained both, leaving 7,229 female-only and 8,470 male-only articles. That's about 20% of the original corpus.</p>
+{# Sheet: W2V Bias — concepts leaning female (f) or male (m) by category; sig = survive FDR #}
+{% set w2v_cats = [
+  {'name': 'Domestic / family',          'f': 12, 'm': 7,  'sig': 1},
+  {'name': 'Victimhood / vulnerability', 'f': 8,  'm': 10, 'sig': 1},
+  {'name': 'Professional / career',      'f': 7,  'm': 11, 'sig': 3},
+  {'name': 'Leadership / power',         'f': 3,  'm': 17, 'sig': 1},
+  {'name': 'Crime / legal',              'f': 1,  'm': 18, 'sig': 0}] %}
+{% set w2v_f = 31 %}
+{% set w2v_m = 63 %}
+{% set w2v_male = [
+  {'w': 'چیئرمین', 'en': 'chairman',   'f': 0.092, 'm': 0.176, 'd': '−0.083'},
+  {'w': 'کاروبار', 'en': 'business',   'f': 0.034, 'm': 0.095, 'd': '−0.062'},
+  {'w': 'روزگار',  'en': 'employment', 'f': 0.150, 'm': 0.211, 'd': '−0.061'},
+  {'w': 'دفتر',    'en': 'office',     'f': 0.165, 'm': 0.221, 'd': '−0.055'}] %}
+{% set w2v_female = [
+  {'w': 'گھریلو',  'en': 'domestic',            'f': 0.272, 'm': 0.211, 'd': '+0.061'},
+  {'w': 'مظلوم',   'en': 'oppressed, wronged',  'f': 0.382, 'm': 0.314, 'd': '+0.068'}] %}
+{% set sim_max = 0.4 %}
 
-<p>200 articles from the female-term set and 200 from the male-term set were parsed with Stanza's Urdu pipeline (no parsing failures) for grammatical agency. For each gendered mention we recorded whether it was a subject or an object. Documents with a countable role were assigned a document-level "agency rate" — subjects ÷ (subjects + objects/passives) — which left 62 usable female articles and 49 usable male articles. The group difference in mean document-level rate was tested with a 10,000-permutation test.</p>
+{# Sheets: BERTopic Female / BERTopic Male — article counts per theme (out of 500 each).
+   Theme = sum of the topic counts grouped into it:
+   Film & celebrity      F: topics 0, 3, 13        M: topics 0, 1, 3, 9
+   Sport                 F: topics 1, 2, 8         M: topics 2, 5, 8
+   Crime & courts        F: topics 4, 10           M: topic 4
+   Fashion & culture     F: topics 6, 7, 11, 15    M: topic 15
+   General news          F: topics 12, 14          M: topics 6, 7, 10, 14
+   Weddings & family     F: topics 5, 9            M: topics 11, 12, 13 #}
+{% set topic_n = 500 %}
+{% set themes = [
+  {'name': 'Film & celebrity',                 'f': 170, 'm': 162},
+  {'name': 'Sport',                            'f': 104, 'm': 115},
+  {'name': 'Crime & courts',                   'f': 56,  'm': 32},
+  {'name': 'Fashion & culture',                'f': 85,  'm': 21},
+  {'name': 'General news (tech, science, economy, COVID-19)', 'f': 33, 'm': 107},
+  {'name': 'Weddings, family & obituaries',    'f': 52,  'm': 63}] %}
+{% set theme_scale = 40 %}
 
-<p>Adjectives attached to female and male terms were counted (102 female and 53 male modifier tokens; 64 vs. 33 distinct words) and compared with a log-odds score, where a positive score is more distinctive of female terms and a negative score of male terms. At this sample size, these statistics are best read descriptively.</p>
+{# Sheets: BERTopic Female / BERTopic Male, raw — topic number, keywords, article count,
+   grouped under the same six themes as above. Keywords are the model's own top terms
+   for that topic; underscore-joined names from the sheet, split for display here. #}
+{% set appendix = [
+  {'theme': 'Film & celebrity', 'f': [
+      {'t': 0, 'n': 115, 'kw': ['فلم','کردار','کہانی','اداکارہ']},
+      {'t': 3, 'n': 40,  'kw': ['فلم','خان','بالی','عامر']},
+      {'t': 13,'n': 15,  'kw': ['فہرست','خان','فواد','سال']}],
+   'm': [
+      {'t': 0, 'n': 40, 'kw': ['اداکارہ','فلم','شوہر','انہوں']},
+      {'t': 1, 'n': 41, 'kw': ['فلم','خان','سلمان','ریلیز']},
+      {'t': 3, 'n': 31, 'kw': ['فلم','ہالی','کہانی','گھروں']},
+      {'t': 9, 'n': 50, 'kw': ['فلم','کردار','خان','رخ']}]},
+  {'theme': 'Sport', 'f': [
+      {'t': 1, 'n': 45, 'kw': ['ٹیم','پاکستان','میچ','کرکٹ']},
+      {'t': 2, 'n': 37, 'kw': ['فائنل','کھلاڑی','عالمی','نمبر']},
+      {'t': 8, 'n': 22, 'kw': ['سی','کرکٹ','بورڈ','پاکستان']}],
+   'm': [
+      {'t': 2, 'n': 30, 'kw': ['رنز','ٹیم','میچ','ٹیسٹ']},
+      {'t': 5, 'n': 60, 'kw': ['ٹیم','کرکٹ','پاکستان','سی']},
+      {'t': 8, 'n': 25, 'kw': ['ٹیم','میچ','ٹیسٹ','پاکستان']}]},
+  {'theme': 'Crime & courts', 'f': [
+      {'t': 4, 'n': 39, 'kw': ['جنسی','وڈ','خواتین','وائنسٹن']},
+      {'t': 10,'n': 17, 'kw': ['عدالت','سزا','درخواست','سماعت']}],
+   'm': [
+      {'t': 4, 'n': 32, 'kw': ['عدالت','کیس','الزام','پولیس']}]},
+  {'theme': 'Fashion & culture', 'f': [
+      {'t': 6, 'n': 24, 'kw': ['فیشن','ملبوسات','نمائش','ویک']},
+      {'t': 7, 'n': 21, 'kw': ['بانو','موسیقی','اردو','گلوکار']},
+      {'t': 11,'n': 24, 'kw': ['ایوارڈز','ایوارڈ','ورلڈ','تقریب']},
+      {'t': 15,'n': 16, 'kw': ['بچن','اداکارہ','عمر','امیتابھ']}],
+   'm': [
+      {'t': 15,'n': 21, 'kw': ['موسیقی','علی','استاد','خان']}]},
+  {'theme': 'General news (tech, science, economy, COVID-19)', 'f': [
+      {'t': 12,'n': 16, 'kw': ['برقع','پابندی','سرمایہ','مالی']},
+      {'t': 14,'n': 17, 'kw': ['خواتین','مہم','موجود','کسی']}],
+   'm': [
+      {'t': 6, 'n': 23, 'kw': ['ڈالر','ارب','کورونا','وائرس']},
+      {'t': 7, 'n': 49, 'kw': ['پاکستان','پاکستانی','خان','ئی']},
+      {'t': 10,'n': 18, 'kw': ['ایپ','فیس','صارفین','واٹس']},
+      {'t': 14,'n': 17, 'kw': ['چاند','نیند','انسانی','کمی']}]},
+  {'theme': 'Weddings, family & obituaries', 'f': [
+      {'t': 5, 'n': 28, 'kw': ['شادی','علی','دونوں','کلونی']},
+      {'t': 9, 'n': 24, 'kw': ['بیٹی','انتقال','کرکٹر','علی']}],
+   'm': [
+      {'t': 11,'n': 19, 'kw': ['شادی','دونوں','مرزا','ملک']},
+      {'t': 12,'n': 23, 'kw': ['انتقال','علاج','انہوں','اداکار']},
+      {'t': 13,'n': 21, 'kw': ['بچوں','فیشن','کیلئے','خوب']}]}] %}
 
-<p>A skip-gram Word2Vec model was trained on the full corpus with a minimum word count of 20. Female and male attribute term sets (47 and 45 terms) were reduced by the frequency cutoff to 37 and 34 in-vocabulary terms. Five concept categories were tested against those attribute sets — Leadership/Power, Domestic/Family, Crime/Legal, Victimhood/Vulnerability, and Professional/Career — for 94 concept tests in total. For each test we computed mean cosine similarity of the concept to each attribute set, then the difference Δ = female − male. Significance came from a randomization test reshuffling which terms carry the male or female label, followed by a Benjamini–Hochberg FDR correction across all 94 tests at α = 0.05.</p>
 
-<p>BERTopic, with UMAP dimensionality reduction, was run separately on 500 female-term and 500 male-term articles. Outlier documents were reassigned so every article belonged to a topic. Each topic was labelled in plain English by hand, then grouped into broader themes.</p>
+<div class="entry-detail cx">
 
-<h2>Results</h2>
+  <!-- ================= HERO ================= -->
+  <header class="browse-heading">
+    <p class="hero-eyebrow">Newspaper corpus analysis</p>
+    <h1 class="browse-title cx-hero-title">Who acts, and who is acted upon?</h1>
+    <p class="mission">How Urdu news writes about women and men, measured four ways: grammar, adjectives, word embeddings and topics.</p>
+  </header>
 
-<h3>Agency</h3>
-
-<p>Across all parsed mentions, female terms were grammatical subjects 48 times and objects or passives 55 times (46.6% agentive). Male terms split 39 and 30 (56.6% agentive).</p>
-
-<img src="{{ url_for('static', filename='chart_agency.png') }}" alt="Bar chart showing female articles at 46.6% subject / 53.4% object-passive, and male articles at 56.5% subject / 43.5% object-passive">
-
-<p>At the document level, mean agency rate was 0.44 for female articles and 0.61 for male articles — a difference of −0.173 (permutation p = 0.050). A bootstrap over the same 111 documents gives a 95% interval of roughly −0.34 to −0.005 for that difference, which only just excludes zero; treating each mention as independent instead of each document, the same comparison is not significant (Fisher's exact p ≈ 0.22). Since mentions inside one article aren't independent, the document-level test is the better one, but this remains a suggestive rather than a settled result given the small sample.</p>
-
-<h3>Modifiers</h3>
-
-<p>Urdu grammar itself is gendered, which made this the hardest test to run cleanly: adjectives that scored as strongly feminine or masculine, such as بڑی and بڑا ("big," feminine and masculine forms), often just reflect grammatical agreement with whoever is being described rather than any real bias. With no ready-made list of gendered Urdu terms to exclude, we relied on manually built stopword lists, which are imperfect — so the two most frequent words below are exactly this grammatical-agreement artifact, not a distinctive-usage finding.</p>
-
-<img src="{{ url_for('static', filename='chart_modifiers.png') }}" alt="Two bar charts showing the most frequent modifiers attached to female terms and to male terms">
-
-<p>By log-odds score — a better measure of distinctiveness than raw frequency — female terms leaned toward words such as سوتیلی ("step-"), نوجوان ("young"), and خوبصورت ("beautiful"), against more ordinary male-leaning terms like مبتلا ("afflicted"), شفیق ("kind"), and انجہانی ("the late," i.e. deceased). None of these correlations reached FDR significance, so read them as descriptive rather than confirmed.</p>
-
-<h3>Word2Vec</h3>
-
-<p>Across all 94 tests, the average Δ was −0.011, and 63 of 94 concepts sat closer to the male attribute set. Leadership/Power (17 of 20) and Crime/Legal (18 of 19) were almost exclusively male-leaning, though individual effect sizes are small and most words don't survive correction. Domestic/Family was the only category where more concepts leaned female than male (12 of 19).</p>
-
-<img src="{{ url_for('static', filename='chart_word2vec.png') }}" alt="Diverging bar chart showing the share of Word2Vec concept tests leaning female or male, by category">
-
-<p>Six associations survived FDR correction (q &lt; 0.05). Male-leaning: چیئرمین ("chairman," Δ −0.083), کاروبار ("business," Δ −0.062), روزگار ("employment," Δ −0.061), and دفتر ("office," Δ −0.055) — all professional/career vocabulary. Female-leaning: گھریلو ("domestic," Δ +0.061) and مظلوم ("oppressed/wronged," Δ +0.068) — domestic and victimhood vocabulary. Similarities across these six terms ranged 0.095–0.221 on the male-leaning side and 0.272–0.382 on the female-leaning side.</p>
-
-<h3>Topics</h3>
-
-<p>Film and celebrity coverage was the largest theme in both samples (34% female, 32% male), followed by sport (21% vs. 23%). The gap between the two samples shows up in the smaller themes: articles mentioning women included more crime stories (11% vs. 6%), driven largely by harassment and assault cases, as well as more fashion and culture coverage. Articles mentioning men spread further into a broad bucket of general Pakistan news: technology, science, economics, and COVID-19.</p>
-
-<img src="{{ url_for('static', filename='chart_topics.png') }}" alt="Grouped bar chart comparing article share by theme for female-term and male-term articles">
-
-<h2>Discussion</h2>
-
-<p>Each result on its own is modest, but together they point toward a pattern: women under-represented in public-sphere roles, and more often framed as marginalized or as victims. Women are mentioned more often in object or passive roles (agency), sit nearer household and victimhood vocabulary (Word2Vec), and appear more often in stories about harassment and courts (topic modelling).</p>
-
-<p>That said, male vocabulary may simply be acting as the baseline in this embedding space. The two attribute sets differ in size, term mix and frequency, and embedding similarity tends to track frequency — so the average Δ of −0.011 could reflect a baseline shift rather than "everything is more male." A useful next step is to centre Δ on the mean and re-test.</p>
-
-<h2>Limitations</h2>
-
-<p>The corpus is dominated by entertainment and sport, so these results describe how gender appears in that coverage, not necessarily in politics or economics reporting. The frequency cutoff dropped 10 female and 11 male terms, mostly kinship words like "mother" and "father" — since both attribute sets lose much of their family vocabulary, this may soften any domestic-versus-public contrast. The agency result lands at exactly p = 0.050, which is fragile, and Urdu's free word order, ergative marking, and light-verb constructions make subject/object labelling harder for a parser than in English. Topic themes were grouped by hand, and forcing every outlier document into a topic can sometimes assign articles to a topic that isn't a clean fit. We also ran a single Word2Vec training run — similarity values shift between random seeds, so repeated runs would give a better sense of stability — and hardware limitations meant we could only parse about 400 of the gendered articles for the agency test.</p>
-
-<h2>Future work</h2>
-
-<p>Lemmatizing modifiers would stop grammatical gender agreement from showing up as a false bias signal. Retraining Word2Vec over several seeds and reporting the spread in similarity, rather than a single run, would give a better sense of how stable these associations are. Parsing and sampling more articles would improve statistical power on the borderline results. And comparing these findings against English-medium Pakistani papers would be an interesting extension.</p>
+  <div class="entry-hero">
+    <div class="cx-wordrow">
+      <div class="entry-word-card cx-word f">
+        <span class="script ur" lang="ur" dir="rtl">عورت</span>
+        <div class="card-tags"><span class="tag">Female terms</span></div>
+        <p class="cx-word-count">{{ '{:,}'.format(corpus.female) }} articles</p>
+      </div>
+      <div class="entry-word-card cx-word m">
+        <span class="script ur" lang="ur" dir="rtl">مرد</span>
+        <div class="card-tags"><span class="tag tag-teal">Male terms</span></div>
+        <p class="cx-word-count">{{ '{:,}'.format(corpus.male) }} articles</p>
+      </div>
+    </div>
+    <div class="entry-facts-card">
+      <p class="facts-label">At a glance</p>
+      <dl class="facts-list">
+        <div class="facts-row facts-count">
+          <dt>Grammatical subject</dt>
+          <dd>{{ '%.1f'|format(f_rate) }}% vs {{ '%.1f'|format(m_rate) }}%</dd>
+        </div>
+        <div class="facts-row">
+          <dt>Word2Vec, closer to male</dt>
+          <dd>{{ w2v_m }} of {{ w2v_f + w2v_m }} concepts</dd>
+        </div>
+        <div class="facts-row">
+          <dt>Crime-story share</dt>
+          <dd>{{ '%.0f'|format(themes[2].f / topic_n * 100) }}% vs {{ '%.0f'|format(themes[2].m / topic_n * 100) }}%</dd>
+        </div>
+      </dl>
+    </div>
   </div>
+
+  <!-- ================= INTRO ================= -->
+  <div class="wallotext cx-lead">
+    <p>Larger bodies of work can carry linguistic bias, and newspapers are an excellent example. Are women written about as people who "do" things, or as people things happen "to"? Are certain words used typically around women that aren't used for men? This phenomenon has been studied previously in English, and emerging studies have done so for Arabic, Turkish and Hindi. Even though Urdu is spoken by over 250 million people worldwide, it has received much less attention.</p>
+    <p>In this analysis, we ask a simple question: how do the words used around men and women in Urdu news differ? We answered this question by measuring four things.</p>
+  </div>
+
+  <nav class="entry-grid cx-measures" aria-label="The four measures">
+    <a class="entry-card" href="#agency"><span class="cx-measure-title">Grammatical agency</span><span class="gloss">Is a gendered term more often the subject or object?</span></a>
+    <a class="entry-card" href="#modifiers"><span class="cx-measure-title">Modifiers</span><span class="gloss">Which adjectives are found more commonly around female versus male terms?</span></a>
+    <a class="entry-card" href="#word2vec"><span class="cx-measure-title">Semantic association</span><span class="gloss">In a Word2Vec space, which concepts are female or male terms nearer to?</span></a>
+    <a class="entry-card" href="#topics"><span class="cx-measure-title">Topics</span><span class="gloss">What do articles about men and women talk about?</span></a>
+  </nav>
+
+  <!-- ================= DATA & METHODS ================= -->
+  <section class="cx-sec" id="data">
+    <h2 class="cx-h2">Data and methods</h2>
+    <div class="wallotext">
+      <p>Our articles come from a public dataset of Urdu news, containing {{ '{:,}'.format(corpus.total) }} articles across four categories: Business &amp; Economics, Science &amp; Technology, Entertainment, and Sports. Each article was flagged using a list of female and male terms. {{ '{:,}'.format(corpus.female) }} articles contained a female term and {{ '{:,}'.format(corpus.male) }} a male term; {{ '{:,}'.format(corpus.both) }} contained both, leaving {{ '{:,}'.format(corpus.f_only) }} female-only and {{ '{:,}'.format(corpus.m_only) }} male-only articles. So only about 20% of the original corpus was used for this analysis.</p>
+    </div>
+
+    <figure class="cx-fig">
+      <h3>{{ '{:,}'.format(flagged) }} of {{ '{:,}'.format(corpus.total) }} articles mention a gendered term</h3>
+      <p class="cx-fig-sub">Articles flagged against the list of female and male terms.</p>
+      <div class="cx-row-label"><span>All articles: {{ '{:,}'.format(corpus.total) }}</span><span>Flagged: {{ '%.1f'|format(flagged_pct) }}%</span></div>
+      <div class="cx-bar" aria-hidden="true">
+        <span class="rest" style="width: {{ 100 - flagged_pct }}%"></span><span class="hit" style="width: {{ flagged_pct }}%"></span>
+      </div>
+      <svg class="cx-zoom" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><polygon points="{{ 100 - flagged_pct }},0 100,0 100,10 0,10"/></svg>
+      <div class="cx-bar">
+        <span class="f" style="width: {{ corpus.f_only / flagged * 100 }}%">{{ '{:,}'.format(corpus.f_only) }}</span>
+        <span class="n" style="width: {{ corpus.both / flagged * 100 }}%">{{ '{:,}'.format(corpus.both) }}</span>
+        <span class="m" style="width: {{ corpus.m_only / flagged * 100 }}%">{{ '{:,}'.format(corpus.m_only) }}</span>
+      </div>
+      <div class="cx-seglabels">
+        <span style="width: {{ corpus.f_only / flagged * 100 }}%">Female terms only</span>
+        <span style="width: {{ corpus.both / flagged * 100 }}%">Both</span>
+        <span style="width: {{ corpus.m_only / flagged * 100 }}%">Male terms only</span>
+      </div>
+      <p class="cx-fig-note">Female terms appear in {{ '{:,}'.format(corpus.female) }} articles in total and male terms in {{ '{:,}'.format(corpus.male) }}; the {{ '{:,}'.format(corpus.both) }} articles that mention both are counted in each.</p>
+    </figure>
+
+    <div style="margin-top: 1.8rem;">
+      <div class="cx-method">
+        <h3>Agency via dependency parsing</h3>
+        <div class="wallotext"><p>200 articles from the female-term set and 200 from the male-term set were sampled and parsed with Stanza's Urdu pipeline (no parsing failures). For each gendered term, we recorded whether it was used as a grammatical subject or object. Only documents with one countable role were assigned an "agency rate" — subjects ÷ (subjects + objects/passives) — which left about {{ ag.f_docs }} female and {{ ag.m_docs }} male articles. The group difference in mean document-level rate was tested with a 10,000-permutation test.</p></div>
+      </div>
+      <div class="cx-method">
+        <h3>Distinctive modifiers</h3>
+        <div class="wallotext"><p>Adjectives attached to female and male terms were counted (102 female and 53 male modifier tokens; 64 vs. 33 distinct words) and compared with a log-odds score. A positive score means a word is more distinctive of female terms; a negative score, of male terms. At this sample size, these statistics are best read descriptively.</p></div>
+      </div>
+      <div class="cx-method">
+        <h3>Word2Vec semantic association</h3>
+        <div class="wallotext"><p>A skip-gram Word2Vec model was trained on the full corpus with a min_count of 20. Female and male attribute sets (47 and 45 terms) were reduced by the frequency cutoff to 37 and 34 in-vocabulary terms. We defined five categories to test — Leadership/Power, Domestic/Family, Crime/Legal, Victimhood/Vulnerability, and Professional/Career — for 94 concept tests in total. For each test we calculated the mean cosine similarity of the concept to each attribute set, then the difference Δ = female − male. Significance came from a randomization test that reshuffles which terms carry a male or female label, followed by a Benjamini–Hochberg FDR correction across all 94 tests at α = 0.05. Randomization p-values shift by a few thousandths between runs.</p></div>
+      </div>
+      <div class="cx-method">
+        <h3>Topic modelling</h3>
+        <div class="wallotext"><p>BERTopic, with UMAP dimensionality reduction, was run separately on 500 female-term and 500 male-term articles. Outlier documents were reassigned so every article belonged to a topic. Each topic is a cluster of frequently co-occurring keywords, which we labelled in plain English and then grouped into six broader themes. Since labelling is up to interpretation, the individual topics are listed in the appendix below.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= AGENCY ================= -->
+  <section class="cx-sec" id="agency">
+    <h2 class="cx-h2">Agency</h2>
+    <div class="wallotext">
+      <p>Across all parsed mentions, female terms were grammatical subjects {{ ag.f_subj }} times and objects or passives {{ ag.f_obj }} times ({{ '%.1f'|format(f_rate) }}% agentive). For male terms, this was {{ ag.m_subj }} and {{ ag.m_obj }} ({{ '%.1f'|format(m_rate) }}%).</p>
+    </div>
+
+    <figure class="cx-fig">
+      <h3>Female terms were the subject {{ '%.1f'|format(f_rate) }}% of the time, male terms {{ '%.1f'|format(m_rate) }}%</h3>
+      <p class="cx-fig-sub">Share of gendered mentions that were grammatical subjects, all parsed mentions pooled ({{ ag.f_subj + ag.f_obj }} female, {{ ag.m_subj + ag.m_obj }} male).</p>
+      <p class="cx-legend"><span class="cx-sw f"><i></i>Solid: grammatical subject</span><span class="cx-sw fp"><i></i>Pale: object or passive</span></p>
+      <div class="cx-hbar">
+        <span class="lab" style="color: var(--f)">Female terms</span>
+        <div class="track" aria-hidden="true"><span class="f-solid" style="width: {{ f_rate }}%">{{ '%.1f'|format(f_rate) }}%</span><span class="f-pale" style="width: {{ 100 - f_rate }}%">{{ '%.1f'|format(100 - f_rate) }}%</span></div>
+        <span class="cnt">{{ ag.f_subj }} as subject, {{ ag.f_obj }} as object or passive</span>
+      </div>
+      <div class="cx-hbar">
+        <span class="lab" style="color: var(--m)">Male terms</span>
+        <div class="track" aria-hidden="true"><span class="m-solid" style="width: {{ m_rate }}%">{{ '%.1f'|format(m_rate) }}%</span><span class="m-pale" style="width: {{ 100 - m_rate }}%">{{ '%.1f'|format(100 - m_rate) }}%</span></div>
+        <span class="cnt">{{ ag.m_subj }} as subject, {{ ag.m_obj }} as object or passive</span>
+      </div>
+      <p class="cx-fig-note">Treating each mention as independent, this gap is not significant (Fisher's exact p ≈ 0.22). Mentions inside one article aren't independent, so the document-level test below is the better one.</p>
+    </figure>
+
+    <div class="wallotext" style="margin-top: 1.8rem;">
+      <p>At the document level, the mean agency rate was {{ '%.2f'|format(ag.f_mean) }} for female articles and {{ '%.2f'|format(ag.m_mean) }} for male articles, a difference of −0.173 (permutation p = {{ '%.3f'|format(ag.p) }}). Nearly half of the female documents — 30 of 62 — contained only object or passive mentions, while over half of the male documents — 26 of 49 — contained only subject mentions.</p>
+      <p>A bootstrap on the same 111 documents gives a 95% interval for the difference of roughly −0.34 to −0.005, which only just excludes zero. If each mention is treated as independent, the comparison is not significant (Fisher's exact p ≈ 0.22). Mentions inside an article aren't independent, so the document-level test is the better one, but this remains a suggestive result given the small sample.</p>
+    </div>
+
+    <figure class="cx-fig">
+      <h3>Per document, the gap is −0.173, and the interval only just excludes zero</h3>
+      <p class="cx-fig-sub">Mean document-level agency rate: subjects ÷ (subjects + objects or passives).</p>
+      <div class="cx-stats3">
+        <div><p class="n" style="color: var(--f)">{{ '%.2f'|format(ag.f_mean) }}</p><p>Female-term articles ({{ ag.f_docs }} usable)</p></div>
+        <div><p class="n" style="color: var(--m)">{{ '%.2f'|format(ag.m_mean) }}</p><p>Male-term articles ({{ ag.m_docs }} usable)</p></div>
+        <div><p class="n" style="color: var(--hi)">−0.173</p><p>Difference, permutation p = {{ '%.3f'|format(ag.p) }}</p></div>
+      </div>
+      {# axis runs from -0.4 to +0.1, so position % = (value + 0.4) * 200 #}
+      <div class="cx-ci" role="img" aria-label="Difference in mean agency rate is −0.173, with a 95% bootstrap interval from −0.34 to −0.005. Zero, no difference, sits just outside the right end of the interval.">
+        <span class="zero-l" style="left: {{ (0 + 0.4) * 200 }}%">No difference</span>
+        <span class="zero" style="left: {{ (0 + 0.4) * 200 }}%"></span>
+        <span class="axis"></span>
+        {% for v in [-0.4, -0.3, -0.2, -0.1, 0, 0.1] %}
+        <span class="tick" style="left: {{ (v + 0.4) * 200 }}%"></span>
+        <span class="tl" style="left: {{ (v + 0.4) * 200 }}%">{{ '%+.1f'|format(v) if v != 0 else '0' }}</span>
+        {% endfor %}
+        <span class="ci" style="left: {{ (ag.ci_lo + 0.4) * 200 }}%; width: {{ (ag.ci_hi - ag.ci_lo) * 200 }}%"></span>
+        <span class="pt" style="left: {{ (ag.diff + 0.4) * 200 }}%"></span>
+        <span class="pt-l" style="left: {{ (ag.diff + 0.4) * 200 }}%">−0.173</span>
+        <span class="end-l" style="left: 0">Female terms less agentive</span>
+        <span class="end-l" style="right: 0">more agentive</span>
+      </div>
+      <p class="cx-fig-note">Dot: observed difference (female minus male). Bar: 95% bootstrap interval, −0.34 to −0.005, over the same {{ ag.f_docs + ag.m_docs }} documents.</p>
+    </figure>
+  </section>
+
+  <!-- ================= MODIFIERS ================= -->
+  <section class="cx-sec" id="modifiers">
+    <h2 class="cx-h2">Modifiers</h2>
+    <div class="wallotext">
+      <p>The biggest problem we ran into here was that gender is built into Urdu grammar. Adjectives that scored as strongly feminine or masculine, such as <span class="ur" lang="ur" dir="rtl">بڑی</span> and <span class="ur" lang="ur" dir="rtl">بڑا</span> ("big," feminine and masculine forms), often just reflected grammatical agreement with whoever was being described, not any real bias. Since there's no list of gendered Urdu terms we could use to exclude, we were forced to rely on manually created stopword lists, which were not perfect — so the hatched bars below are exactly this grammatical-agreement artifact, not a distinctive-usage finding.</p>
+    </div>
+
+    <figure class="cx-fig">
+      <h3>The most frequent modifiers, by the terms they attach to</h3>
+      <p class="cx-fig-sub">Number of times each adjective was attached to a female or a male term.</p>
+      <p class="cx-legend"><span class="cx-sw hatch" style="color: var(--muted)"><i></i>Hatched: gender-agreement form, likely an artifact</span></p>
+      <div class="cx-cols2">
+        <div>
+          <p class="cx-colhead" style="color: var(--f)">Female terms<small>102 modifier tokens, 64 distinct words</small></p>
+          <ol class="cx-mods f">
+            {% for w in mod_f %}
+            <li class="cx-mod{{ ' agree' if w.agree }}"><span class="ur" lang="ur" dir="rtl">{{ w.w }}</span><span><span class="gloss">{{ w.en }}</span><span class="barrow"><i style="width: calc((100% - 1.8rem) * {{ w.n / mod_scale }})"></i><span class="n">{{ w.n }}</span></span></span></li>
+            {% endfor %}
+          </ol>
+        </div>
+        <div>
+          <p class="cx-colhead" style="color: var(--m)">Male terms<small>53 modifier tokens, 33 distinct words</small></p>
+          <ol class="cx-mods m">
+            {% for w in mod_m %}
+            <li class="cx-mod{{ ' agree' if w.agree }}"><span class="ur" lang="ur" dir="rtl">{{ w.w }}</span><span><span class="gloss">{{ w.en }}</span><span class="barrow"><i style="width: calc((100% - 1.8rem) * {{ w.n / mod_scale }})"></i><span class="n">{{ w.n }}</span></span></span></li>
+            {% endfor %}
+          </ol>
+        </div>
+      </div>
+      <p class="cx-fig-note">Both sides use the same scale. English glosses are approximate.</p>
+    </figure>
+
+    <div class="wallotext" style="margin-top: 1.8rem;">
+      <p>By log-odds score, female terms leaned towards words such as <span class="ur" lang="ur" dir="rtl">سوتیلی</span> ("step-"), <span class="ur" lang="ur" dir="rtl">نوجوان</span> ("young"), and <span class="ur" lang="ur" dir="rtl">خوبصورت</span> ("beautiful"), as opposed to the more ordinary male terms, which included <span class="ur" lang="ur" dir="rtl">مبتلا</span> ("afflicted"), <span class="ur" lang="ur" dir="rtl">شفیق</span> ("kind"), and <span class="ur" lang="ur" dir="rtl">انجہانی</span> ("the late," i.e. deceased). However, these correlations did not reach FDR significance, so this should be read as descriptive insight rather than confirmed.</p>
+    </div>
+    <div class="cx-cols2" style="margin-top: 1.2rem;">
+      <div>
+        <p class="cx-colhead" style="color: var(--f); margin: 0">Most distinctive of female terms</p>
+        <ul class="cx-chips">{% for w in distinct_f %}<li class="tag"><span class="ur" lang="ur" dir="rtl">{{ w.w }}</span>{{ w.en }}</li>{% endfor %}</ul>
+      </div>
+      <div>
+        <p class="cx-colhead" style="color: var(--m); margin: 0">Most distinctive of male terms</p>
+        <ul class="cx-chips">{% for w in distinct_m %}<li class="tag tag-teal"><span class="ur" lang="ur" dir="rtl">{{ w.w }}</span>{{ w.en }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WORD2VEC ================= -->
+  <section class="cx-sec" id="word2vec">
+    <h2 class="cx-h2">Word2Vec</h2>
+    <div class="wallotext">
+      <p>Across all 94 tests, we found that our average difference was −0.011, and 63 of 94 concepts sit closer to the male attribute set. Leadership/Power (17 of 20) and Crime/Legal (18 of 19) are almost exclusively male, but individual effect sizes are small, so most words do not survive correction. Domestic/Family is the only category where more concepts lean female than male (12 of 19).</p>
+    </div>
+
+    <figure class="cx-fig">
+      <h3>Only Domestic/Family leans female; Leadership/Power and Crime/Legal are almost all male</h3>
+      <p class="cx-fig-sub">Number of concepts in each category that sit closer to the female or to the male attribute set.</p>
+      <div class="cx-share">
+        <div class="hdr"><div></div><div><span class="l">Closer to female terms</span><span class="r">Closer to male terms</span></div><div></div></div>
+        {% for c in w2v_cats %}
+        {% set n = c.f + c.m %}
+        <div class="row">
+          <span class="name">{{ c.name }}</span>
+          <div class="bars" aria-hidden="true"><span class="f" style="width: {{ c.f / n * 100 }}%">{{ c.f }}</span><span class="m" style="width: {{ c.m / n * 100 }}%">{{ c.m }}</span><i class="mid" style="left: 50%"></i></div>
+          <span class="sig">{% if c.sig %}{{ c.sig }} survive{{ '' if c.sig > 1 else 's' }} correction{% else %}none survive correction{% endif %}</span>
+        </div>
+        {% endfor %}
+        {% set nt = w2v_f + w2v_m %}
+        <div class="row total">
+          <span class="name">All 94 tests</span>
+          <div class="bars" aria-hidden="true"><span class="f" style="width: {{ w2v_f / nt * 100 }}%">{{ w2v_f }}</span><span class="m" style="width: {{ w2v_m / nt * 100 }}%">{{ w2v_m }}</span><i class="mid" style="left: 50%"></i></div>
+          <span class="sig">6 survive correction</span>
+        </div>
+      </div>
+      <p class="cx-fig-note">Dark line marks an even split. Categories are ordered from most female-leaning to most male-leaning.</p>
+    </figure>
+
+    <div class="wallotext" style="margin-top: 1.8rem;">
+      <p>Primarily, six associations survive correction (q &lt; 0.05). Terms such as <span class="ur" lang="ur" dir="rtl">چیئرمین</span> ("chairman"), <span class="ur" lang="ur" dir="rtl">کاروبار</span> ("business"), <span class="ur" lang="ur" dir="rtl">دفتر</span> ("office") and <span class="ur" lang="ur" dir="rtl">روزگار</span> ("employment") — all professional, career-oriented terms — were male, with 0.095–0.221 similarity. Conversely, the two female terms were <span class="ur" lang="ur" dir="rtl">گھریلو</span> ("domestic") and <span class="ur" lang="ur" dir="rtl">مظلوم</span> ("oppressed/wronged"), which relate to family and victimhood themes respectively, with 0.272–0.382 similarity.</p>
+    </div>
+
+    <figure class="cx-fig">
+      <h3>Four professional words lean male; a domestic word and a victimhood word lean female</h3>
+      <p class="cx-fig-sub">Cosine similarity of each word to the female and male attribute sets. Δ = female − male; all six survive FDR correction (q &lt; 0.05).</p>
+      <p class="cx-legend"><span class="cx-sw f"><i></i>Similarity to female terms</span><span class="cx-sw m"><i></i>Similarity to male terms</span></p>
+      <div class="cx-dumb">
+        {% for grp, label, items in [('m', 'Closer to male terms', w2v_male), ('f', 'Closer to female terms', w2v_female)] %}
+        <p class="grp" style="color: var(--{{ grp }})">{{ label }}</p>
+        {% for w in items %}
+        {% set lo = [w.f, w.m]|min %}{% set hi = [w.f, w.m]|max %}
+        <div class="row">
+          <span class="lab"><span class="ur" lang="ur" dir="rtl">{{ w.w }}</span><span class="en">{{ w.en }}</span></span>
+          <div class="track" aria-hidden="true">
+            <i class="link" style="left: {{ lo / sim_max * 100 }}%; width: {{ (hi - lo) / sim_max * 100 }}%"></i>
+            <i class="dot f" style="left: {{ w.f / sim_max * 100 }}%"></i>
+            <i class="dot m" style="left: {{ w.m / sim_max * 100 }}%"></i>
+          </div>
+          <span class="d" style="color: var(--{{ grp }})">Δ {{ w.d }}</span>
+        </div>
+        {% endfor %}
+        {% endfor %}
+        <div class="axis"><span></span><div class="ticks"><span style="left: 0">0</span><span style="left: 25%">0.1</span><span style="left: 50%">0.2</span><span style="left: 75%">0.3</span><span style="left: 100%">0.4</span></div><span></span></div>
+      </div>
+      <p class="cx-fig-note">Similarities ranged 0.095–0.221 on the male-leaning side and 0.272–0.382 on the female-leaning side. The tests use single-run embeddings; see limitations.</p>
+    </figure>
+  </section>
+
+  <!-- ================= TOPICS ================= -->
+  <section class="cx-sec" id="topics">
+    <h2 class="cx-h2">Topic modelling</h2>
+    <div class="wallotext">
+      <p>Our topic modelling results found that film and celebrity coverage is the largest theme in both samples (34% female, 32% male), followed by sport (21% vs. 23%). The differences are present in the smaller themes. Articles mentioning women include more crime stories (11% vs. 6%), driven by harassment and assault cases, as well as fashion and culture. Articles mentioning men spread into a broader bucket of general Pakistan news, relating to technology, science, economics and COVID-19.</p>
+    </div>
+
+    <figure class="cx-fig">
+      <h3>More crime and fashion in articles about women, more general news in articles about men</h3>
+      <p class="cx-fig-sub">Share of each sample of {{ topic_n }} articles, by theme.</p>
+      <p class="cx-legend"><span class="cx-sw f"><i></i>Female-term articles</span><span class="cx-sw m"><i></i>Male-term articles</span></p>
+      <div class="cx-themes">
+        {% for t in themes %}
+        {% set fp = t.f / topic_n * 100 %}{% set mp = t.m / topic_n * 100 %}
+        <div class="cx-theme">
+          <span class="name">{{ t.name }}</span>
+          <div class="bars">
+            <div class="b f"><i style="width: {{ fp / theme_scale * 100 }}%" aria-hidden="true"></i><span>{{ '%.0f'|format(fp) }}%</span></div>
+            <div class="b m"><i style="width: {{ mp / theme_scale * 100 }}%" aria-hidden="true"></i><span>{{ '%.0f'|format(mp) }}%</span></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="cx-fig-note">BERTopic run separately on {{ topic_n }} female-term and {{ topic_n }} male-term articles; every article, including outliers, was assigned to a topic. Topics were labelled by hand and grouped into themes.</p>
+    </figure>
+  </section>
+
+  <!-- ================= DISCUSSION ================= -->
+  <section class="cx-sec" id="discussion">
+    <h2 class="cx-h2">Discussion</h2>
+    <div class="voice-grid cx-signals">
+      <div class="voice-card"><b>Agency</b><p class="voice-content">Female terms are more often the object or passive of a sentence.</p></div>
+      <div class="voice-card voice-card-b"><b>Word2Vec</b><p class="voice-content">Female terms sit nearer household and victimhood vocabulary.</p></div>
+      <div class="voice-card voice-card-c"><b>Topics</b><p class="voice-content">Women appear more often in stories about harassment and courts.</p></div>
+    </div>
+    <div class="wallotext" style="margin-top: 0.4rem;">
+      <p>Although each of our results is modest alone, they broadly point to a trend of women being under-represented in public-sphere roles and often being framed as marginalized or as victims. Women are often mentioned more in object or passive roles (agency test), sit nearer household and victimhood vocabulary (Word2Vec), and appear more often in stories about harassment and courts (topic modelling).</p>
+    </div>
+    <div class="pull-quote">
+      <p>However, the male attribute set may simply be the baseline here. The two attribute sets differ in size, term mix and frequency, and embedding similarity tends to track frequency. The average Δ of −0.011 could be a baseline shift rather than "everything is more male." A useful next step is to centre Δ on the mean and re-test.</p>
+    </div>
+  </section>
+
+  <!-- ================= LIMITATIONS ================= -->
+  <section class="cx-sec" id="limitations">
+    <h2 class="cx-h2">Limitations</h2>
+    <ul class="cx-list">
+      <li><b>The corpus is dominated by entertainment and sport,</b> so results describe how gender appears in that coverage, not particularly in politics or economics reporting.</li>
+      <li><b>Our frequency cutoff dropped 10 female and 11 male terms,</b> mostly kinship words such as "mother" and "father." Since both attribute sets lose much of their family-related vocabulary, this may soften any domestic-versus-public contrast.</li>
+      <li><b>Our agency significance is at exactly p = 0.050,</b> which means it's quite fragile. Urdu's free word order, ergative marking and light-verb constructions also make subject/object labelling harder for a parser than in English.</li>
+      <li><b>The theme assignments for topics are manually grouped,</b> and outlier reassignment can sometimes force the model to assign articles to a topic when it may not be that clean.</li>
+      <li><b>We ran one Word2Vec training run.</b> Since embedding similarities shift between random seeds — and even randomization p-values shift by a few thousandths between runs — repeated runs would give a better sense of stability.</li>
+      <li><b>Due to hardware limitations, we were only able to parse about 400 of the gendered articles.</b></li>
+    </ul>
+  </section>
+
+  <!-- ================= FUTURE WORK ================= -->
+  <section class="cx-sec" id="next">
+    <h2 class="cx-h2">Future work</h2>
+    <ul class="cx-list">
+      <li><b>Lemmatize modifiers</b> so grammatical gender agreement would not show up in our bias results.</li>
+      <li><b>Retrain Word2Vec over several seeds</b> to report the spread and change in the similarity.</li>
+      <li><b>Increase the number of articles,</b> given more time and better equipment, to help improve the statistical significance of some results.</li>
+      <li><b>Compare these findings to English-medium Pakistani papers,</b> another interesting analysis.</li>
+    </ul>
+  </section>
+
+
 </div>
 
 {% endblock %}
