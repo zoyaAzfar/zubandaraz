@@ -1043,9 +1043,34 @@ footer span a:hover {
   .nav-link { padding: 10px 12px; } /* comfier tap target */
   .btn-submit { margin-left: auto; }
 }
-@media (max-width: 720px) {
-    .search input, .search select,
-    .field input, .field textarea, .field select { font-size: 16px; }
-}
 
-  .entry-row-body, .wotd-card > *, .entry-hero > * { min-width: 0; }
+@media (max-width: 720px) {
+  .site-header { position: static; }
+
+  .header-inner {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    gap: 10px 12px;
+  }
+
+  .logo { order: 1; }
+
+  .search {
+    order: 2;
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .main-nav {
+    order: 3;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .nav-link { padding: 10px 12px; }
+  .btn-submit { margin-left: auto; }
+
+  .search input, .search select,
+  .field input, .field textarea, .field select { font-size: 16px; }
+}
