@@ -112,7 +112,8 @@
   </div>
 
   {% if graph_json %}
-  <div id="network-view-container" style="display: none; width: 100%; height: 70vh; background-color: #0a3323; border-radius: 8px; margin-top: 1rem; overflow: hidden; border: 1px solid #eee;">
+  <div id="network-view-container" style="display: none; position: relative; width: 100%; height: 70vh; background-color: #0a3323; border-radius: 8px; margin-top: 1rem; overflow: hidden; border: 1px solid #eee;">
+    <button type="button" class="dropdown-button legend-toggle" id="legend-toggle-btn">Show themes</button>
     <div id="plotly-graph" style="width: 100%; height: 100%;"></div>
   </div>
   {% endif %}
@@ -181,36 +182,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const filterItems = filterDropdown.querySelectorAll('.dropdown-menu li');
       const themeDropdown = document.getElementById('theme-dropdown');
       
-      if (themeDropdown) {
-        const themeBtn = document.getElementById('theme-dropdown-btn');
-        const themeItems = themeDropdown.querySelectorAll('.dropdown-menu li');
       
-        themeBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          dropdown.classList.remove('open');
-          if (filterDropdown) filterDropdown.classList.remove('open');
-          themeDropdown.classList.toggle('open');
-        });
-      
-        themeItems.forEach(item => {
-          item.addEventListener('click', () => {
-            window.location.href = item.dataset.href;
-          });
-        });
-      }
-            
-      filterBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.classList.remove('open');
-        filterDropdown.classList.toggle('open');
-      });
-
-      filterItems.forEach(item => {
-        item.addEventListener('click', () => {
-          window.location.href = item.dataset.href;
-        });
-      });
-    }
 
     function sortRows(criteria) {
       let sorted;
@@ -236,17 +208,26 @@ document.addEventListener("DOMContentLoaded", function () {
       sorted.forEach(row => entryIndex.appendChild(row));
     }
 
-    dropdownBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (filterDropdown) filterDropdown.classList.remove('open');
-      dropdown.classList.toggle('open');
-    });
-
-    document.addEventListener('click', () => {
-      dropdown.classList.remove('open');
-      if (filterDropdown) filterDropdown.classList.remove('open');
-    });
-
+    const menus = Array.from(document.querySelectorAll('.custom-dropdown'))
+          .filter(d => d.querySelector('.dropdown-menu'));   // skips the Galaxy toggle
+        
+        const closeAll = (except) =>
+          menus.forEach(d => { if (d !== except) d.classList.remove('open'); });
+        
+        menus.forEach(d => {
+          d.querySelector('.dropdown-button').addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeAll(d);
+            d.classList.toggle('open');
+          });
+        });
+        document.addEventListener('click', () => closeAll());
+        
+        // filter + theme items navigate; sort items keep their own handler below
+        document.querySelectorAll('.dropdown-menu li[data-href]').forEach(li => {
+          li.addEventListener('click', () => { window.location.href = li.dataset.href; });
+        });
+              
     menuItems.forEach(item => {
       item.addEventListener('click', () => {
         selectedOption.textContent = 'Sort: ' + item.textContent;
@@ -298,18 +279,21 @@ if (editDialog && editForm) {
         if (!graphRendered) {
           const graphData = {{ graph_json | safe }};
         
-          if (graphData.layout.scene) {
-            graphData.layout.scene.camera = { eye: { x: 0.8, y: 0.8, z: 0.8 } }; 
-          }
+          const isMobile = window.matchMedia('(max-width: 720px)').matches;
 
-          // Enable and style legend
-          graphData.layout.showlegend = true;
+                  if (graphData.layout.scene) {
+            graphData.layout.scene.camera = { eye: { x: 0.8, y: 0.8, z: 0.8 } };
+          }
+          
+          graphData.layout.showlegend = !isMobile;   // hidden by default on phones
           graphData.layout.legend = {
-            title: { text: 'Themes', font: { color: '#ffffff' } },
-            font: { color: '#ffffff' },
-            bgcolor: 'rgba(0,0,0,0)',
-            itemsizing: 'constant'
+            title: { text: isMobile ? '' : 'Themes', font: { color: '#ffffff' } },
+            font: { color: '#ffffff', size: isMobile ? 10 : 12 },
+            bgcolor: isMobile ? 'rgba(10,51,35,0.9)' : 'rgba(0,0,0,0)',
+            itemsizing: 'constant',
+            ...(isMobile && { orientation: 'h', x: 0, xanchor: 'left', y: 0, yanchor: 'bottom' })
           };
+          if (isMobile) graphData.layout.margin = { l: 0, r: 0, t: 0, b: 0 };
         
           const themeMap = {
               "Harlot / Prostitution / Chastity / Modesty": "Chastity & Modesty",
@@ -396,8 +380,22 @@ if (editDialog && editForm) {
 
           graphData.data = newTraces;
         
-          Plotly.newPlot('plotly-graph', graphData.data, graphData.layout, {responsive: true});
-          graphRendered = true;
+          Plotly.newPlot('plotly-graph', graphData.data, graphData.layout, {
+            responsive: true,
+            displaylogo: false,
+            displayModeBar: !isMobile      // the toolbar is clutter on a phone
+          });
+          
+          const legendBtn = document.getElementById('legend-toggle-btn');
+          if (legendBtn && isMobile) {
+            let legendOn = false;
+            legendBtn.addEventListener('click', () => {
+              legendOn = !legendOn;
+              Plotly.relayout('plotly-graph', { showlegend: legendOn });
+              legendBtn.textContent = legendOn ? 'Hide themes' : 'Show themes';
+            });
+          }
+                  graphRendered = true;
         }
       }
     });
