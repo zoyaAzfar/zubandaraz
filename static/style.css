@@ -1350,3 +1350,51 @@ button.btn-cancel {
   .nav-link { padding: 14px 12px; font-size: 1rem; }
   .btn-submit { margin: 8px 0 0; padding: 14px 16px; text-align: center; }
 }
+
+@media (max-width: 560px) {
+  .hero, .wotd, .browse-preview, .browse-full, .entry-detail {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .wotd-card { padding: 24px 20px; }
+  footer { padding: 32px 16px; }
+}
+
+@media (max-width: 720px) {
+  .browse-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .toolbar-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+  }
+  .custom-dropdown { width: 100%; }
+  .dropdown-button {
+    width: 100%;
+    justify-content: space-between;
+    padding: 12px 14px;
+  }
+  .dropdown-menu {
+    left: 0;
+    right: 0;
+    min-width: 0;
+    max-height: 50vh;      /* long theme list scrolls instead of running off-screen */
+    overflow-y: auto;
+  }
+  .dropdown-menu li { padding: 12px; }
+}
+
+.legend-toggle {
+  display: none;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+}
+@media (max-width: 720px) {
+  .legend-toggle { display: flex; width: auto; }
+}
