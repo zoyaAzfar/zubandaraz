@@ -37,15 +37,23 @@
       <a class="btn-submit" href="{{ url_for('submit_page') }}">Submit a word</a>
     </nav>
 
-<a class="logo" ...>...</a>
+<a class="logo" href="{{ url_for('home') }}">
+      <span class="logo-mark">ز</span>
+      <span class="logo-word">Zuban Daraz</span>
+    </a>
 
 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Toggle menu">
   <span></span><span></span><span></span>
 </button>
 
 <nav class="main-nav" id="main-nav">
-  ...your links...
-</nav>
+<a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Home</a>
+      <a class="nav-link {% if request.endpoint == 'browse' %}active{% endif %}" href="{{ url_for('browse') }}">Words</a>
+        <a class="nav-link {% if request.endpoint == 'idioms' %}active{% endif %}" href="{{ url_for('idioms') }}">Idioms</a>
+        <a class="nav-link {% if request.endpoint == 'corpora' %}active{% endif %}" href="{{ url_for('corpus_page') }}">Corpora</a>
+
+      <a class="nav-link {% if request.endpoint == 'about_page' %}active{% endif %}" href="{{ url_for('about_page') }}">About</a>
+      <a class="btn-submit" href="{{ url_for('submit_page') }}">Submit a word</a></nav>
           
   </div>
 </header>
