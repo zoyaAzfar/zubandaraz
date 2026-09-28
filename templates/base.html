@@ -60,20 +60,21 @@
             <a href="{{ url_for('mod_policy') }}">Moderation policy</a>
 </footer>
 <script>
+(() => {
   const toggle = document.querySelector('.nav-toggle');
   const nav = document.getElementById('main-nav');
+  if (!toggle || !nav) return;
 
-  toggle.addEventListener('click', () => {
-    const open = nav.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', open);
-  });
+  const setOpen = (open) => {
+    nav.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  };
 
+  toggle.addEventListener('click', () => setOpen(!nav.classList.contains('open')));
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && nav.classList.contains('open')) {
-      nav.classList.remove('open');
-      toggle.setAttribute('aria-expanded', 'false');
-    }
+    if (e.key === 'Escape') setOpen(false);
   });
+})();
 </script>
 {% block extra_scripts %}{% endblock %}
 </body>
