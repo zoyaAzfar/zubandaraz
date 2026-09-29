@@ -262,6 +262,26 @@ document.addEventListener("DOMContentLoaded", function () {
     "Animals (deer, buffalo, cows)": "Animals"
   };
 
+  // Wrap long hover text onto multiple lines so the tooltip shows the whole idiom.
+  // Keeps any <br> the server already sent and only wraps the plain segments.
+  function wrapHover(text, width = 40) {
+    return String(text).split('<br>').map(line => {
+      const words = line.split(' ');
+      const lines = [];
+      let cur = '';
+      words.forEach(w => {
+        if ((cur + ' ' + w).trim().length > width) {
+          if (cur.trim()) lines.push(cur.trim());
+          cur = w;
+        } else {
+          cur += ' ' + w;
+        }
+      });
+      if (cur.trim()) lines.push(cur.trim());
+      return lines.join('<br>');
+    }).join('<br>');
+  }
+
   function renderGraph() {
     if (!graphData) return;
     const isMobile = window.matchMedia('(max-width: 720px)').matches;
@@ -295,7 +315,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const xArr = trace.x || [];
       const yArr = trace.y || [];
       const zArr = trace.z || null;
-      const textArr = trace.text || [];
+      // Plotly prefers `hovertext` over `text` on hover, so read whichever the server set
+      const textArr = Array.isArray(trace.hovertext) ? trace.hovertext : (trace.text || []);
       const colorArr = (trace.marker && Array.isArray(trace.marker.color)) ? trace.marker.color : null;
 
       for (let i = 0; i < xArr.length; i++) {
@@ -315,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
         g.x.push(xArr[i]);
         g.y.push(yArr[i]);
         if (zArr) g.z.push(zArr[i]);
-        g.text.push(hoverText);
+        g.text.push(wrapHover(hoverText));
         if (colorArr) g.colors.push(colorArr[i]);
       }
 
@@ -326,7 +347,19 @@ document.addEventListener("DOMContentLoaded", function () {
         themeTrace.y = grp.y;
         if (grp.z) themeTrace.z = grp.z;
         themeTrace.text = grp.text;
+        delete themeTrace.hovertext;   // otherwise it would override our wrapped text
         themeTrace.showlegend = true;
+
+        // show the full, wrapped idiom in the tooltip
+        themeTrace.hoverinfo = 'text';
+        themeTrace.hovertemplate = '%{text}<extra></extra>';
+        themeTrace.hoverlabel = {
+          namelength: -1,              // never truncate
+          align: 'left',
+          bgcolor: 'rgba(10,51,35,0.95)',
+          font: { color: '#ffffff', size: 13 }
+        };
+
         if (!themeTrace.marker) themeTrace.marker = {};
         themeTrace.marker.size = 6;
         if (colorArr && grp.colors.length > 0) themeTrace.marker.color = grp.colors;
