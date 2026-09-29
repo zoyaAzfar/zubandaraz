@@ -586,6 +586,66 @@ def delete(id):
 
     return redirect("/admin")
 
+# ---------------------------------------------------------------
+# 1) Paste this helper into app.py (anywhere above the /idioms route).
+#    `re`, `json`, `Entry` are already imported/defined in your app.py.
+# ---------------------------------------------------------------
+
+_HOVER_RE = re.compile(r'^(<b>.*?</b><br><b>\[.*?\]</b><br>)(.*)$', re.S)
+_WORD_RE = re.compile(r'^<b>(.*?)</b>')
+
+
+def _norm(s):
+    """Lowercase-free, whitespace/<br>-insensitive form used only for comparing."""
+    return re.sub(r'\s+', ' ', (s or '').replace('<br>', ' ')).strip()
+
+
+def restore_full_hover_text(data):
+    """
+    galaxy_graph.json (built in Colab) contains hover text cut off with "...".
+    For each truncated label, look the idiom up in the database and swap in the
+    full text. A field is only used if it starts with the visible fragment, so
+    the wrong field can never overwrite a label.
+    """
+    idioms = (
+        Entry.query
+        .filter_by(status="approved")
+        .filter(Entry.pos.ilike("idiom"))
+        .all()
+    )
+    by_word = {e.word.strip().lower(): e for e in idioms if e.word}
+
+    # fields that might hold the English text shown in the tooltip
+    candidate_fields = ("literal_definition", "story", "etymology")
+
+    for trace in data.get("data", []):
+        texts = trace.get("text")
+        if "markers" not in (trace.get("mode") or "") or not isinstance(texts, list):
+            continue
+
+        for i, t in enumerate(texts):
+            m = _HOVER_RE.match(t or "")
+            if not m:
+                continue
+            head, tail = m.groups()
+            if not tail.rstrip().endswith(("...", "\u2026")):
+                continue
+
+            word_match = _WORD_RE.match(head)
+            entry = by_word.get(word_match.group(1).strip().lower()) if word_match else None
+            if not entry:
+                continue
+
+            fragment = _norm(tail).rstrip(".\u2026").strip()
+            if not fragment:
+                continue
+
+            for field in candidate_fields:
+                full = getattr(entry, field, None)
+                if full and _norm(full).startswith(fragment):
+                    texts[i] = head + full.strip()
+                    break
+
 
 @app.route(
     "/approve_edit/<int:id>",
