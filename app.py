@@ -314,10 +314,11 @@ def idioms():
     }
 
     try:
-        with open('galaxy_graph.json', 'r') as f:
-            graph_json = f.read()
-            data = json.loads(graph_json)
-            for trace in data.get('data', []):
+         with open('galaxy_graph.json', 'r', encoding='utf-8') as f:
+             data = json.load(f)
+             restore_full_hover_text(data)
+             graph_json = json.dumps(data)
+             for trace in data.get('data', []):
                 if trace.get('mode') == 'markers':
                     for t in trace.get('text', []):
                         match = re.search(r'<b>(.*?)</b><br><b>\[(.*?)\]</b>', t)
