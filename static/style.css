@@ -1074,3 +1074,29 @@ footer span a:hover {
   .search input, .search select,
   .field input, .field textarea, .field select { font-size: 16px; }
 }
+
+.hero-word-block {
+  position: relative;
+}
+
+.hero-art {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 220px;          /* adjust to taste */
+  width: auto;
+  z-index: 0;             /* sits behind the text */
+  pointer-events: none;
+}
+
+.hero-word {
+  position: relative;
+  z-index: 1;             /* text on top of the image */
+  padding-left: 140px;    /* pushes text right; smaller = more overlap */
+}
+
+@media (max-width: 600px) {
+  .hero-art { height: 140px; }
+  .hero-word { padding-left: 80px; }
+}
