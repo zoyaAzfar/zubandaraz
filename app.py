@@ -223,6 +223,10 @@ def submit_page():
 def about_page():
     return render_template("aboutus.html")
 
+@app.route("/game")
+def game_page():
+    return render_template("game.html")
+
 @app.route("/corpora")
 def corpus_page():
     return render_template("analysis.html")
