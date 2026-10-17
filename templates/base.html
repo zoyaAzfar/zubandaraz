@@ -29,6 +29,7 @@
       <a class="nav-link {% if request.endpoint == 'browse' %}active{% endif %}" href="{{ url_for('browse') }}">Words</a>
       <a class="nav-link {% if request.endpoint == 'idioms' %}active{% endif %}" href="{{ url_for('idioms') }}">Idioms</a>
       <a class="nav-link {% if request.endpoint == 'corpora' %}active{% endif %}" href="{{ url_for('corpus_page') }}">Corpora</a>
+      <a class="nav-link {% if request.endpoint == 'game' %}active{% endif %}" href="{{ url_for('game_page') }}">Game</a>
       <a class="nav-link {% if request.endpoint == 'about_page' %}active{% endif %}" href="{{ url_for('about_page') }}">About</a>
       <a class="btn-submit" href="{{ url_for('submit_page') }}">Submit a word</a>
     </nav>
