@@ -549,5 +549,30 @@ def reject_edit(id):
     return redirect("/admin")
 
 
+from sqlalchemy import text
+
+@app.route("/db-test")
+def db_test():
+    try:
+        with db.engine.connect() as connection:
+            result = connection.execute(
+                text("SELECT 1")
+            ).scalar_one()
+
+        return {
+            "database": "connected",
+            "result": result
+        }, 200
+
+    except Exception as exc:
+        app.logger.exception("Turso database test failed")
+
+        return {
+            "database": "failed",
+            "error_type": type(exc).__name__,
+            "error": str(exc)
+        }, 500
+
+
 if __name__ == "__main__":
     app.run(debug=False)
