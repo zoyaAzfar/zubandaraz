@@ -9,6 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import text
 from models import db, Entry, EntryEdit
 from slugify import slugify
+from sqlalchemy.pool import NullPool
 
 app = Flask(__name__)
 
@@ -16,6 +17,9 @@ db_url = os.environ.get("TURSO_DATABASE_URL")
 auth_token = os.environ.get("TURSO_AUTH_TOKEN")
 
 if db_url and db_url.startswith("libsql://"):
+    if not auth_token:
+        raise RuntimeError("TURSO_AUTH_TOKEN is missing")
+
     stripped = db_url.replace("libsql://", "", 1)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = (
@@ -25,24 +29,14 @@ if db_url and db_url.startswith("libsql://"):
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         "connect_args": {
             "auth_token": auth_token
-        }
+        },
+        "poolclass": NullPool,
     }
 
 else:
-    fallback = os.environ.get(
-        "DATABASE_URL",
-        "sqlite:///dictionary.db"
+    raise RuntimeError(
+        "TURSO_DATABASE_URL is missing or does not start with libsql://"
     )
-
-    if fallback.startswith("postgres://"):
-        fallback = fallback.replace(
-            "postgres://",
-            "postgresql://",
-            1
-        )
-
-    app.config["SQLALCHEMY_DATABASE_URI"] = fallback
-
 
 db.init_app(app)
 
