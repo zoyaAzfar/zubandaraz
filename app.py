@@ -9,12 +9,15 @@ from sqlalchemy import text
 from models import db, Entry, EntryEdit
 from slugify import slugify
 import json
+from sqlalchemy.pool import NullPool
+
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 
 db_url = os.environ.get("TURSO_DATABASE_URL")
 auth_token = os.environ.get("TURSO_AUTH_TOKEN")
+
 
 if db_url and db_url.startswith("libsql://"):
     stripped = db_url.replace("libsql://", "", 1)
@@ -23,10 +26,10 @@ if db_url and db_url.startswith("libsql://"):
         f"sqlite+libsql://{stripped}?secure=true"
     )
 
+    
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-        "connect_args": {
-            "auth_token": auth_token
-        }
+        "connect_args": {"auth_token": auth_token},
+        "poolclass": NullPool,
     }
 
 else:
