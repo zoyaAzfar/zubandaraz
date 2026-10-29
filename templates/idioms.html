@@ -9,24 +9,25 @@
     <h1 class="browse-title">Idioms.</h1>
     <p class="browse-sub">A directory of idioms and set phrases from our archive.</p>
   </div>
-{% if request.args.get('edit_submitted') %}
-<div class="notice-banner">Thanks! Your edit was submitted for review.</div>
-{% endif %}
-  
+
+  {% if request.args.get('edit_submitted') %}
+  <div class="notice-banner">Thanks! Your edit was submitted for review.</div>
+  {% endif %}
+
   <div class="browse-toolbar">
     <p class="result-count">
-      {{ entries|length }} {{ "idiom" if entries|length == 1 else "idioms" }}{% if q %} matching &ldquo;{{ q }}&rdquo;{% endif %}{% if language %} in {{ language }}{% endif %}
+      {{ entries|length }} {{ "idiom" if entries|length == 1 else "idioms" }}{% if q %} matching &ldquo;{{ q }}&rdquo;{% endif %}{% if language %} in {{ language }}{% endif %}{% if theme_filter %} · {{ theme_filter }}{% endif %}
     </p>
 
     <div class="toolbar-controls">
-      {% if graph_json %}
+      {% if graph and entries %}
       <div class="custom-dropdown">
         <button type="button" class="dropdown-button" id="view-toggle-btn">
           <span id="view-toggle-text">View: Galaxy</span>
         </button>
       </div>
       {% endif %}
-        
+
       <div class="custom-dropdown" id="filter-dropdown">
         <button type="button" class="dropdown-button" id="filter-dropdown-btn">
           <span id="filter-selected-option">{{ 'Language: ' + language if language else 'All languages' }}</span>
@@ -40,7 +41,6 @@
         </ul>
       </div>
 
-      <!-- NEW THEME FILTER -->
       <div class="custom-dropdown" id="theme-dropdown">
         <button type="button" class="dropdown-button" id="theme-dropdown-btn">
           <span id="theme-selected-option">{{ 'Theme: ' + theme_filter if theme_filter else 'All Themes' }}</span>
@@ -69,13 +69,13 @@
   </div>
 
 {% if entries %}
-  <!-- List View (Visible by default) -->
+  <!-- List View (visible by default) -->
   <div id="list-view-container">
     <div class="entry-index">
-      {% for entry in entries %}  
+      {% for entry in entries %}
         {% set e_script, e_rtl = detect_script(entry.word) %}
-        {% set entry_theme = word_to_theme.get(entry.word|lower, 'Uncategorized') %}
-        
+        {% set entry_theme = id_to_theme.get(entry.id, 'Uncategorized') %}
+
         <div class="entry-row idiom-row"
              data-word="{{ entry.word | lower }}"
              data-language="{{ entry.language | lower }}"
@@ -99,34 +99,36 @@
               {% if entry.literal_definition %}{{ entry.literal_definition }}{% else %}{{ entry.story | truncate(160) }}{% endif %}
             </p>
           </div>
+
           <button type="button" class="btn-edit-idiom"
-        data-slug="{{ entry.slug }}"
-        data-word="{{ entry.word }}"
-        data-transliteration="{{ entry.transliteration or '' }}"
-        data-language="{{ entry.language or '' }}"
-        data-literal="{{ entry.literal_definition or '' }}"
-        aria-label="Edit {{ entry.word }}">Edit</button>
+                  data-slug="{{ entry.slug }}"
+                  data-word="{{ entry.word }}"
+                  data-transliteration="{{ entry.transliteration or '' }}"
+                  data-language="{{ entry.language or '' }}"
+                  data-literal="{{ entry.literal_definition or '' }}"
+                  aria-label="Edit {{ entry.word }}">Edit</button>
         </div>
       {% endfor %}
     </div>
   </div>
 
-  {% if graph_json %}
+  {% if graph %}
   <div id="network-view-container" style="display: none; position: relative; width: 100%; height: 70vh; background-color: #0a3323; border-radius: 8px; margin-top: 1rem; overflow: hidden; border: 1px solid #eee;">
     <button type="button" class="dropdown-button legend-toggle" id="legend-toggle-btn">Show themes</button>
     <div id="plotly-graph" style="width: 100%; height: 100%;"></div>
   </div>
   {% endif %}
-  
+
 {% else %}
   <p class="empty-note">
-    {% if q or language %}
+    {% if q or language or theme_filter %}
       <a href="{{ url_for('idioms') }}">Clear your filters</a>, or <a href="{{ url_for('submit_page') }}">submit this idiom</a> yourself.
     {% else %}
       Be the first to <a href="{{ url_for('submit_page') }}">submit an idiom</a>.
     {% endif %}
   </p>
 {% endif %}
+
 <dialog id="edit-dialog" class="edit-dialog">
   <form method="POST" id="edit-form">
     <input type="hidden" name="next" value="{{ request.full_path }}">
@@ -156,13 +158,13 @@
     </div>
   </form>
 </dialog>
-  
-</div> <!-- Closed browse-full here -->
+
+</div> <!-- /browse-full -->
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- Load Plotly for the 3D Graph -->
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<!-- Plotly 2.x (plotly-latest is frozen at v1.58 and no longer updated) -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -238,33 +240,15 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // --- GALAXY VIEW TOGGLE ---
-  const graphData = {{ (graph_json | safe) if graph_json else 'null' }};
+  const graphData = {{ graph|tojson }};   // tojson escapes </script> etc. (safe against XSS); null if no graph
   const viewToggleBtn = document.getElementById('view-toggle-btn');
   const listView = document.getElementById('list-view-container');
   const networkView = document.getElementById('network-view-container');
   const toggleText = document.getElementById('view-toggle-text');
   let graphRendered = false;
-
-  const themeMap = {
-    "Harlot / Prostitution / Chastity / Modesty": "Chastity & Modesty",
-    "Laughter / Talking / Tongue": "Talkativeness",
-    "Devil / Cunning / Wiles / Evil": "Cunning & Evil",
-    "Bride / Wife": "Bride & Wife",
-    "In Laws": "In-Laws",
-    "Food / Eating": "Eating Habits",
-    "Idle / Useless": "Idle & Useless",
-    "Leadership and Authority": "Authority",
-    "Smart / Intelligence": "Intelligence",
-    "Youth / Old ": "Age",
-    "Youth / Old": "Age",
-    "Property and Wealth": "Property & Wealth",
-    "Daughter / Sons / Children": "Children",
-    "Animals (deer, buffalo, cows)": "Animals"
-  };
-
-  // --- CUSTOM TOOLTIP (replaces Plotly's own hover label, which clips long text) ---
   let tipEl = null;
 
+  // --- CUSTOM TOOLTIP (replaces Plotly's own hover label, which clips long text) ---
   // escape everything, then re-allow a few harmless formatting tags
   function formatTip(text) {
     return String(text)
@@ -328,90 +312,45 @@ document.addEventListener("DOMContentLoaded", function () {
     gd.on('plotly_unhover', () => { tipEl.style.display = 'none'; });
   }
 
+  // --- RENDER ---
+  // The JSON already has one marker trace per theme (name = theme,
+  // customdata = [id, theme, language]), so no regex parsing or renaming is needed.
   function renderGraph() {
     if (!graphData) return;
     const isMobile = window.matchMedia('(max-width: 720px)').matches;
+    const layout = graphData.layout || (graphData.layout = {});
 
-    if (graphData.layout.scene) {
-      graphData.layout.scene.camera = { eye: { x: 0.8, y: 0.8, z: 0.8 } };
-    }
+    layout.scene = layout.scene || {};
+    layout.scene.camera = { eye: { x: 0.8, y: 0.8, z: 0.8 } };
 
-    graphData.layout.showlegend = !isMobile;   // hidden by default on phones
-    graphData.layout.legend = {
+    layout.showlegend = !isMobile;   // hidden by default on phones
+    layout.legend = {
       title: { text: isMobile ? '' : 'Themes', font: { color: '#ffffff' } },
       font: { color: '#ffffff', size: isMobile ? 10 : 12 },
       bgcolor: isMobile ? 'rgba(10,51,35,0.9)' : 'rgba(0,0,0,0)',
       itemsizing: 'constant',
       ...(isMobile && { orientation: 'h', x: 0, xanchor: 'left', y: 0, yanchor: 'bottom' })
     };
-    if (isMobile) graphData.layout.margin = { l: 0, r: 0, t: 0, b: 0 };
+    if (isMobile) layout.margin = { l: 0, r: 0, t: 0, b: 0 };
 
-    const newTraces = [];
-
-    graphData.data.forEach(trace => {
-      // connection lines: keep, but hide from legend
-      if (!trace.mode || !trace.mode.includes('markers')) {
-        trace.showlegend = false;
-        newTraces.push(trace);
-        return;
+    const traces = graphData.data.map(tr => {
+      const isNodes = !!(tr.mode && tr.mode.includes('markers'));
+      tr.showlegend = isNodes;           // link lines stay out of the legend
+      if (isNodes) {
+        // Plotly's own tooltip off (hover events still fire); our tooltip shows tr.text
+        tr.hoverinfo = 'none';
+        delete tr.hovertemplate;
+        delete tr.hoverlabel;
+        delete tr.hovertext;
+        tr.marker = Object.assign({}, tr.marker, { size: isMobile ? 5 : 6 });
       }
-
-      // split the single marker trace into one trace per theme
-      const groups = {};
-      const xArr = trace.x || [];
-      const yArr = trace.y || [];
-      const zArr = trace.z || null;
-      // Plotly prefers `hovertext` over `text` on hover, so read whichever the server set
-      const textArr = Array.isArray(trace.hovertext) ? trace.hovertext : (trace.text || []);
-      const colorArr = (trace.marker && Array.isArray(trace.marker.color)) ? trace.marker.color : null;
-
-      for (let i = 0; i < xArr.length; i++) {
-        let hoverText = textArr[i] || '';
-        let cleanTheme = 'Uncategorized';
-        const match = hoverText.match(/\[(.*?)\]/);
-        if (match && match[1]) {
-          const rawTheme = match[1].trim();
-          cleanTheme = themeMap[rawTheme] || rawTheme;
-          hoverText = hoverText.replace(`[${rawTheme}]`, `[${cleanTheme}]`);
-        }
-
-        if (!groups[cleanTheme]) {
-          groups[cleanTheme] = { x: [], y: [], z: zArr ? [] : null, text: [], colors: [] };
-        }
-        const g = groups[cleanTheme];
-        g.x.push(xArr[i]);
-        g.y.push(yArr[i]);
-        if (zArr) g.z.push(zArr[i]);
-        g.text.push(hoverText);
-        if (colorArr) g.colors.push(colorArr[i]);
-      }
-
-      for (const [themeName, grp] of Object.entries(groups)) {
-        const themeTrace = JSON.parse(JSON.stringify(trace));
-        themeTrace.name = themeName;
-        themeTrace.x = grp.x;
-        themeTrace.y = grp.y;
-        if (grp.z) themeTrace.z = grp.z;
-        themeTrace.text = grp.text;
-        delete themeTrace.hovertext;   // otherwise it would override our wrapped text
-        themeTrace.showlegend = true;
-
-        // turn off Plotly's own tooltip (events still fire); our custom tooltip shows the text
-        themeTrace.hoverinfo = 'none';
-        delete themeTrace.hovertemplate;
-        delete themeTrace.hoverlabel;
-
-        if (!themeTrace.marker) themeTrace.marker = {};
-        themeTrace.marker.size = 6;
-        if (colorArr && grp.colors.length > 0) themeTrace.marker.color = grp.colors;
-        newTraces.push(themeTrace);
-      }
+      return tr;
     });
 
-    Plotly.newPlot('plotly-graph', newTraces, graphData.layout, {
+    Plotly.newPlot('plotly-graph', traces, layout, {
       responsive: true,
       displaylogo: false,
-      displayModeBar: !isMobile      // the toolbar is clutter on a phone
+      displayModeBar: !isMobile          // the toolbar is clutter on a phone
     }).then(gd => attachTooltip(gd));
 
     const legendBtn = document.getElementById('legend-toggle-btn');
