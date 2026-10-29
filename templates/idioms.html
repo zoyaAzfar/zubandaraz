@@ -166,6 +166,8 @@
 <!-- Plotly 2.x (plotly-latest is frozen at v1.58 and no longer updated) -->
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 
+<script id="graph-data" type="application/json">{{ graph|tojson }}</script>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -240,7 +242,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // --- GALAXY VIEW TOGGLE ---
-  const graphData = {{ graph|tojson }};   
+  let graphData = null;
+  try {
+    const graphDataElement = document.getElementById('graph-data');
+    graphData = graphDataElement ? JSON.parse(graphDataElement.textContent) : null;
+  } catch (error) {
+    console.error('Could not parse Galaxy graph data:', error);
+  }
   const viewToggleBtn = document.getElementById('view-toggle-btn');
   const listView = document.getElementById('list-view-container');
   const networkView = document.getElementById('network-view-container');
