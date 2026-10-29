@@ -274,8 +274,37 @@ def browse():
         story_counts=story_counts,
     )
 
-import json
 import re
+
+# --- Galaxy graph: loaded once, reloaded automatically when the file changes ---
+GALAXY_PATH = os.path.join(app.root_path, "galaxy_graph.json")
+UNCATEGORIZED = "Uncategorized"
+_galaxy = {"mtime": None, "graph": None, "id_to_theme": {}, "themes": []}
+
+
+def load_galaxy():
+    try:
+        mtime = os.path.getmtime(GALAXY_PATH)
+    except OSError:
+        return _galaxy                      # file missing -> empty galaxy, page still works
+    if _galaxy["mtime"] != mtime:
+        try:
+            with open(GALAXY_PATH, "r", encoding="utf-8") as f:
+                graph = json.load(f)
+        except (OSError, ValueError) as e:
+            print("Galaxy JSON error:", e)
+            return _galaxy
+        id_to_theme = {}
+        for trace in graph.get("data", []):
+            if "markers" not in (trace.get("mode") or ""):
+                continue
+            theme = trace.get("name") or UNCATEGORIZED
+            for row in trace.get("customdata") or []:
+                id_to_theme[int(row[0])] = theme
+        themes = sorted({t for t in id_to_theme.values() if t != UNCATEGORIZED})
+        _galaxy.update(mtime=mtime, graph=graph, id_to_theme=id_to_theme, themes=themes)
+    return _galaxy
+
 
 @app.route("/idioms")
 def idioms():
@@ -298,50 +327,12 @@ def idioms():
         )
 
     entries = query.order_by(Entry.word).all()
-    
-    graph_json = None
-    word_to_theme = {}
-    available_themes = set()
-    
-    # Map your raw Colab names to clean UI names here!
-    theme_map = {
-              "Harlot / Prostitution / Chastity / Modesty": "Chastity & Modesty",
-              "Laughter / Talking / Tongue" : "Talkativeness",
-              "Devil / Cunning / Wiles / Evil": "Cunning & Evil",
-              "Bride / Wife": "Bride & Wife",
-              "In Laws": "In-Laws",
-              "Food / Eating": "Eating Habits",
-              "Idle / Useless": "Idle & Useless",
-              "Leadership and Authority": "Authority",
-              "Smart / Intelligence": "Intelligence",
-              "Youth / Old ": "Age",
-              "Property and Wealth": "Property & Wealth",
-              "Daughter / Sons / Children": "Children",
-              "Animals (deer, buffalo, cows)": "Animals"
-    }
 
-    try:
-         with open('galaxy_graph.json', 'r', encoding='utf-8') as f:
-             data = json.load(f)
-             restore_full_hover_text(data)
-             graph_json = json.dumps(data)
-             for trace in data.get('data', []):
-                if trace.get('mode') == 'markers':
-                    for t in trace.get('text', []):
-                        match = re.search(r'<b>(.*?)</b><br><b>\[(.*?)\]</b>', t)
-                        if match:
-                            word = match.group(1).lower()
-                            raw_theme = match.group(2)
-                            clean_theme = theme_map.get(raw_theme, raw_theme)
-                            word_to_theme[word] = clean_theme
-                            available_themes.add(clean_theme)
-    except Exception as e:
-        print("Galaxy JSON not found or error parsing:", e)
-
-    available_themes = sorted(list(available_themes))
+    galaxy = load_galaxy()
+    id_to_theme = galaxy["id_to_theme"]
 
     if theme_filter:
-        entries = [e for e in entries if word_to_theme.get(e.word.lower(), "Uncategorized") == theme_filter]
+        entries = [e for e in entries if id_to_theme.get(e.id, UNCATEGORIZED) == theme_filter]
 
     return render_template(
         "idioms.html",
@@ -349,9 +340,9 @@ def idioms():
         q=q,
         language=language,
         theme_filter=theme_filter,
-        graph_json=graph_json,
-        word_to_theme=word_to_theme,
-        available_themes=available_themes
+        graph=galaxy["graph"],              # dict (or None), NOT a pre-dumped string
+        id_to_theme=id_to_theme,            # keyed by entry id (was word_to_theme, keyed by word)
+        available_themes=galaxy["themes"],
     )
     
 @app.route('/entry/<slug>')
