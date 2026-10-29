@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // --- GALAXY VIEW TOGGLE ---
-  const graphData = {{ graph|tojson }};   // tojson escapes </script> etc. (safe against XSS); null if no graph
+  const graphData = {{ graph|tojson }};   
   const viewToggleBtn = document.getElementById('view-toggle-btn');
   const listView = document.getElementById('list-view-container');
   const networkView = document.getElementById('network-view-container');
